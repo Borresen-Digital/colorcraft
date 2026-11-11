@@ -33,7 +33,7 @@ export function ColorSwatch({ label, color, size = "md" }: ColorSwatchProps) {
       <div
         className={cn(
           "rounded-lg cursor-pointer transition-all duration-300 hover:scale-110 hover:shadow-lg relative",
-          sizeClasses[size]
+          sizeClasses[size],
         )}
         style={{ backgroundColor: color }}
         onClick={copyToClipboard}

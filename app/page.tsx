@@ -14,7 +14,7 @@ export default function ColorCraft() {
   const [palettes, setPalettes] =
     useState<ExtendedColorPalette[]>(colorPalettes);
   const [selectedPaletteId, setSelectedPaletteId] = useState(
-    colorPalettes[0].id
+    colorPalettes[0].id,
   );
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [editorOpen, setEditorOpen] = useState(false);
@@ -26,7 +26,10 @@ export default function ColorCraft() {
     if (storageUtils.isStorageAvailable()) {
       const customPalettes = storageUtils.loadCustomPalettes();
       if (customPalettes.length > 0) {
-        // Combine default palettes with custom palettes
+        // localStorage finnes ikke når siden gjengis på serveren, så de egne
+        // palettene kan først leses etter hydrering. Dette er synkronisering
+        // med et eksternt lager, som effekter er ment for.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setPalettes([...colorPalettes, ...customPalettes]);
       }
     }
@@ -91,7 +94,7 @@ export default function ColorCraft() {
   const handleEditPalette = () => {
     const currentExtendedPalette = palettes.find(
       (p) =>
-        p.id === selectedPaletteId || p.darkVariant?.id === selectedPaletteId
+        p.id === selectedPaletteId || p.darkVariant?.id === selectedPaletteId,
     );
     setEditingPalette(currentExtendedPalette || null);
     setEditorOpen(true);
@@ -100,7 +103,7 @@ export default function ColorCraft() {
   // Handle saving palette from editor
   const handleSavePalette = (
     palette: ColorPalette,
-    darkVariant?: ColorPalette
+    darkVariant?: ColorPalette,
   ) => {
     const newExtendedPalette: ExtendedColorPalette = {
       ...palette,
@@ -110,7 +113,7 @@ export default function ColorCraft() {
     if (editingPalette) {
       // Update existing palette
       setPalettes((prev) =>
-        prev.map((p) => (p.id === editingPalette.id ? newExtendedPalette : p))
+        prev.map((p) => (p.id === editingPalette.id ? newExtendedPalette : p)),
       );
     } else {
       // Add new palette
@@ -129,7 +132,7 @@ export default function ColorCraft() {
 
     const paletteToDelete = palettes.find(
       (p) =>
-        p.id === selectedPaletteId || p.darkVariant?.id === selectedPaletteId
+        p.id === selectedPaletteId || p.darkVariant?.id === selectedPaletteId,
     );
 
     if (paletteToDelete) {
@@ -145,7 +148,7 @@ export default function ColorCraft() {
 
       // Select first available palette
       const remainingPalettes = palettes.filter(
-        (p) => p.id !== paletteToDelete.id
+        (p) => p.id !== paletteToDelete.id,
       );
       if (remainingPalettes.length > 0) {
         setSelectedPaletteId(remainingPalettes[0].id);
@@ -238,15 +241,17 @@ export default function ColorCraft() {
       </div>
 
       {/* Palette Editor Modal */}
-      <PaletteEditor
-        isOpen={editorOpen}
-        onClose={() => {
-          setEditorOpen(false);
-          setEditingPalette(null);
-        }}
-        onSave={handleSavePalette}
-        editingPalette={editingPalette}
-      />
+      {editorOpen && (
+        <PaletteEditor
+          key={editingPalette?.id ?? "ny"}
+          onClose={() => {
+            setEditorOpen(false);
+            setEditingPalette(null);
+          }}
+          onSave={handleSavePalette}
+          editingPalette={editingPalette}
+        />
+      )}
     </div>
   );
 }

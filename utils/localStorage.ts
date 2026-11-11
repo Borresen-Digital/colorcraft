@@ -9,7 +9,7 @@ export const storageUtils = {
     try {
       // Only save custom palettes (those with IDs starting with 'custom-')
       const customPalettes = palettes.filter((palette) =>
-        palette.id.startsWith("custom-")
+        palette.id.startsWith("custom-"),
       );
       localStorage.setItem(STORAGE_KEY, JSON.stringify(customPalettes));
     } catch (error) {
@@ -39,7 +39,7 @@ export const storageUtils = {
     try {
       const customPalettes = storageUtils.loadCustomPalettes();
       const filtered = customPalettes.filter(
-        (palette) => palette.id !== paletteId
+        (palette) => palette.id !== paletteId,
       );
       localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
     } catch (error) {
