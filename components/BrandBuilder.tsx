@@ -73,7 +73,7 @@ function ColorRow({
           value={gyldig ?? "#000000"}
           onChange={(e) => onChange(e.target.value.toUpperCase())}
           aria-label={value}
-          className="h-10 w-12 shrink-0 cursor-pointer rounded border-2 border-gray-300"
+          className="h-10 w-12 shrink-0 cursor-pointer rounded border border-field"
         />
         <input
           id={id}
@@ -82,7 +82,7 @@ function ColorRow({
           onChange={(e) => onChange(e.target.value)}
           aria-invalid={!gyldig}
           aria-describedby={gyldig ? undefined : `${id}-feil`}
-          className="min-w-0 flex-1 rounded border-2 border-gray-300 bg-white p-2 font-mono text-sm text-gray-900 focus:border-blue-500 focus:outline-none aria-[invalid=true]:border-red-500"
+          className="min-w-0 flex-1 rounded border border-field bg-panel p-2 font-mono text-sm text-ink focus:border-accent focus:outline-none aria-[invalid=true]:border-bad"
           placeholder="#000000"
         />
         {onRemove && (
@@ -90,21 +90,21 @@ function ColorRow({
             type="button"
             onClick={onRemove}
             aria-label={removeLabel}
-            className="shrink-0 rounded border-2 border-gray-300 px-3 text-gray-700 hover:bg-gray-50"
+            className="shrink-0 rounded border border-field px-3 text-subtle hover:bg-sunken"
           >
             ×
           </button>
         )}
       </div>
       {!gyldig && (
-        <p id={`${id}-feil`} className="text-xs text-red-700">
+        <p id={`${id}-feil`} className="text-xs text-bad">
           {invalidText}
         </p>
       )}
       <div className="flex items-center gap-2 pl-14">
         <label
           htmlFor={`${id}-cmyk`}
-          className="shrink-0 text-xs font-medium text-gray-700"
+          className="shrink-0 text-xs font-medium text-subtle"
         >
           CMYK ≈
         </label>
@@ -117,11 +117,11 @@ function ColorRow({
           aria-invalid={!cmykGyldig}
           aria-describedby={cmykGyldig ? undefined : `${id}-cmyk-feil`}
           placeholder="0 25 100 0"
-          className="min-w-0 flex-1 rounded border border-gray-300 bg-white px-2 py-1 font-mono text-xs text-gray-900 focus:border-blue-500 focus:outline-none aria-[invalid=true]:border-red-500"
+          className="min-w-0 flex-1 rounded border border-line bg-panel px-2 py-1 font-mono text-xs text-ink focus:border-accent focus:outline-none aria-[invalid=true]:border-bad"
         />
       </div>
       {!cmykGyldig && (
-        <p id={`${id}-cmyk-feil`} className="pl-14 text-[11px] text-red-700">
+        <p id={`${id}-cmyk-feil`} className="pl-14 text-[11px] text-bad">
           {t.values.cmykInvalid}
         </p>
       )}
@@ -147,9 +147,9 @@ function Swatches({
   ];
   return (
     <div>
-      <p className="mb-1 text-xs font-medium text-gray-700">{label}</p>
+      <p className="mb-1 text-xs font-medium text-subtle">{label}</p>
       <div
-        className="flex overflow-hidden rounded-lg border border-gray-200"
+        className="flex overflow-hidden rounded-lg border border-line"
         aria-hidden="true"
       >
         {vis.map((c, i) => (
@@ -246,8 +246,8 @@ export function BrandBuilder({ onClose, onCreate }: BrandBuilderProps) {
     min: number,
   ) => (
     <fieldset className="min-w-0 space-y-2">
-      <legend className="text-sm font-semibold text-gray-900">{tittel}</legend>
-      <p className="text-xs text-gray-600">{hjelp}</p>
+      <legend className="text-sm font-semibold text-ink">{tittel}</legend>
+      <p className="text-xs text-subtle">{hjelp}</p>
       {liste.map((c, i) => (
         <ColorRow
           key={i}
@@ -267,7 +267,7 @@ export function BrandBuilder({ onClose, onCreate }: BrandBuilderProps) {
         <button
           type="button"
           onClick={() => sett([...liste, "#888888"])}
-          className="text-sm font-medium text-blue-700 underline-offset-4 hover:underline"
+          className="text-sm font-medium text-accent underline-offset-4 hover:underline"
         >
           + {b.add}
         </button>
@@ -281,29 +281,35 @@ export function BrandBuilder({ onClose, onCreate }: BrandBuilderProps) {
       role="dialog"
       aria-modal="true"
       aria-labelledby="brand-title"
+      onKeyDown={(e) => {
+        if (e.key === "Escape") onClose();
+      }}
     >
-      <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-xl bg-white">
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-white p-4 sm:p-6">
-          <h2 id="brand-title" className="text-xl font-bold sm:text-2xl">
+      <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl border border-line bg-panel">
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-panel p-4 sm:p-6">
+          <h2
+            id="brand-title"
+            className="font-display text-xl font-bold sm:text-2xl"
+          >
             {b.title}
           </h2>
           <button
             type="button"
             onClick={onClose}
             aria-label={t.editor.close}
-            className="flex h-8 w-8 items-center justify-center text-2xl text-gray-500 hover:text-gray-700"
+            className="flex h-8 w-8 items-center justify-center text-2xl text-subtle hover:text-ink"
           >
             ×
           </button>
         </div>
 
         <div className="space-y-5 p-4 sm:p-6">
-          <p className="text-sm text-gray-700">{b.intro}</p>
+          <p className="text-sm text-subtle">{b.intro}</p>
 
           <div>
             <label
               htmlFor="brand-name"
-              className="mb-1 block text-sm font-semibold text-gray-900"
+              className="mb-1 block text-sm font-semibold text-ink"
             >
               {b.name}
             </label>
@@ -312,7 +318,7 @@ export function BrandBuilder({ onClose, onCreate }: BrandBuilderProps) {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-lg border-2 border-gray-300 p-2 text-gray-900 focus:border-blue-500 focus:outline-none"
+              className="w-full rounded-lg border border-field p-2 text-ink focus:border-accent focus:outline-none"
             />
           </div>
 
@@ -327,16 +333,13 @@ export function BrandBuilder({ onClose, onCreate }: BrandBuilderProps) {
               0,
             )}
           </div>
-          <p className="text-xs text-gray-600">{t.values.cmykHelp}</p>
+          <p className="text-xs text-subtle">{t.values.cmykHelp}</p>
 
           <section
             aria-labelledby="brand-preview"
-            className="space-y-3 rounded-lg border border-gray-200 bg-gray-50 p-4"
+            className="space-y-3 rounded-lg border border-line bg-sunken p-4"
           >
-            <h3
-              id="brand-preview"
-              className="text-sm font-semibold text-gray-900"
-            >
+            <h3 id="brand-preview" className="text-sm font-semibold text-ink">
               {b.preview}
             </h3>
             {result ? (
@@ -347,15 +350,13 @@ export function BrandBuilder({ onClose, onCreate }: BrandBuilderProps) {
                 </div>
                 <p
                   className={
-                    stryker === 0
-                      ? "text-sm text-emerald-800"
-                      : "text-sm text-amber-800"
+                    stryker === 0 ? "text-sm text-ok" : "text-sm text-warn"
                   }
                 >
                   {stryker === 0 ? b.allPass : b.failing(stryker)}
                 </p>
                 {result.notes.length > 0 && (
-                  <ul className="list-disc space-y-1 pl-5 text-xs text-gray-700">
+                  <ul className="list-disc space-y-1 pl-5 text-xs text-subtle">
                     {result.notes.map((n, i) => (
                       <li key={i}>{noteText(n)}</li>
                     ))}
@@ -363,7 +364,7 @@ export function BrandBuilder({ onClose, onCreate }: BrandBuilderProps) {
                 )}
               </>
             ) : (
-              <p className="text-sm text-red-700">{b.invalid}</p>
+              <p className="text-sm text-bad">{b.invalid}</p>
             )}
           </section>
 
@@ -371,7 +372,7 @@ export function BrandBuilder({ onClose, onCreate }: BrandBuilderProps) {
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg border-2 border-gray-300 px-5 py-2 font-medium text-gray-700 hover:bg-gray-50"
+              className="rounded-lg border border-field px-5 py-2 font-medium text-subtle hover:bg-sunken"
             >
               {b.cancel}
             </button>
@@ -379,7 +380,7 @@ export function BrandBuilder({ onClose, onCreate }: BrandBuilderProps) {
               type="button"
               onClick={handleCreate}
               disabled={!result}
-              className="rounded-lg bg-blue-600 px-5 py-2 font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-full bg-ink px-5 py-2 font-medium text-paper hover:bg-ink/85 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {b.create}
             </button>

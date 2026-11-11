@@ -41,7 +41,7 @@ export function LivePreview({ palette, brand, onApply }: LivePreviewProps) {
       <div
         role="tablist"
         aria-label={t.surfaces.tabsLabel}
-        className="flex gap-1 overflow-x-auto border-b border-gray-200 bg-white px-2 pt-3 sm:px-3"
+        className="flex gap-1 overflow-x-auto border-b border-line bg-panel px-3 py-2.5 [scrollbar-width:none] sm:px-4"
       >
         {faner.map(([id, label]) => (
           <button
@@ -53,10 +53,10 @@ export function LivePreview({ palette, brand, onApply }: LivePreviewProps) {
             aria-controls="preview-panel"
             onClick={() => setTab(id)}
             className={cn(
-              "-mb-px shrink-0 whitespace-nowrap rounded-t-lg border px-3 py-2 text-sm font-medium sm:px-4",
+              "shrink-0 whitespace-nowrap rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors",
               tab === id
-                ? "border-gray-200 border-b-white bg-white text-gray-900"
-                : "border-transparent text-gray-600 hover:text-gray-900",
+                ? "bg-ink text-paper"
+                : "text-subtle hover:bg-sunken hover:text-ink",
             )}
           >
             {label}
@@ -89,7 +89,7 @@ function ComponentsPreview({ palette }: { palette: ColorPalette }) {
 
   return (
     <div
-      className="h-full rounded-xl p-4 transition-all duration-500 sm:p-6"
+      className="h-full p-4 transition-colors duration-300 sm:p-6"
       style={{
         backgroundColor: palette.colors.background,
         color: palette.colors.foreground,
@@ -101,9 +101,9 @@ function ComponentsPreview({ palette }: { palette: ColorPalette }) {
           className="text-3xl font-bold mb-2 transition-all duration-500 sm:text-4xl"
           style={{ color: palette.colors.primary }}
         >
-          {palette.name}
+          {t.preview.siteName}
         </h1>
-        <p style={{ color: palette.colors.muted }}>{palette.description}</p>
+        <p style={{ color: palette.colors.muted }}>{t.preview.siteTagline}</p>
       </div>
 
       {/* Navigation */}

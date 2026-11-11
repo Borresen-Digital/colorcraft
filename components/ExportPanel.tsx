@@ -51,7 +51,7 @@ export function ExportPanel({ palette }: ExportPanelProps) {
     <section aria-labelledby="export-heading">
       <h3
         id="export-heading"
-        className="mb-3 text-lg font-semibold text-gray-900"
+        className="mb-3 font-display text-lg font-bold text-ink"
       >
         {t.export.title}
       </h3>
@@ -71,8 +71,8 @@ export function ExportPanel({ palette }: ExportPanelProps) {
             className={cn(
               "rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
               format === f
-                ? "bg-gray-900 text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200",
+                ? "bg-ink text-paper"
+                : "bg-sunken text-subtle hover:bg-line",
             )}
           >
             {EXPORTS[f].label}
@@ -80,10 +80,10 @@ export function ExportPanel({ palette }: ExportPanelProps) {
         ))}
       </div>
 
-      <p className="mb-2 text-[11px] text-gray-600">{t.export.hints[format]}</p>
+      <p className="mb-2 text-[11px] text-subtle">{t.export.hints[format]}</p>
 
       <pre
-        className="max-h-72 overflow-auto rounded-lg bg-gray-900 p-3 font-mono text-[11px] leading-relaxed text-green-400"
+        className="max-h-72 overflow-auto rounded-lg bg-sunken p-3 font-mono text-[11px] leading-relaxed text-ink"
         tabIndex={0}
         aria-label={`${t.export.title}: ${EXPORTS[format].label}`}
       >
@@ -94,7 +94,7 @@ export function ExportPanel({ palette }: ExportPanelProps) {
         <button
           type="button"
           onClick={copy}
-          className="flex-1 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700"
+          className="flex-1 rounded-lg bg-ink px-3 py-1.5 text-xs font-medium text-paper hover:bg-ink/85"
         >
           {status === "copied"
             ? t.export.copied
@@ -105,12 +105,12 @@ export function ExportPanel({ palette }: ExportPanelProps) {
         <button
           type="button"
           onClick={download}
-          className="flex-1 rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-800 hover:bg-gray-50"
+          className="flex-1 rounded-lg border border-line px-3 py-1.5 text-xs font-medium text-ink hover:bg-sunken"
         >
           {t.export.download}
         </button>
       </div>
-      <p className="mt-1 truncate text-[11px] text-gray-500">
+      <p className="mt-1 truncate text-[11px] text-subtle">
         {spec.filename(palette)}
       </p>
     </section>

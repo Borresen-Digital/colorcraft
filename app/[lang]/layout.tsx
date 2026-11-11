@@ -1,11 +1,24 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import {
+  Bricolage_Grotesque,
+  Instrument_Sans,
+  JetBrains_Mono,
+} from "next/font/google";
 import { notFound } from "next/navigation";
 import { isLocale, LOCALES, localePath, MESSAGES } from "@/lib/i18n";
+import { THEME_SCRIPT } from "@/lib/theme";
 import "../globals.css";
 
-const inter = Inter({
-  variable: "--font-inter",
+// Visningsfont til navnet og overskrifter: litt leken, men lesbar.
+const bricolage = Bricolage_Grotesque({
+  variable: "--font-bricolage",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+// Brødtekst: rolig og tydelig i små størrelser.
+const instrument = Instrument_Sans({
+  variable: "--font-instrument",
   subsets: ["latin"],
   display: "swap",
 });
@@ -71,7 +84,11 @@ export async function generateMetadata({
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#3B82F6",
+  // Samme papirfarge som rammen, så nettleserens kant glir inn i siden.
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f6f3ee" },
+    { media: "(prefers-color-scheme: dark)", color: "#121110" },
+  ],
 };
 
 export default async function RootLayout({
@@ -81,9 +98,15 @@ export default async function RootLayout({
   const { lang } = await params;
   if (!isLocale(lang)) notFound();
   return (
-    <html lang={lang} className="scroll-smooth">
+    // suppressHydrationWarning: skriptet under setter data-theme på <html>
+    // før React tar over, og det skal ikke regnes som en avvikende attributt.
+    <html lang={lang} className="scroll-smooth" suppressHydrationWarning>
+      <head>
+        {/* Valgt tema før første tegning, så siden ikke blinker lys. */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+      </head>
       <body
-        className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased bg-gray-50 text-gray-900`}
+        className={`${bricolage.variable} ${instrument.variable} ${jetbrainsMono.variable} bg-paper font-sans text-ink antialiased`}
         suppressHydrationWarning={true}
       >
         <div id="root" className="min-h-screen">

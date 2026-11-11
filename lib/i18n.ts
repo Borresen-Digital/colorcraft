@@ -53,6 +53,12 @@ const nb = {
     otherLanguage: "English",
     otherLanguageLabel: "Switch to English",
     footer: "Et gratis verktøy fra",
+    home: "ColorCraft, til forsiden",
+    theme: { system: "System", light: "Lys", dark: "Mørk" },
+    themeLabel: (navn: string) => `Utseende: ${navn}. Trykk for å bytte.`,
+    paletteMode: "Vis paletten i",
+    paletteActions: "Handlinger for paletten",
+    paletteList: "Paletter",
   },
   selector: {
     title: "Velg palett",
@@ -67,6 +73,8 @@ const nb = {
   },
   preview: {
     nav: ["Hjem", "Om oss", "Tjenester", "Kontakt"],
+    siteName: "Din bedrift",
+    siteTagline: "Slik kan nettsiden se ut med denne paletten",
     primaryTitle: "Hovedhandling",
     primaryText: "Slik ser de viktigste elementene ut med denne paletten.",
     primaryButton: "Kom i gang",
@@ -305,6 +313,12 @@ const en: Messages = {
     otherLanguage: "Norsk",
     otherLanguageLabel: "Bytt til norsk",
     footer: "A free tool from",
+    home: "ColorCraft, home",
+    theme: { system: "System", light: "Light", dark: "Dark" },
+    themeLabel: (name) => `Appearance: ${name}. Click to switch.`,
+    paletteMode: "Show the palette in",
+    paletteActions: "Palette actions",
+    paletteList: "Palettes",
   },
   selector: {
     title: "Choose palette",
@@ -319,6 +333,8 @@ const en: Messages = {
   },
   preview: {
     nav: ["Home", "About", "Services", "Contact"],
+    siteName: "Your business",
+    siteTagline: "This is how the website could look with this palette",
     primaryTitle: "Primary action",
     primaryText:
       "This demonstrates how primary elements look with this color palette.",

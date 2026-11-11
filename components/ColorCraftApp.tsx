@@ -16,7 +16,9 @@ import { PaletteEditor } from "@/components/PaletteEditor";
 import { BrandBuilder } from "@/components/BrandBuilder";
 import { ColorPalette } from "@/types/palette";
 import { storageUtils } from "@/utils/localStorage";
-import { Logo } from "@/components/Logo";
+import { FanMark } from "@/components/FanMark";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { btn, panel } from "@/lib/ui";
 import { I18nProvider, useI18n } from "@/components/I18nProvider";
 import {
   localePath,
@@ -396,157 +398,220 @@ function ColorCraft() {
     );
   };
 
+  const fanFarger = [
+    currentPalette.colors.primary,
+    currentPalette.colors.accent,
+    currentPalette.colors.secondary,
+    currentPalette.colors.warm,
+  ];
+  const harMørk = !!currentExtended.darkVariant;
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 py-4 sm:py-6">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex min-w-0 items-center">
-              <Logo size="xl" showText={false} />
-              <div className="ml-3 min-w-0 sm:ml-4">
-                <h1 className="sr-only">ColorCraft</h1>
-                <p className="text-gray-600 text-sm">{t.app.tagline}</p>
-              </div>
-            </div>
+    <div className="min-h-screen bg-paper text-ink">
+      <header className="sticky top-0 z-30 border-b border-line bg-paper/90 backdrop-blur">
+        <div className="mx-auto flex max-w-[1440px] flex-wrap items-center justify-between gap-x-4 gap-y-3 px-4 py-3 sm:px-6">
+          <a
+            href={localePath(locale)}
+            className="flex min-w-0 items-center gap-2.5 rounded-lg"
+            aria-label={t.app.home}
+          >
+            <FanMark colors={fanFarger} />
+            <h1 className="font-display text-xl font-extrabold tracking-tight sm:text-2xl">
+              Color<span className="font-semibold text-subtle">Craft</span>
+            </h1>
+          </a>
+          <p className="order-last hidden w-full text-sm text-subtle lg:order-none lg:block lg:w-auto lg:max-w-md">
+            {t.app.tagline}
+          </p>
 
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-              <a
-                href={localePath(otherLocale)}
-                hrefLang={otherLocale}
-                lang={otherLocale}
-                aria-label={t.app.otherLanguageLabel}
-                onClick={switchLanguage}
-                className="text-sm font-medium text-gray-600 underline-offset-4 hover:text-gray-900 hover:underline"
-              >
-                {t.app.otherLanguage}
-              </a>
-              {/* Palette Actions */}
-              <div className="flex flex-wrap gap-2">
-                <button
-                  onClick={copyShareLink}
-                  className="px-3 py-2 sm:px-4 text-white rounded-lg transition-colors text-sm font-medium bg-emerald-700 hover:bg-emerald-800"
-                  title={t.app.shareTitle}
-                >
-                  {linkStatus === "copied"
-                    ? t.app.linkCopied
-                    : linkStatus === "failed"
-                      ? t.app.copyFailed
-                      : t.app.share}
-                </button>
-                <button
-                  onClick={() => setBrandOpen(true)}
-                  title={t.brand.openTitle}
-                  className="px-3 py-2 sm:px-4 text-white rounded-lg transition-colors text-sm font-medium bg-violet-700 hover:bg-violet-800"
-                >
-                  {t.brand.open}
-                </button>
-                <button
-                  onClick={handleCreatePalette}
-                  className="px-3 py-2 sm:px-4 text-white rounded-lg transition-colors text-sm font-medium bg-blue-600 hover:bg-blue-700"
-                >
-                  {t.app.add}
-                </button>
-                <button
-                  onClick={handleEditPalette}
-                  className="px-3 py-2 sm:px-4 text-white rounded-lg transition-colors text-sm font-medium bg-gray-600 hover:bg-gray-700"
-                >
-                  {t.app.edit}
-                </button>
-                {canReset && (
-                  <button
-                    onClick={handleResetBuiltin}
-                    title={t.app.resetTitle}
-                    className="px-3 py-2 sm:px-4 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-800 transition-colors hover:bg-gray-50"
-                  >
-                    {t.app.reset}
-                  </button>
-                )}
-                {canDelete && (
-                  <button
-                    onClick={handleDeletePalette}
-                    className="px-3 py-2 sm:px-4 text-white rounded-lg transition-colors text-sm font-medium bg-red-600 hover:bg-red-700"
-                  >
-                    {t.app.delete}
-                  </button>
-                )}
-              </div>
-
-              <div className="hidden text-right text-sm text-gray-600 md:block">
-                <p>
-                  {t.app.viewing}{" "}
-                  <span className="font-medium text-gray-900">
-                    {currentPalette.name}
-                  </span>
-                </p>
-                <p className="text-xs mt-1">
-                  {t.app.mode}{" "}
-                  <span className="font-medium">
-                    {isDarkMode ? t.app.dark : t.app.light}
-                  </span>
-                </p>
-              </div>
-            </div>
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+            <a
+              href={localePath(otherLocale)}
+              hrefLang={otherLocale}
+              lang={otherLocale}
+              aria-label={t.app.otherLanguageLabel}
+              onClick={switchLanguage}
+              className={btn("ghost", "sm")}
+            >
+              {t.app.otherLanguage}
+            </a>
+            <ThemeToggle />
+            <button
+              type="button"
+              onClick={copyShareLink}
+              className={btn("outline", "sm")}
+              title={t.app.shareTitle}
+            >
+              {linkStatus === "copied"
+                ? t.app.linkCopied
+                : linkStatus === "failed"
+                  ? t.app.copyFailed
+                  : t.app.share}
+            </button>
+            <button
+              type="button"
+              onClick={handleCreatePalette}
+              className={btn("outline", "sm")}
+            >
+              {t.app.add}
+            </button>
+            <button
+              type="button"
+              onClick={() => setBrandOpen(true)}
+              title={t.brand.openTitle}
+              className={btn("primary", "sm")}
+            >
+              {t.brand.open}
+            </button>
           </div>
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto p-4">
+      <main className="mx-auto max-w-[1440px] px-4 py-5 sm:px-6 sm:py-6">
         {currentExtended.id.startsWith("shared-") && (
           <div
             role="status"
-            className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900"
+            className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-accent-soft px-4 py-3 text-sm text-ink"
           >
             <span>
               <strong>{currentExtended.name}</strong> {t.app.sharedBanner}
             </span>
             <button
+              type="button"
               onClick={handleSaveShared}
-              className="rounded-lg bg-emerald-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-800"
+              className={btn("primary", "sm")}
             >
               {t.app.saveShared}
             </button>
           </div>
         )}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:h-[850px] lg:grid-cols-12 lg:gap-6">
-          <div className="bg-white rounded-xl p-4 shadow-lg sm:p-6 lg:col-span-3 lg:overflow-y-auto">
+
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:h-[calc(100vh-7.5rem)] lg:min-h-[720px] lg:grid-cols-12 lg:gap-5">
+          <nav
+            aria-label={t.app.paletteList}
+            className={`${panel} p-4 lg:col-span-3 lg:overflow-y-auto`}
+          >
             <PaginatedPaletteSelector
               palettes={shown}
               selectedId={selectedPaletteId}
               onSelect={handlePaletteSelect}
-              isDarkMode={isDarkMode}
-              onDarkModeToggle={handleDarkModeToggle}
             />
-          </div>
+          </nav>
 
-          <div
+          <section
             ref={previewRef}
-            className="scroll-mt-4 bg-white rounded-xl shadow-lg overflow-hidden order-first md:col-span-2 lg:order-none lg:col-span-6 lg:overflow-y-auto"
+            aria-labelledby="palette-title"
+            className={`${panel} order-first flex scroll-mt-20 flex-col overflow-hidden md:col-span-2 lg:order-none lg:col-span-6`}
           >
-            <LivePreview
-              palette={currentPalette}
-              brand={currentExtended.brand}
-              onApply={handleApplySuggestion}
-            />
-          </div>
+            <div className="flex flex-wrap items-start justify-between gap-3 border-b border-line px-4 py-4 sm:px-5">
+              <div className="min-w-0">
+                <h2
+                  id="palette-title"
+                  className="font-display text-2xl font-bold tracking-tight"
+                >
+                  {currentPalette.name}
+                </h2>
+                {currentPalette.description && (
+                  <p className="mt-0.5 text-sm text-subtle">
+                    {currentPalette.description}
+                  </p>
+                )}
+              </div>
+              <div className="flex flex-wrap items-center gap-1.5">
+                {harMørk && (
+                  <div
+                    role="group"
+                    aria-label={t.app.paletteMode}
+                    className="flex rounded-full border border-line bg-sunken p-0.5"
+                  >
+                    {(
+                      [
+                        [false, t.app.light],
+                        [true, t.app.dark],
+                      ] as const
+                    ).map(([mørk, navn]) => (
+                      <button
+                        key={navn}
+                        type="button"
+                        aria-pressed={isDarkMode === mørk}
+                        onClick={() => handleDarkModeToggle(mørk)}
+                        className={
+                          isDarkMode === mørk
+                            ? "rounded-full bg-panel px-3 py-1 text-xs font-semibold text-ink shadow-sm"
+                            : "rounded-full px-3 py-1 text-xs font-medium text-subtle hover:text-ink"
+                        }
+                      >
+                        {navn}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                <div
+                  role="group"
+                  aria-label={t.app.paletteActions}
+                  className="flex items-center gap-0.5"
+                >
+                  <button
+                    type="button"
+                    onClick={handleEditPalette}
+                    className={btn("ghost", "sm")}
+                  >
+                    {t.app.edit}
+                  </button>
+                  {canReset && (
+                    <button
+                      type="button"
+                      onClick={handleResetBuiltin}
+                      title={t.app.resetTitle}
+                      className={btn("ghost", "sm")}
+                    >
+                      {t.app.reset}
+                    </button>
+                  )}
+                  {canDelete && (
+                    <button
+                      type="button"
+                      onClick={handleDeletePalette}
+                      className={btn("danger", "sm")}
+                    >
+                      {t.app.delete}
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="min-h-0 flex-1 lg:overflow-y-auto">
+              <LivePreview
+                palette={currentPalette}
+                brand={currentExtended.brand}
+                onApply={handleApplySuggestion}
+              />
+            </div>
+          </section>
 
-          <div className="bg-white rounded-xl p-4 shadow-lg sm:p-6 lg:col-span-3 lg:overflow-y-auto">
+          <aside
+            className={`${panel} p-4 sm:p-5 lg:col-span-3 lg:overflow-y-auto`}
+          >
             <ColorDetails
               palette={currentPalette}
               exportPalette={currentExtended}
               onApplySuggestion={handleApplySuggestion}
             />
-          </div>
+          </aside>
         </div>
-      </div>
+      </main>
 
-      <footer className="max-w-7xl mx-auto px-4 pb-8 text-center text-sm text-gray-600">
-        {t.app.footer}{" "}
-        <a
-          href="https://www.borresendigital.no"
-          className="font-medium text-gray-900 underline underline-offset-4 hover:text-blue-700"
-        >
-          Børresen Digital
-        </a>
+      <footer className="mx-auto flex max-w-[1440px] flex-wrap items-center justify-between gap-2 px-4 pb-8 text-sm text-subtle sm:px-6">
+        <span>
+          {t.app.footer}{" "}
+          <a
+            href="https://www.borresendigital.no"
+            className="font-medium text-ink underline underline-offset-4 hover:text-accent"
+          >
+            Børresen Digital
+          </a>
+        </span>
+        <span className="font-mono text-xs">farger.borresendigital.no</span>
       </footer>
 
       {brandOpen && (
@@ -556,7 +621,6 @@ function ColorCraft() {
         />
       )}
 
-      {/* Palette Editor Modal */}
       {editorOpen && (
         <PaletteEditor
           key={editingPalette?.id ?? "ny"}

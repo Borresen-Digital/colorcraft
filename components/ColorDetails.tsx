@@ -31,10 +31,10 @@ export function ColorDetails({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">
+        <h2 className="mb-3 font-display text-lg font-bold text-ink">
           {t.details.swatches}
         </h2>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 gap-3">
           <ColorSwatch label={t.roles.primary} color={palette.colors.primary} />
           <ColorSwatch
             label={t.roles.secondary}
@@ -48,10 +48,10 @@ export function ColorDetails({
       </div>
 
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-3">
+        <h3 className="mb-3 font-display text-lg font-bold text-ink">
           {t.details.semantic}
         </h3>
-        <div className="grid grid-cols-4 gap-3 lg:grid-cols-2">
+        <div className="grid grid-cols-4 gap-2">
           <ColorSwatch
             label={t.roles.success}
             color={palette.colors.success}

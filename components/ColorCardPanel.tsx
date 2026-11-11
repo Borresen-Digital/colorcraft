@@ -48,13 +48,13 @@ export function ColorCardPanel({ palette }: { palette: ExtendedColorPalette }) {
 
   return (
     <section aria-labelledby="card-heading" className="space-y-2">
-      <h3 id="card-heading" className="text-lg font-semibold text-gray-900">
+      <h3 id="card-heading" className="font-display text-lg font-bold text-ink">
         {k.panelTitle}
       </h3>
-      <p className="text-[11px] text-gray-600">{k.panelHelp}</p>
+      <p className="text-[11px] text-subtle">{k.panelHelp}</p>
       <label
         htmlFor="card-maker"
-        className="block text-xs font-medium text-gray-800"
+        className="block text-xs font-medium text-ink"
       >
         {k.maker}
       </label>
@@ -65,14 +65,14 @@ export function ColorCardPanel({ palette }: { palette: ExtendedColorPalette }) {
         maxLength={60}
         onChange={(e) => setMaker(e.target.value)}
         placeholder={k.makerPlaceholder}
-        className="w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm text-gray-900 focus:border-blue-500 focus:outline-none"
+        className="w-full rounded border border-line bg-panel px-2 py-1.5 text-sm text-ink focus:border-accent focus:outline-none"
       />
       <div className="flex gap-2">
         <button
           type="button"
           onClick={() => lag("pdf")}
           disabled={status === "working"}
-          className="flex-1 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+          className="flex-1 rounded-lg bg-ink px-3 py-1.5 text-xs font-medium text-paper hover:bg-ink/85 disabled:opacity-50"
         >
           {k.downloadPdf}
         </button>
@@ -80,18 +80,16 @@ export function ColorCardPanel({ palette }: { palette: ExtendedColorPalette }) {
           type="button"
           onClick={() => lag("png")}
           disabled={status === "working"}
-          className="flex-1 rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-800 hover:bg-gray-50 disabled:opacity-50"
+          className="flex-1 rounded-lg border border-line px-3 py-1.5 text-xs font-medium text-ink hover:bg-sunken disabled:opacity-50"
         >
           {k.downloadPng}
         </button>
       </div>
       <p role="status" aria-live="polite" className="min-h-4 text-[11px]">
         {status === "working" && (
-          <span className="text-gray-600">{k.working}</span>
+          <span className="text-subtle">{k.working}</span>
         )}
-        {status === "failed" && (
-          <span className="text-red-700">{k.failed}</span>
-        )}
+        {status === "failed" && <span className="text-bad">{k.failed}</span>}
       </p>
     </section>
   );
