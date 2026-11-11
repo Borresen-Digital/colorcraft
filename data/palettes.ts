@@ -2,6 +2,8 @@ import { ColorPalette } from "@/types/palette";
 
 export interface ExtendedColorPalette extends ColorPalette {
   darkVariant?: ColorPalette;
+  /** Merkefargene paletten er laget fra (profilmanual), hvis den er det. */
+  brand?: { logo: string[]; support: string[] };
 }
 
 export const colorPalettes: ExtendedColorPalette[] = [
