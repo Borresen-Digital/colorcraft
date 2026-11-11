@@ -6,6 +6,7 @@ import { ColorSwatch } from "./ColorSwatch";
 import { useI18n } from "./I18nProvider";
 import { ContrastPanel } from "./ContrastPanel";
 import { ExportPanel } from "./ExportPanel";
+import { ColorValues } from "./ColorValues";
 import type { ExtendedColorPalette } from "@/data/palettes";
 
 interface ColorDetailsProps {
@@ -72,6 +73,8 @@ export function ColorDetails({
           />
         </div>
       </div>
+
+      <ColorValues palette={palette} />
 
       <ContrastPanel palette={palette} onApply={onApplySuggestion} />
 
