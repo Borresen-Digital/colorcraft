@@ -4,15 +4,77 @@
 
 "use client";
 
+import { useState } from "react";
+import type { ExtendedColorPalette } from "@/data/palettes";
 import { textOn } from "@/lib/contrastPairs";
+import { cn } from "@/lib/utils";
+import { SurfacesPreview } from "@/components/SurfacesPreview";
 import { useI18n } from "@/components/I18nProvider";
 import { ColorPalette } from "@/types/palette";
 
 interface LivePreviewProps {
   palette: ColorPalette;
+  /** Merkefargene, hvis paletten er laget fra en profilmanual. */
+  brand?: ExtendedColorPalette["brand"];
 }
 
-export function LivePreview({ palette }: LivePreviewProps) {
+type Tab = "components" | "surfaces";
+
+/**
+ * Forhåndsvisningen har to faner: komponenter (knapper, kort, meny) og
+ * flater (støttefargene som heldekkende seksjoner og infobokser).
+ */
+export function LivePreview({ palette, brand }: LivePreviewProps) {
+  const { t } = useI18n();
+  const [tab, setTab] = useState<Tab>("components");
+  const faner: [Tab, string][] = [
+    ["components", t.surfaces.tabComponents],
+    ["surfaces", t.surfaces.tabSurfaces],
+  ];
+  return (
+    <div className="flex h-full flex-col">
+      <div
+        role="tablist"
+        aria-label={t.surfaces.tabsLabel}
+        className="flex gap-1 border-b border-gray-200 bg-white px-3 pt-3"
+      >
+        {faner.map(([id, label]) => (
+          <button
+            key={id}
+            type="button"
+            role="tab"
+            id={`preview-tab-${id}`}
+            aria-selected={tab === id}
+            aria-controls="preview-panel"
+            onClick={() => setTab(id)}
+            className={cn(
+              "-mb-px rounded-t-lg border px-4 py-2 text-sm font-medium",
+              tab === id
+                ? "border-gray-200 border-b-white bg-white text-gray-900"
+                : "border-transparent text-gray-600 hover:text-gray-900",
+            )}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+      <div
+        id="preview-panel"
+        role="tabpanel"
+        aria-labelledby={`preview-tab-${tab}`}
+        className="flex-1"
+      >
+        {tab === "components" ? (
+          <ComponentsPreview palette={palette} />
+        ) : (
+          <SurfacesPreview palette={palette} brand={brand} />
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ComponentsPreview({ palette }: { palette: ColorPalette }) {
   const { t } = useI18n();
   // Samme tekstfarge som kontrastsjekken regner med.
   const onPrimary = textOn(palette, palette.colors.primary);
