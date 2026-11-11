@@ -1,0 +1,34 @@
+name: CI
+
+# Kvalitetsporten på pull requests: lint, format, typer og et vanlig
+# Next-bygg. Deployen (cf-deploy.yml) kjører den samme porten på main før
+# noe går ut, i tillegg til OpenNext-bygget og røyktesten.
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  kvalitet:
+    name: Lint, typer og bygg
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Format
+        run: npm run format:check
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Bygg
+        run: npm run build

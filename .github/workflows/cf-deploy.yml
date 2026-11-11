@@ -1,0 +1,153 @@
+name: Cloudflare-deploy
+
+# Hver push til main bygges, røyktestes og deployes til Cloudflare Workers
+# (farger.borresendigital.no). Manuell kjøring kan være en tørrkjøring.
+#
+# Krever to repo-secrets (Settings → Secrets and variables → Actions):
+#   CLOUDFLARE_API_TOKEN   token med «Edit Cloudflare Workers» og DNS for sonen
+#   CLOUDFLARE_ACCOUNT_ID  konto-ID fra Workers-oversikten
+#
+# Mangler de, hopper deployen over med en beskjed i stedet for å feile.
+# Bygget kjører bare på Linux: OpenNext støtter ikke Windows.
+# Mal: jobbsokerassistenten.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Bygg og valider wrangler-konfigen uten å deploye"
+        type: boolean
+        default: false
+
+# Aldri to deploys i parallell.
+concurrency:
+  group: cf-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Bygg og deploy til Workers
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      DRY_RUN: ${{ inputs.dry_run == true }}
+    steps:
+      - name: Sjekk at hemmelighetene finnes
+        id: secrets
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::notice::CLOUDFLARE_API_TOKEN eller CLOUDFLARE_ACCOUNT_ID mangler. Hopper over deploy."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Feiler fort og tydelig hvis tokenet ikke virker herfra. Skriver aldri
+      # ut verdien.
+      - name: Verifiser Cloudflare-token
+        if: steps.secrets.outputs.ready == 'true'
+        run: |
+          curl -sS -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID" \
+            | python3 -c 'import sys,json; d=json.load(sys.stdin); print("success:", d["success"], "errors:", d["errors"]); sys.exit(0 if d["success"] else 1)'
+
+      - uses: actions/checkout@v7
+        if: steps.secrets.outputs.ready == 'true'
+
+      - uses: actions/setup-node@v7
+        if: steps.secrets.outputs.ready == 'true'
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+        if: steps.secrets.outputs.ready == 'true'
+
+      # Samme port som CI: en deploy går aldri ut forbi lint, format og typer.
+      - name: Lint
+        if: steps.secrets.outputs.ready == 'true'
+        run: npm run lint
+
+      - name: Format
+        if: steps.secrets.outputs.ready == 'true'
+        run: npm run format:check
+
+      - name: Typecheck
+        if: steps.secrets.outputs.ready == 'true'
+        run: npm run typecheck
+
+      - name: Bygg for Cloudflare Workers
+        if: steps.secrets.outputs.ready == 'true'
+        run: npx opennextjs-cloudflare build
+
+      # Røyktest av det ferdige bygget i en lokal worker FØR noe går ut. Lint
+      # og typer fanger ikke en oppgradering som krasjer i runtime: Next 16.4
+      # med for gammel OpenNext gikk grønt gjennom alt det og tok ned Kursvarde
+      # 23.10 og Sofagjest 02.11.2026. Her må workeren faktisk svare med siden,
+      # sikkerhetshodene og et skript fra _next/static.
+      - name: Røyktest den ferdige workeren lokalt
+        if: steps.secrets.outputs.ready == 'true'
+        run: |
+          npx opennextjs-cloudflare preview > preview.log 2>&1 &
+
+          for i in $(seq 1 40); do
+            sleep 3
+            code=$(curl -s -D hoder.txt -o forside.html -w '%{http_code}' --max-time 20 \
+              -A "Mozilla/5.0" -H "Accept: text/html" "http://localhost:8787/" || true)
+            if [ "$code" = "200" ] && grep -q "ColorCraft" forside.html; then
+              echo "ok: forsiden svarer 200 (forsøk $i)"
+              if ! grep -qi "^content-security-policy:" hoder.txt; then
+                echo "::error::Forsiden mangler Content-Security-Policy."
+                exit 1
+              fi
+              skript=$(grep -o '/_next/static/[^"]*\.js' forside.html | head -1)
+              if [ -z "$skript" ]; then
+                echo "::error::Fant ikke noe skript fra /_next/static i forsiden."
+                exit 1
+              fi
+              kode=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "http://localhost:8787$skript" || true)
+              if [ "$kode" != "200" ]; then
+                echo "::error::$skript svarte $kode."
+                exit 1
+              fi
+              echo "ok: sikkerhetshoder og $skript"
+              exit 0
+            fi
+          done
+
+          echo "::error::Workeren svarte ikke riktig (siste status ${code:-ingen})."
+          echo "--- preview.log ---"; tail -80 preview.log
+          exit 1
+
+      # De forhåndsgjengitte sidene kopieres inn i assets av `deploy`.
+      # Tørrkjøringen gjør det for hånd.
+      - name: Tørrkjør wrangler-konfig
+        if: steps.secrets.outputs.ready == 'true' && env.DRY_RUN == 'true'
+        run: |
+          npx opennextjs-cloudflare populateCache local
+          npx wrangler deploy --dry-run --outdir .wrangler-dry-run
+
+      - name: Deploy
+        if: steps.secrets.outputs.ready == 'true' && env.DRY_RUN != 'true'
+        run: npx opennextjs-cloudflare deploy
+
+      # Røyk mot produksjon rett etter deploy. Første gang skal DNS-posten og
+      # sertifikatet også opprettes, så prøv i opptil fem minutter.
+      - name: Verifiser produksjon
+        if: steps.secrets.outputs.ready == 'true' && env.DRY_RUN != 'true'
+        run: |
+          for i in $(seq 1 30); do
+            sleep 10
+            html=$(curl -sS -A "Mozilla/5.0" -H "Cache-Control: no-cache" --max-time 30 "https://farger.borresendigital.no/" || true)
+            if echo "$html" | grep -q "ColorCraft"; then
+              echo "ok: forsiden svarer (forsøk $i)"
+              exit 0
+            fi
+            echo "forsøk $i: forsiden svarer ikke ennå"
+          done
+          echo "::error::farger.borresendigital.no svarer ikke etter fem minutter"
+          exit 1

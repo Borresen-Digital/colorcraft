@@ -26,7 +26,7 @@ export function PaginatedPaletteSelector({
   const filteredPalettes = palettes.filter(
     (palette) =>
       palette.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      palette.description.toLowerCase().includes(searchTerm.toLowerCase())
+      palette.description.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   // Pagination

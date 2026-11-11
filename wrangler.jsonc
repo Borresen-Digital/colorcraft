@@ -1,0 +1,22 @@
+{
+  // Cloudflare Workers-konfig. Deploy skjer fra GitHub Actions
+  // (.github/workflows/cf-deploy.yml), aldri lokalt: OpenNext bygger ikke på
+  // Windows. Kontoen identifiseres med CLOUDFLARE_ACCOUNT_ID i workflowen.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "colorcraft",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-06-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS",
+  },
+  // Ingen workers.dev-adresse: én inngang, på vårt eget domene.
+  "workers_dev": false,
+  // Cloudflare oppretter DNS-post og sertifikat selv. Sonen borresendigital.no
+  // ligger i samme konto.
+  "routes": [{ "pattern": "farger.borresendigital.no", "custom_domain": true }],
+  "observability": {
+    "enabled": true,
+  },
+}

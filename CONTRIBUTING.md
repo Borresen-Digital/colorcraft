@@ -9,11 +9,13 @@ Takk for at du vurderer å bidra til Theme-Advisor! Jeg setter stor pris på all
    - Clone din fork lokalt på din maskin
 
 2. **Sett opp utviklingsmiljøet**
+
    ```bash
    npm install
    ```
 
 3. **Lag en ny branch**
+
    ```bash
    git checkout -b feature/din-nye-funksjon
    ```
@@ -32,12 +34,14 @@ Takk for at du vurderer å bidra til Theme-Advisor! Jeg setter stor pris på all
 ## Retningslinjer for bidrag
 
 ### Kodestandard
+
 - Bruk TypeScript for all ny kode
 - Følg eksisterende formatering og stil
 - Kommenter kompleks logikk
 - Hold komponentene rene og gjenbrukbare
 
 ### Pull Requests
+
 - Gi PR-en din en beskrivende tittel
 - Beskriv endringene dine i detalj
 - Link til relaterte issues hvis relevant
@@ -45,7 +49,9 @@ Takk for at du vurderer å bidra til Theme-Advisor! Jeg setter stor pris på all
 - Oppdater dokumentasjon hvis nødvendig
 
 ### Funksjoner og Forbedringer
+
 Jeg er spesielt interessert i:
+
 - Nye fargepaletter og fargetema
 - Forbedringer i brukergrensesnittet
 - Ytelsesoptimaliseringer
@@ -53,7 +59,9 @@ Jeg er spesielt interessert i:
 - Nye verktøy for fargemanipulering
 
 ### Rapportere Bugs
+
 Hvis du finner en bug:
+
 1. Sjekk først om den allerede er rapportert
 2. Inkluder så mye detaljer som mulig:
    - Nøyaktige steg for å reprodusere
@@ -62,9 +70,11 @@ Hvis du finner en bug:
    - Din nettleser og operativsystem
 
 ## Kommunikasjon
+
 - Hold diskusjoner profesjonelle og respektfulle
 - Still spørsmål hvis noe er uklart
 - Vær tålmodig med tilbakemeldinger
 
 ## Lisens
+
 Ved å bidra til Theme-Advisor, godtar du at dine bidrag vil bli lisensiert under samme MIT-lisens som prosjektet.

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -15,6 +15,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://farger.borresendigital.no"),
   title: "ColorCraft - Professional Color Palette Testing Tool",
   description:
     "Test, create, and visualize color palettes for your design projects. Professional color palette testing and visualization tool with live preview and dark mode support.",
@@ -26,8 +27,10 @@ export const metadata: Metadata = {
     "UI colors",
     "design system",
   ],
-  authors: [{ name: "Your Name" }],
-  creator: "ColorCraft",
+  authors: [
+    { name: "Børresen Digital", url: "https://www.borresendigital.no" },
+  ],
+  creator: "Børresen Digital",
   openGraph: {
     title: "ColorCraft - Professional Color Palette Testing Tool",
     description:
@@ -41,8 +44,14 @@ export const metadata: Metadata = {
     description:
       "Test, create, and visualize color palettes for your design projects",
   },
-  viewport: "width=device-width, initial-scale=1",
   robots: "index, follow",
+};
+
+// Next 16 tar ikke lenger viewport og themeColor i metadata.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#3B82F6",
 };
 
 export default function RootLayout({
@@ -54,7 +63,6 @@ export default function RootLayout({
     <html lang="en" className="scroll-smooth">
       <head>
         <link rel="icon" href="/favicon.ico" />
-        <meta name="theme-color" content="#3B82F6" />
       </head>
       <body
         className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased bg-gray-50 text-gray-900`}

@@ -1,151 +1,99 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { ColorPalette } from "@/types/palette";
 import { ExtendedColorPalette } from "@/data/palettes";
 
 interface PaletteEditorProps {
-  isOpen: boolean;
   onClose: () => void;
   onSave: (palette: ColorPalette, darkVariant?: ColorPalette) => void;
   editingPalette?: ExtendedColorPalette | null;
 }
 
+const DEFAULT_LIGHT_COLORS: ColorPalette["colors"] = {
+  primary: "#3B82F6",
+  secondary: "#E5E7EB",
+  accent: "#10B981",
+  warm: "#F59E0B",
+  cool: "#06B6D4",
+  background: "#FFFFFF",
+  surface: "#F9FAFB",
+  foreground: "#111827",
+  muted: "#6B7280",
+  border: "#D1D5DB",
+  success: "#10B981",
+  warning: "#F59E0B",
+  error: "#EF4444",
+  info: "#3B82F6",
+};
+
+const DEFAULT_DARK_COLORS: ColorPalette["colors"] = {
+  primary: "#60A5FA",
+  secondary: "#374151",
+  accent: "#34D399",
+  warm: "#FBBF24",
+  cool: "#22D3EE",
+  background: "#111827",
+  surface: "#1F2937",
+  foreground: "#F9FAFB",
+  muted: "#9CA3AF",
+  border: "#374151",
+  success: "#34D399",
+  warning: "#FBBF24",
+  error: "#F87171",
+  info: "#60A5FA",
+};
+
+/**
+ * Skjemaet for å lage eller endre en palett.
+ *
+ * Forelderen monterer komponenten bare når redigeringen er åpen, med en ny
+ * `key` hver gang. Da settes starttilstanden én gang fra props, og det trengs
+ * ingen effekt som nullstiller skjemaet når en annen palett åpnes.
+ */
 export function PaletteEditor({
-  isOpen,
   onClose,
   onSave,
   editingPalette,
 }: PaletteEditorProps) {
-  const [palette, setPalette] = useState<ColorPalette>({
-    name: "Custom Palette",
-    id: `custom-${Date.now()}`,
-    description: "My custom color palette",
-    colors: {
-      primary: "#3B82F6",
-      secondary: "#E5E7EB",
-      accent: "#10B981",
-      warm: "#F59E0B",
-      cool: "#06B6D4",
-      background: "#FFFFFF",
-      surface: "#F9FAFB",
-      foreground: "#111827",
-      muted: "#6B7280",
-      border: "#D1D5DB",
-      success: "#10B981",
-      warning: "#F59E0B",
-      error: "#EF4444",
-      info: "#3B82F6",
-    },
-  });
-
-  const [createDarkVariant, setCreateDarkVariant] = useState(false);
-  const [darkPalette, setDarkPalette] = useState<ColorPalette>({
-    name: "Custom Palette Dark",
-    id: `custom-${Date.now()}-dark`,
-    description: "My custom color palette - Dark mode",
-    colors: {
-      primary: "#60A5FA",
-      secondary: "#374151",
-      accent: "#34D399",
-      warm: "#FBBF24",
-      cool: "#22D3EE",
-      background: "#111827",
-      surface: "#1F2937",
-      foreground: "#F9FAFB",
-      muted: "#9CA3AF",
-      border: "#374151",
-      success: "#34D399",
-      warning: "#FBBF24",
-      error: "#F87171",
-      info: "#60A5FA",
-    },
-  });
-
-  // Update form when editingPalette changes
-  useEffect(() => {
-    if (editingPalette) {
-      setPalette(editingPalette);
-      setCreateDarkVariant(!!editingPalette.darkVariant);
-
-      if (editingPalette.darkVariant) {
-        setDarkPalette(editingPalette.darkVariant);
-      }
-    } else {
-      // Reset to default values for new palette
-      const timestamp = Date.now();
-      setPalette({
+  const [palette, setPalette] = useState<ColorPalette>(
+    () =>
+      editingPalette ?? {
         name: "Custom Palette",
-        id: `custom-${timestamp}`,
+        id: `custom-${Date.now()}`,
         description: "My custom color palette",
-        colors: {
-          primary: "#3B82F6",
-          secondary: "#E5E7EB",
-          accent: "#10B981",
-          warm: "#F59E0B",
-          cool: "#06B6D4",
-          background: "#FFFFFF",
-          surface: "#F9FAFB",
-          foreground: "#111827",
-          muted: "#6B7280",
-          border: "#D1D5DB",
-          success: "#10B981",
-          warning: "#F59E0B",
-          error: "#EF4444",
-          info: "#3B82F6",
-        },
-      });
-      setCreateDarkVariant(false);
-      setDarkPalette({
-        name: "Custom Palette Dark",
-        id: `custom-${timestamp}-dark`,
-        description: "My custom color palette - Dark mode",
-        colors: {
-          primary: "#60A5FA",
-          secondary: "#374151",
-          accent: "#34D399",
-          warm: "#FBBF24",
-          cool: "#22D3EE",
-          background: "#111827",
-          surface: "#1F2937",
-          foreground: "#F9FAFB",
-          muted: "#9CA3AF",
-          border: "#374151",
-          success: "#34D399",
-          warning: "#FBBF24",
-          error: "#F87171",
-          info: "#60A5FA",
-        },
-      });
-    }
-  }, [editingPalette, isOpen]);
+        colors: DEFAULT_LIGHT_COLORS,
+      },
+  );
 
-  // Update dark palette name and id when light palette changes
-  useEffect(() => {
-    if (createDarkVariant) {
-      setDarkPalette((prev) => ({
-        ...prev,
-        name: `${palette.name} Dark`,
-        id: `${palette.id}-dark`,
-        description: `${palette.description} - Dark mode`,
-      }));
-    }
-  }, [palette.name, palette.id, palette.description, createDarkVariant]);
+  const [createDarkVariant, setCreateDarkVariant] = useState(
+    () => !!editingPalette?.darkVariant,
+  );
+  // Bare fargene lagres her. Navn, id og beskrivelse for den mørke varianten
+  // utledes fra den lyse ved lagring, så de alltid følger hverandre.
+  const [darkColors, setDarkColors] = useState<ColorPalette["colors"]>(
+    () => editingPalette?.darkVariant?.colors ?? DEFAULT_DARK_COLORS,
+  );
 
   const handleSave = () => {
-    onSave(palette, createDarkVariant ? darkPalette : undefined);
+    const darkVariant: ColorPalette | undefined = createDarkVariant
+      ? {
+          name: `${palette.name} Dark`,
+          id: `${palette.id}-dark`,
+          description: `${palette.description} - Dark mode`,
+          colors: darkColors,
+        }
+      : undefined;
+    onSave(palette, darkVariant);
   };
 
   const handleColorChange = (
     colorKey: string,
     value: string,
-    isDark = false
+    isDark = false,
   ) => {
     if (isDark) {
-      setDarkPalette((prev) => ({
-        ...prev,
-        colors: { ...prev.colors, [colorKey]: value },
-      }));
+      setDarkColors((prev) => ({ ...prev, [colorKey]: value }));
     } else {
       setPalette((prev) => ({
         ...prev,
@@ -154,10 +102,8 @@ export function PaletteEditor({
     }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
         <div className="p-6 border-b sticky top-0 bg-white z-10">
           <div className="flex justify-between items-center">
@@ -260,7 +206,7 @@ export function PaletteEditor({
                   Dark Mode Colors
                 </h4>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {Object.entries(darkPalette.colors).map(([key, value]) => (
+                  {Object.entries(darkColors).map(([key, value]) => (
                     <div key={key} className="space-y-2">
                       <label className="block text-sm font-medium text-gray-200 capitalize">
                         {key.replace(/([A-Z])/g, " $1").trim()}
