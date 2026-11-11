@@ -10,17 +10,27 @@ import { PaletteEditor } from "@/components/PaletteEditor";
 import { ColorPalette } from "@/types/palette";
 import { storageUtils } from "@/utils/localStorage";
 import { Logo } from "@/components/Logo";
+import { I18nProvider, useI18n } from "@/components/I18nProvider";
+import {
+  localePath,
+  localizePalette,
+  type Locale,
+  type Messages,
+} from "@/lib/i18n";
 
 // En palett fra en lenke lagres ikke før brukeren ber om det. Da får den en
 // vanlig custom-id og havner i localStorage som de andre egne palettene.
-function toCustom(p: ExtendedColorPalette): ExtendedColorPalette {
+function toCustom(
+  p: ExtendedColorPalette,
+  m: Messages["palette"],
+): ExtendedColorPalette {
   const id = `custom-${Date.now()}`;
   return {
     ...p,
     id,
     description:
-      p.description === "Shared palette"
-        ? "Saved from a shared link"
+      p.description === m.sharedDescription
+        ? m.savedDescription
         : p.description,
     ...(p.darkVariant && {
       darkVariant: { ...p.darkVariant, id: `${id}-dark` },
@@ -28,7 +38,16 @@ function toCustom(p: ExtendedColorPalette): ExtendedColorPalette {
   };
 }
 
-export default function ColorCraft() {
+export function ColorCraftApp({ locale }: { locale: Locale }) {
+  return (
+    <I18nProvider locale={locale}>
+      <ColorCraft />
+    </I18nProvider>
+  );
+}
+
+function ColorCraft() {
+  const { locale, t } = useI18n();
   const [palettes, setPalettes] =
     useState<ExtendedColorPalette[]>(colorPalettes);
   const [selectedPaletteId, setSelectedPaletteId] = useState(
@@ -65,7 +84,7 @@ export default function ColorCraft() {
   const hashLest = useRef(false);
   useEffect(() => {
     const bruk = () => {
-      const delt = decodeShare(window.location.hash);
+      const delt = decodeShare(window.location.hash, t.palette);
       hashLest.current = true;
       if (!delt) return;
       if (delt.kind === "builtin") {
@@ -98,7 +117,7 @@ export default function ColorCraft() {
     bruk();
     window.addEventListener("hashchange", bruk);
     return () => window.removeEventListener("hashchange", bruk);
-  }, []);
+  }, [t.palette]);
 
   // Dark mode toggle - maintains dark mode state when switching palettes
   const handleDarkModeToggle = (newDarkMode: boolean) => {
@@ -133,21 +152,25 @@ export default function ColorCraft() {
     }
   };
 
+  // Innebygde paletter med navn og beskrivelse på sidens språk. Tilstanden
+  // (palettes) holdes på ett språk, så lagring og lenker ikke avhenger av det.
+  const shown = palettes.map((p) => localizePalette(p, locale));
+
   const getCurrentPalette = (): ColorPalette => {
-    for (const palette of palettes) {
+    for (const palette of shown) {
       if (palette.id === selectedPaletteId) return palette;
       if (palette.darkVariant?.id === selectedPaletteId)
         return palette.darkVariant;
     }
-    return palettes[0];
+    return shown[0];
   };
 
   // Hele paletten (lys med eventuell mørk) som den viste varianten hører til.
   const getCurrentExtendedPalette = (): ExtendedColorPalette =>
-    palettes.find(
+    shown.find(
       (p) =>
         p.id === selectedPaletteId || p.darkVariant?.id === selectedPaletteId,
-    ) ?? palettes[0];
+    ) ?? shown[0];
 
   const currentExtended = getCurrentExtendedPalette();
 
@@ -183,7 +206,10 @@ export default function ColorCraft() {
   const handleSaveShared = () => {
     const delt = currentExtended;
     if (!delt.id.startsWith("shared-")) return;
-    const lagret = toCustom(delt);
+    const lagret = toCustom(
+      palettes.find((p) => p.id === delt.id) ?? delt,
+      t.palette,
+    );
     setPalettes((prev) => prev.map((p) => (p.id === delt.id ? lagret : p)));
     setSelectedPaletteId(
       selectedPaletteId === delt.darkVariant?.id
@@ -219,7 +245,7 @@ export default function ColorCraft() {
     };
     // En palett fra en lenke som endres, blir en egen palett som lagres.
     if (newExtendedPalette.id.startsWith("shared-")) {
-      newExtendedPalette = toCustom(newExtendedPalette);
+      newExtendedPalette = toCustom(newExtendedPalette, t.palette);
     }
 
     if (editingPalette) {
@@ -269,6 +295,12 @@ export default function ColorCraft() {
   };
 
   const currentPalette = getCurrentPalette();
+  const otherLocale: Locale = locale === "nb" ? "en" : "nb";
+  // Paletten i lenken følger med over til det andre språket.
+  const switchLanguage = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    window.location.href = localePath(otherLocale) + window.location.hash;
+  };
   const canDelete = palettes.length > 1;
 
   return (
@@ -279,60 +311,68 @@ export default function ColorCraft() {
             <div className="flex items-center">
               <Logo size="xl" showText={false} />
               <div className="ml-4">
-                {/* <h1 className="text-3xl font-bold text-gray-900">ColorCraft</h1> */}
-                <p className="text-gray-600 text-sm">
-                  Professional color palette testing and visualization tool
-                </p>
+                <h1 className="sr-only">ColorCraft</h1>
+                <p className="text-gray-600 text-sm">{t.app.tagline}</p>
               </div>
             </div>
 
             <div className="flex items-center gap-4">
+              <a
+                href={localePath(otherLocale)}
+                hrefLang={otherLocale}
+                lang={otherLocale}
+                aria-label={t.app.otherLanguageLabel}
+                onClick={switchLanguage}
+                className="text-sm font-medium text-gray-600 underline-offset-4 hover:text-gray-900 hover:underline"
+              >
+                {t.app.otherLanguage}
+              </a>
               {/* Palette Actions */}
               <div className="flex gap-2">
                 <button
                   onClick={copyShareLink}
                   className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors text-sm font-medium"
-                  title="Copy a link to this palette"
+                  title={t.app.shareTitle}
                 >
                   {linkStatus === "copied"
-                    ? "Link copied!"
+                    ? t.app.linkCopied
                     : linkStatus === "failed"
-                      ? "Copy failed"
-                      : "Share link"}
+                      ? t.app.copyFailed
+                      : t.app.share}
                 </button>
                 <button
                   onClick={handleCreatePalette}
                   className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium"
                 >
-                  Add Palette
+                  {t.app.add}
                 </button>
                 <button
                   onClick={handleEditPalette}
                   className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm font-medium"
                 >
-                  Edit Palette
+                  {t.app.edit}
                 </button>
                 {canDelete && (
                   <button
                     onClick={handleDeletePalette}
                     className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm font-medium"
                   >
-                    Delete
+                    {t.app.delete}
                   </button>
                 )}
               </div>
 
               <div className="text-right text-sm text-gray-500">
                 <p>
-                  Currently viewing:{" "}
+                  {t.app.viewing}{" "}
                   <span className="font-medium text-gray-900">
                     {currentPalette.name}
                   </span>
                 </p>
                 <p className="text-xs mt-1">
-                  Mode:{" "}
+                  {t.app.mode}{" "}
                   <span className="font-medium">
-                    {isDarkMode ? "Dark" : "Light"}
+                    {isDarkMode ? t.app.dark : t.app.light}
                   </span>
                 </p>
               </div>
@@ -348,21 +388,20 @@ export default function ColorCraft() {
             className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900"
           >
             <span>
-              <strong>{currentExtended.name}</strong> came from a shared link.
-              It is not saved in this browser yet.
+              <strong>{currentExtended.name}</strong> {t.app.sharedBanner}
             </span>
             <button
               onClick={handleSaveShared}
               className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-700"
             >
-              Save to my palettes
+              {t.app.saveShared}
             </button>
           </div>
         )}
         <div className="grid grid-cols-12 gap-6 h-[850px]">
           <div className="col-span-3 bg-white rounded-xl p-6 shadow-lg overflow-y-auto">
             <PaginatedPaletteSelector
-              palettes={palettes}
+              palettes={shown}
               selectedId={selectedPaletteId}
               onSelect={handlePaletteSelect}
               isDarkMode={isDarkMode}
@@ -382,6 +421,16 @@ export default function ColorCraft() {
           </div>
         </div>
       </div>
+
+      <footer className="max-w-7xl mx-auto px-4 pb-8 text-center text-sm text-gray-600">
+        {t.app.footer}{" "}
+        <a
+          href="https://www.borresendigital.no"
+          className="font-medium text-gray-900 underline underline-offset-4 hover:text-blue-700"
+        >
+          Børresen Digital
+        </a>
+      </footer>
 
       {/* Palette Editor Modal */}
       {editorOpen && (

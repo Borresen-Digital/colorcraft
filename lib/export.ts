@@ -1,6 +1,7 @@
 import type { ExtendedColorPalette } from "@/data/palettes";
 import type { ColorPalette } from "@/types/palette";
 import { textOn } from "./contrastPairs";
+import { DEFAULT_LOCALE, MESSAGES, type Locale } from "./i18n";
 
 /**
  * Eksport av en palett, lys og eventuelt mørk, til tre formater:
@@ -57,8 +58,12 @@ export function fileSlug(name: string): string {
   return slug || "palett";
 }
 
-function header(palette: ColorPalette): string {
-  return `/* ${safeName(palette.name)}, laget med ColorCraft (farger.borresendigital.no) */`;
+function credit(palette: ColorPalette, locale: Locale): string {
+  return `${safeName(palette.name)}, ${MESSAGES[locale].export.madeWith} ColorCraft (farger.borresendigital.no)`;
+}
+
+function header(palette: ColorPalette, locale: Locale): string {
+  return `/* ${credit(palette, locale)} */`;
 }
 
 function block(
@@ -95,19 +100,25 @@ function themeBlocks(palette: ExtendedColorPalette, prefix: string): string {
   ].join("\n\n");
 }
 
-export function toCss(palette: ExtendedColorPalette): string {
-  return `${header(palette)}\n\n${themeBlocks(palette, "color-")}\n`;
+export function toCss(
+  palette: ExtendedColorPalette,
+  locale: Locale = DEFAULT_LOCALE,
+): string {
+  return `${header(palette, locale)}\n\n${themeBlocks(palette, "color-")}\n`;
 }
 
-export function toTailwind(palette: ExtendedColorPalette): string {
+export function toTailwind(
+  palette: ExtendedColorPalette,
+  locale: Locale = DEFAULT_LOCALE,
+): string {
   const navn = tokens(palette).map(([n]) => n);
   const theme = `@theme inline {\n${navn
     .map((n) => `  --color-${n}: var(--palette-${n});`)
     .join("\n")}\n}`;
-  const deler = [header(palette), '@import "tailwindcss";'];
+  const deler = [header(palette, locale), '@import "tailwindcss";'];
   if (palette.darkVariant) {
     deler.push(
-      "/* dark: følger data-theme på <html>. Uten data-theme brukes systemvalget. */\n" +
+      `/* ${MESSAGES[locale].export.darkVariantComment} */\n` +
         '@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));',
     );
   }
@@ -121,9 +132,12 @@ function dtcg(palette: ColorPalette) {
   );
 }
 
-export function toJson(palette: ExtendedColorPalette): string {
+export function toJson(
+  palette: ExtendedColorPalette,
+  locale: Locale = DEFAULT_LOCALE,
+): string {
   const ut: Record<string, unknown> = {
-    $description: `${safeName(palette.name)}, laget med ColorCraft (farger.borresendigital.no)`,
+    $description: credit(palette, locale),
     light: { color: dtcg(palette) },
   };
   if (palette.darkVariant) ut.dark = { color: dtcg(palette.darkVariant) };
@@ -134,7 +148,7 @@ export const EXPORTS: Record<
   ExportFormat,
   {
     label: string;
-    render: (p: ExtendedColorPalette) => string;
+    render: (p: ExtendedColorPalette, locale?: Locale) => string;
     filename: (p: ExtendedColorPalette) => string;
     mime: string;
   }

@@ -6,6 +6,7 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/components/I18nProvider";
 
 interface ColorSwatchProps {
   label: string;
@@ -14,6 +15,7 @@ interface ColorSwatchProps {
 }
 
 export function ColorSwatch({ label, color, size = "md" }: ColorSwatchProps) {
+  const { t } = useI18n();
   const [copied, setCopied] = useState(false);
 
   const copyToClipboard = async () => {
@@ -40,7 +42,9 @@ export function ColorSwatch({ label, color, size = "md" }: ColorSwatchProps) {
       >
         {copied && (
           <div className="absolute inset-0 bg-black/50 rounded-lg flex items-center justify-center">
-            <span className="text-white text-xs font-bold">Copied!</span>
+            <span className="text-white text-xs font-bold">
+              {t.details.copied}
+            </span>
           </div>
         )}
       </div>

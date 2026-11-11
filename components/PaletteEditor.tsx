@@ -3,6 +3,9 @@
 import { useState } from "react";
 import { ColorPalette } from "@/types/palette";
 import { ExtendedColorPalette } from "@/data/palettes";
+import { useI18n } from "@/components/I18nProvider";
+
+type Role = keyof ColorPalette["colors"];
 
 interface PaletteEditorProps {
   onClose: () => void;
@@ -56,12 +59,13 @@ export function PaletteEditor({
   onSave,
   editingPalette,
 }: PaletteEditorProps) {
+  const { t } = useI18n();
   const [palette, setPalette] = useState<ColorPalette>(
     () =>
       editingPalette ?? {
-        name: "Custom Palette",
+        name: t.editor.defaultName,
         id: `custom-${Date.now()}`,
-        description: "My custom color palette",
+        description: t.editor.defaultDescription,
         colors: DEFAULT_LIGHT_COLORS,
       },
   );
@@ -78,9 +82,9 @@ export function PaletteEditor({
   const handleSave = () => {
     const darkVariant: ColorPalette | undefined = createDarkVariant
       ? {
-          name: `${palette.name} Dark`,
+          name: `${palette.name} ${t.palette.darkSuffix}`,
           id: `${palette.id}-dark`,
-          description: `${palette.description} - Dark mode`,
+          description: `${palette.description} ${t.palette.darkDescriptionSuffix}`,
           colors: darkColors,
         }
       : undefined;
@@ -108,10 +112,12 @@ export function PaletteEditor({
         <div className="p-6 border-b sticky top-0 bg-white z-10">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold">
-              {editingPalette ? "Edit Palette" : "Create New Palette"}
+              {editingPalette ? t.editor.titleEdit : t.editor.titleNew}
             </h2>
             <button
+              type="button"
               onClick={onClose}
+              aria-label={t.editor.close}
               className="text-gray-500 hover:text-gray-700 text-2xl w-8 h-8 flex items-center justify-center"
             >
               ×
@@ -123,34 +129,42 @@ export function PaletteEditor({
           {/* Basic Info */}
           <div className="bg-white p-6 rounded-lg border border-gray-200 space-y-4">
             <h3 className="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2">
-              Palette Information
+              {t.editor.info}
             </h3>
             <div>
-              <label className="block text-sm font-medium text-gray-800 mb-2">
-                Palette Name
+              <label
+                htmlFor="palette-name"
+                className="block text-sm font-medium text-gray-800 mb-2"
+              >
+                {t.editor.name}
               </label>
               <input
+                id="palette-name"
                 type="text"
                 value={palette.name}
                 onChange={(e) =>
                   setPalette({ ...palette, name: e.target.value })
                 }
                 className="w-full p-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 text-base"
-                placeholder="Enter palette name"
+                placeholder={t.editor.namePlaceholder}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-800 mb-2">
-                Description
+              <label
+                htmlFor="palette-description"
+                className="block text-sm font-medium text-gray-800 mb-2"
+              >
+                {t.editor.description}
               </label>
               <input
+                id="palette-description"
                 type="text"
                 value={palette.description}
                 onChange={(e) =>
                   setPalette({ ...palette, description: e.target.value })
                 }
                 className="w-full p-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 text-base"
-                placeholder="Describe your palette"
+                placeholder={t.editor.descriptionPlaceholder}
               />
             </div>
           </div>
@@ -158,13 +172,13 @@ export function PaletteEditor({
           {/* Color Grid */}
           <div className="bg-white p-6 rounded-lg border border-gray-200">
             <h3 className="text-lg font-semibold mb-4 text-gray-900">
-              Light Mode Colors
+              {t.editor.lightColors}
             </h3>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {Object.entries(palette.colors).map(([key, value]) => (
                 <div key={key} className="space-y-2">
                   <label className="block text-sm font-medium text-gray-800 capitalize">
-                    {key.replace(/([A-Z])/g, " $1").trim()}
+                    {t.roles[key as Role]}
                   </label>
                   <div className="flex space-x-2">
                     <input
@@ -192,24 +206,28 @@ export function PaletteEditor({
               <input
                 type="checkbox"
                 checked={createDarkVariant}
+                id="create-dark"
                 onChange={(e) => setCreateDarkVariant(e.target.checked)}
                 className="w-5 h-5 text-blue-600 focus:ring-blue-500 border-2 border-gray-300 rounded"
               />
-              <label className="text-lg font-semibold text-gray-900">
-                Create Dark Mode Variant
+              <label
+                htmlFor="create-dark"
+                className="text-lg font-semibold text-gray-900"
+              >
+                {t.editor.createDark}
               </label>
             </div>
 
             {createDarkVariant && (
               <div className="bg-gray-800 p-6 rounded-lg border-2 border-gray-600">
                 <h4 className="text-white font-medium mb-4 text-base">
-                  Dark Mode Colors
+                  {t.editor.darkColors}
                 </h4>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {Object.entries(darkColors).map(([key, value]) => (
                     <div key={key} className="space-y-2">
                       <label className="block text-sm font-medium text-gray-200 capitalize">
-                        {key.replace(/([A-Z])/g, " $1").trim()}
+                        {t.roles[key as Role]}
                       </label>
                       <div className="flex space-x-2">
                         <input
@@ -244,13 +262,13 @@ export function PaletteEditor({
                 onClick={onClose}
                 className="px-6 py-2 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-colors font-medium"
               >
-                Cancel
+                {t.editor.cancel}
               </button>
               <button
                 onClick={handleSave}
                 className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium shadow-sm"
               >
-                {editingPalette ? "Update Palette" : "Create Palette"}
+                {editingPalette ? t.editor.update : t.editor.create}
               </button>
             </div>
           </div>

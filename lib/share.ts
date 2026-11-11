@@ -71,7 +71,7 @@ function contentId(s: string): string {
   return (h >>> 0).toString(36);
 }
 
-function cleanName(name: string | null): string {
+function cleanName(name: string | null, fallback: string): string {
   // Kontrolltegn ut, mellomrom samlet, og en øvre grense. React escaper
   // resten når navnet vises.
   const ren = (name ?? "")
@@ -79,7 +79,7 @@ function cleanName(name: string | null): string {
     .replace(/\s+/g, " ")
     .trim()
     .slice(0, MAX_NAME);
-  return ren || "Shared palette";
+  return ren || fallback;
 }
 
 function sameColors(a: ColorPalette, b: ColorPalette): boolean {
@@ -119,8 +119,26 @@ export function encodeShare(
   return q.toString().replace(/\+/g, "%20");
 }
 
+/** Tekstene en delt palett får, på sidens språk. */
+export interface ShareLabels {
+  sharedName: string;
+  sharedDescription: string;
+  darkSuffix: string;
+  darkDescriptionSuffix: string;
+}
+
+const ENGLISH_LABELS: ShareLabels = {
+  sharedName: "Shared palette",
+  sharedDescription: "Shared palette",
+  darkSuffix: "dark",
+  darkDescriptionSuffix: "(dark mode)",
+};
+
 /** Leser fragmentet (med eller uten #). Gir null hvis det ikke er en palett. */
-export function decodeShare(hash: string): SharedState | null {
+export function decodeShare(
+  hash: string,
+  labels: ShareLabels = ENGLISH_LABELS,
+): SharedState | null {
   const q = new URLSearchParams(hash.replace(/^#/, ""));
   const dark = q.get("m") === "dark";
 
@@ -137,18 +155,20 @@ export function decodeShare(hash: string): SharedState | null {
   if (!lys) return null;
   const mork = decodeColors(q.get("d"));
 
-  const name = cleanName(q.get("n"));
-  const id = `shared-${contentId(`${name}|${q.get("l")}|${q.get("d") ?? ""}`)}`;
+  // Id-en bygger på det som står i lenken, ikke på språket, så samme lenke
+  // gir samme palett på begge sidene.
+  const id = `shared-${contentId(`${cleanName(q.get("n"), "")}|${q.get("l")}|${q.get("d") ?? ""}`)}`;
+  const name = cleanName(q.get("n"), labels.sharedName);
   const palette: ExtendedColorPalette = {
     id,
     name,
-    description: "Shared palette",
+    description: labels.sharedDescription,
     colors: lys,
     ...(mork && {
       darkVariant: {
         id: `${id}-dark`,
-        name: `${name} Dark`,
-        description: "Shared palette - Dark mode",
+        name: `${name} ${labels.darkSuffix}`,
+        description: `${labels.sharedDescription} ${labels.darkDescriptionSuffix}`,
         colors: mork,
       },
     }),
