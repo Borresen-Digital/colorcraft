@@ -201,6 +201,26 @@ const nb = {
       "Skriv CMYK fra manualen, for eksempel 0 25 100 0. Omregnes omtrentlig.",
     cmykInvalid: "Skriv fire tall fra 0 til 100: C M Y K.",
   },
+  tones: {
+    tab: "Valør og varme",
+    intro:
+      "Hver farge i ti valører, og varmere, kaldere, mer og mindre mettet med samme lyshet. Klikk en farge for å bruke den i paletten.",
+    logo: (n: number) => `Logofarge ${n}`,
+    support: (n: number) => `Støttefarge ${n}`,
+    applyAs: "Bruk som",
+    valor: "Valør",
+    variants: "Varme og metning",
+    warmer: "Varmere",
+    cooler: "Kaldere",
+    more: "Mer mettet",
+    less: "Mindre mettet",
+    original: "original",
+    textOk: "Aa betyr at fargen består som tekst (4,5:1) mot bakgrunnen.",
+    apply: (hex: string, role: string) =>
+      `Bruk ${hex} som ${role.toLowerCase()}`,
+    applied: (hex: string, role: string) =>
+      `${hex} er brukt som ${role.toLowerCase()}.`,
+  },
   editor: {
     titleNew: "Ny palett",
     titleEdit: "Rediger palett",
@@ -407,6 +427,24 @@ const en: Messages = {
     cmykHelp:
       "Enter CMYK from the brand guide, for example 0 25 100 0. Converted approximately.",
     cmykInvalid: "Enter four numbers from 0 to 100: C M Y K.",
+  },
+  tones: {
+    tab: "Value and warmth",
+    intro:
+      "Each color in ten values, plus warmer, cooler, more and less saturated at the same lightness. Click a color to use it in the palette.",
+    logo: (n) => `Logo color ${n}`,
+    support: (n) => `Support color ${n}`,
+    applyAs: "Use as",
+    valor: "Value",
+    variants: "Warmth and saturation",
+    warmer: "Warmer",
+    cooler: "Cooler",
+    more: "More saturated",
+    less: "Less saturated",
+    original: "original",
+    textOk: "Aa means the color passes as text (4.5:1) on the background.",
+    apply: (hex, role) => `Use ${hex} as ${role.toLowerCase()}`,
+    applied: (hex, role) => `${hex} is now used as ${role.toLowerCase()}.`,
   },
   editor: {
     titleNew: "Create new palette",
