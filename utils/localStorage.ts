@@ -2,6 +2,7 @@
 import { ExtendedColorPalette } from "@/data/palettes";
 
 const STORAGE_KEY = "colorcraft-custom-palettes";
+const OVERRIDES_KEY = "colorcraft-builtin-overrides";
 
 export const storageUtils = {
   // Save custom palettes to localStorage
@@ -53,6 +54,31 @@ export const storageUtils = {
       localStorage.removeItem(STORAGE_KEY);
     } catch (error) {
       console.warn("Failed to clear palettes from localStorage:", error);
+    }
+  },
+
+  // Endringer i innebygde paletter, med id som nøkkel (se lib/builtin.ts).
+  // Rått innhold: applyOverrides validerer det.
+  loadBuiltinOverrides: (): unknown => {
+    try {
+      const lagret = localStorage.getItem(OVERRIDES_KEY);
+      return lagret ? JSON.parse(lagret) : {};
+    } catch {
+      return {};
+    }
+  },
+
+  saveBuiltinOverrides: (
+    overrides: Record<string, ExtendedColorPalette>,
+  ): void => {
+    try {
+      if (Object.keys(overrides).length === 0) {
+        localStorage.removeItem(OVERRIDES_KEY);
+      } else {
+        localStorage.setItem(OVERRIDES_KEY, JSON.stringify(overrides));
+      }
+    } catch (error) {
+      console.warn("Failed to save palette changes to localStorage:", error);
     }
   },
 

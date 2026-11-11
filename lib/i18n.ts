@@ -48,6 +48,8 @@ const nb = {
     sharedBanner:
       "kom fra en delt lenke og er ikke lagret i denne nettleseren ennå.",
     saveShared: "Lagre i mine paletter",
+    reset: "Tilbakestill",
+    resetTitle: "Gå tilbake til fargene paletten hadde fra starten",
     otherLanguage: "English",
     otherLanguageLabel: "Switch to English",
     footer: "Et gratis verktøy fra",
@@ -104,6 +106,9 @@ const nb = {
     suggest: (color: string, role: string, target: string) =>
       `Prøv ${color} som ${role.toLowerCase()} for å nå ${target}:1`,
     copySuggestion: "Kopier forslaget",
+    apply: "Bruk",
+    applyLabel: (color: string, role: string) =>
+      `Bruk ${color} som ${role.toLowerCase()}`,
     copied: "Kopiert!",
     footnote:
       "WCAG 2.2: AA krever 4,5:1 for tekst og 3:1 for stor tekst. AAA krever 7:1 og 4,5:1.",
@@ -188,6 +193,8 @@ const en: Messages = {
     sharedBanner:
       "came from a shared link. It is not saved in this browser yet.",
     saveShared: "Save to my palettes",
+    reset: "Reset",
+    resetTitle: "Go back to the palette's original colors",
     otherLanguage: "Norsk",
     otherLanguageLabel: "Bytt til norsk",
     footer: "A free tool from",
@@ -246,6 +253,8 @@ const en: Messages = {
     suggest: (color, role, target) =>
       `Try ${color} for ${role.toLowerCase()} to reach ${target}:1`,
     copySuggestion: "Copy the suggested color",
+    apply: "Apply",
+    applyLabel: (color, role) => `Use ${color} for ${role.toLowerCase()}`,
     copied: "Copied!",
     footnote:
       "WCAG 2.2: AA needs 4.5:1 for text and 3:1 for large text. AAA needs 7:1 and 4.5:1.",
@@ -327,7 +336,9 @@ const PALETTE_DESCRIPTIONS_EN: Record<string, string> = {
 
 /**
  * Navn og beskrivelse på riktig språk for de innebygde palettene. Egne og
- * delte paletter er skrevet av brukeren og står som de er.
+ * delte paletter er skrevet av brukeren og står som de er. Det samme gjelder
+ * tekst brukeren har endret i en innebygd palett: bare urørte tekster
+ * oversettes.
  */
 export function localizePalette(
   p: ExtendedColorPalette,
@@ -336,15 +347,25 @@ export function localizePalette(
   const innebygd = colorPalettes.find((x) => x.id === p.id);
   if (!innebygd || locale === DEFAULT_LOCALE) return p;
   const m = MESSAGES[locale].palette;
-  const desc = PALETTE_DESCRIPTIONS_EN[p.id] ?? p.description;
+  const oversatt = PALETTE_DESCRIPTIONS_EN[p.id] ?? p.description;
+  const desc =
+    p.description === innebygd.description ? oversatt : p.description;
+  const mork = p.darkVariant;
+  const morkOrig = innebygd.darkVariant;
   return {
     ...p,
     description: desc,
-    ...(p.darkVariant && {
+    ...(mork && {
       darkVariant: {
-        ...p.darkVariant,
-        name: `${innebygd.name} ${m.darkSuffix}`,
-        description: `${desc} ${m.darkDescriptionSuffix}`,
+        ...mork,
+        name:
+          mork.name === morkOrig?.name
+            ? `${p.name} ${m.darkSuffix}`
+            : mork.name,
+        description:
+          mork.description === morkOrig?.description
+            ? `${desc} ${m.darkDescriptionSuffix}`
+            : mork.description,
       },
     }),
   };
