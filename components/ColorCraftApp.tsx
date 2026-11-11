@@ -3,6 +3,12 @@
 import { useState, useEffect, useRef } from "react";
 import { colorPalettes, ExtendedColorPalette } from "@/data/palettes";
 import { decodeShare, encodeShare } from "@/lib/share";
+import {
+  applyOverrides,
+  builtinOriginal,
+  builtinOverrides,
+  isModifiedBuiltin,
+} from "@/lib/builtin";
 import { PaginatedPaletteSelector } from "@/components/PaletteSelector";
 import { LivePreview } from "@/components/LivePreview";
 import { ColorDetails } from "@/components/ColorDetails";
@@ -58,26 +64,30 @@ function ColorCraft() {
   const [editingPalette, setEditingPalette] =
     useState<ExtendedColorPalette | null>(null);
 
-  // Load custom palettes from localStorage on component mount
+  // Egne paletter og endringer i de innebygde leses fra localStorage når
+  // siden er lastet, og lagres hver gang listen endres. Lagringen venter til
+  // lesingen er gjort, så standardlisten aldri skriver over det som er lagret.
+  // Et state-flagg og ikke en ref: begge effektene kjører i samme commit, så
+  // lagringen må vente til neste gjengivelse, når listen fra lageret er satt.
+  const [lagerLest, setLagerLest] = useState(false);
   useEffect(() => {
     if (storageUtils.isStorageAvailable()) {
       const customPalettes = storageUtils.loadCustomPalettes();
-      if (customPalettes.length > 0) {
-        // localStorage finnes ikke når siden gjengis på serveren, så de egne
-        // palettene kan først leses etter hydrering. Dette er synkronisering
-        // med et eksternt lager, som effekter er ment for.
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setPalettes([...colorPalettes, ...customPalettes]);
-      }
+      const innebygde = applyOverrides(storageUtils.loadBuiltinOverrides());
+      // localStorage finnes ikke når siden gjengis på serveren, så dette kan
+      // først leses etter hydrering. Det er synkronisering med et eksternt
+      // lager, som effekter er ment for.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setPalettes([...innebygde, ...customPalettes]);
     }
+    setLagerLest(true);
   }, []);
 
-  // Save custom palettes to localStorage whenever palettes change
   useEffect(() => {
-    if (storageUtils.isStorageAvailable()) {
-      storageUtils.saveCustomPalettes(palettes);
-    }
-  }, [palettes]);
+    if (!lagerLest || !storageUtils.isStorageAvailable()) return;
+    storageUtils.saveCustomPalettes(palettes);
+    storageUtils.saveBuiltinOverrides(builtinOverrides(palettes));
+  }, [palettes, lagerLest]);
 
   // Delbar lenke, del 1: les paletten fra adressen ved åpning, og når noen
   // limer inn en ny lenke i samme fane.
@@ -96,13 +106,17 @@ function ColorCraft() {
         return;
       }
       // Er den samme paletten (navn og farger) alt lagret, velges den i
-      // stedet for å legge til en kopi.
+      // stedet for å legge til en kopi. Det gjelder også en innebygd palett
+      // du har endret: adressen peker da på fargene, ikke på id-en.
       const lagret = storageUtils.isStorageAvailable()
-        ? storageUtils
-            .loadCustomPalettes()
-            .find(
-              (x) => encodeShare(x, false) === encodeShare(delt.palette, false),
-            )
+        ? [
+            ...applyOverrides(storageUtils.loadBuiltinOverrides()).filter(
+              isModifiedBuiltin,
+            ),
+            ...storageUtils.loadCustomPalettes(),
+          ].find(
+            (x) => encodeShare(x, false) === encodeShare(delt.palette, false),
+          )
         : undefined;
       const p = lagret ?? delt.palette;
       setPalettes((prev) =>
@@ -313,7 +327,56 @@ function ColorCraft() {
     e.preventDefault();
     window.location.href = localePath(otherLocale) + window.location.hash;
   };
-  const canDelete = palettes.length > 1;
+  // Paletten som vises, på formen den lagres i (uten oversettelse).
+  const currentRaw =
+    palettes.find(
+      (p) =>
+        p.id === selectedPaletteId || p.darkVariant?.id === selectedPaletteId,
+    ) ?? palettes[0];
+  const erInnebygd = !!builtinOriginal(currentRaw.id);
+  // Innebygde paletter slettes ikke, de tilbakestilles. Ellers ville de
+  // dukket opp igjen ved neste besøk uansett.
+  const canDelete = !erInnebygd && palettes.length > 1;
+  const canReset = isModifiedBuiltin(currentRaw);
+
+  const handleResetBuiltin = () => {
+    const original = builtinOriginal(currentRaw.id);
+    if (!original) return;
+    setPalettes((prev) =>
+      prev.map((p) => (p.id === original.id ? original : p)),
+    );
+    // Hadde den endrede paletten ingen mørk variant, men originalen har det,
+    // står valget riktig fordi id-ene er de samme.
+    setSelectedPaletteId(
+      selectedPaletteId === `${original.id}-dark` && original.darkVariant
+        ? original.darkVariant.id
+        : original.id,
+    );
+  };
+
+  // «Bruk» på et forslag i kontrastsjekken: bytter én farge i varianten som
+  // vises. En delt palett blir en egen palett når den endres, som i
+  // redigeringen.
+  const handleApplySuggestion = (
+    role: keyof ColorPalette["colors"],
+    color: string,
+  ) => {
+    const viserMork = currentRaw.darkVariant?.id === selectedPaletteId;
+    let ny: ExtendedColorPalette = viserMork
+      ? {
+          ...currentRaw,
+          darkVariant: {
+            ...currentRaw.darkVariant!,
+            colors: { ...currentRaw.darkVariant!.colors, [role]: color },
+          },
+        }
+      : { ...currentRaw, colors: { ...currentRaw.colors, [role]: color } };
+    if (ny.id.startsWith("shared-")) ny = toCustom(ny, t.palette);
+    setPalettes((prev) => prev.map((p) => (p.id === currentRaw.id ? ny : p)));
+    setSelectedPaletteId(
+      viserMork && ny.darkVariant ? ny.darkVariant.id : ny.id,
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -364,6 +427,15 @@ function ColorCraft() {
                 >
                   {t.app.edit}
                 </button>
+                {canReset && (
+                  <button
+                    onClick={handleResetBuiltin}
+                    title={t.app.resetTitle}
+                    className="px-3 py-2 sm:px-4 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-800 transition-colors hover:bg-gray-50"
+                  >
+                    {t.app.reset}
+                  </button>
+                )}
                 {canDelete && (
                   <button
                     onClick={handleDeletePalette}
@@ -432,6 +504,7 @@ function ColorCraft() {
             <ColorDetails
               palette={currentPalette}
               exportPalette={currentExtended}
+              onApplySuggestion={handleApplySuggestion}
             />
           </div>
         </div>

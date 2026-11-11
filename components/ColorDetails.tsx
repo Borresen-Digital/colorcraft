@@ -13,9 +13,18 @@ interface ColorDetailsProps {
   palette: ColorPalette;
   /** Hele paletten, så eksporten får med både lys og mørk. */
   exportPalette: ExtendedColorPalette;
+  /** Bytter én farge i varianten som vises (forslag fra kontrastsjekken). */
+  onApplySuggestion?: (
+    role: keyof ColorPalette["colors"],
+    color: string,
+  ) => void;
 }
 
-export function ColorDetails({ palette, exportPalette }: ColorDetailsProps) {
+export function ColorDetails({
+  palette,
+  exportPalette,
+  onApplySuggestion,
+}: ColorDetailsProps) {
   const { t } = useI18n();
   return (
     <div className="space-y-6">
@@ -64,7 +73,7 @@ export function ColorDetails({ palette, exportPalette }: ColorDetailsProps) {
         </div>
       </div>
 
-      <ContrastPanel palette={palette} />
+      <ContrastPanel palette={palette} onApply={onApplySuggestion} />
 
       <ExportPanel palette={exportPalette} />
     </div>
