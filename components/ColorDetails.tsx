@@ -5,12 +5,17 @@
 import { ColorPalette } from "@/types/palette";
 import { ColorSwatch } from "./ColorSwatch";
 import { ContrastPanel } from "./ContrastPanel";
+import { ExportPanel } from "./ExportPanel";
+import type { ExtendedColorPalette } from "@/data/palettes";
 
 interface ColorDetailsProps {
+  /** Varianten som vises nå (lys eller mørk). */
   palette: ColorPalette;
+  /** Hele paletten, så eksporten får med både lys og mørk. */
+  exportPalette: ExtendedColorPalette;
 }
 
-export function ColorDetails({ palette }: ColorDetailsProps) {
+export function ColorDetails({ palette, exportPalette }: ColorDetailsProps) {
   return (
     <div className="space-y-6">
       <div>
@@ -49,18 +54,7 @@ export function ColorDetails({ palette }: ColorDetailsProps) {
 
       <ContrastPanel palette={palette} />
 
-      <div>
-        <h3 className="text-lg font-semibold text-gray-800 mb-3">CSS Export</h3>
-        <div className="bg-gray-900 text-green-400 p-4 rounded-lg text-sm font-mono overflow-x-auto">
-          <div>:root &#123;</div>
-          {Object.entries(palette.colors).map(([key, value]) => (
-            <div key={key} className="pl-4">
-              --color-{key}: {value};
-            </div>
-          ))}
-          <div>&#125;</div>
-        </div>
-      </div>
+      <ExportPanel palette={exportPalette} />
     </div>
   );
 }
