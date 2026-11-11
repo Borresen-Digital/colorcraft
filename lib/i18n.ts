@@ -193,6 +193,14 @@ const nb = {
     ok: "består",
     fail: "under kravet",
   },
+  values: {
+    title: "HEX, RGB og CMYK",
+    outOfGamut: "kan ikke trykkes likt",
+    note: "CMYK er omtrentlig: regnet ut fra vanlig offset på bestrøket papir (Coated FOGRA39), uten fargestyring. Til trykk gjelder verdiene fra trykkeriets profil. Farger merket «kan ikke trykkes likt» er mer mettede på skjerm enn trykkfargene klarer.",
+    cmykHelp:
+      "Skriv CMYK fra manualen, for eksempel 0 25 100 0. Omregnes omtrentlig.",
+    cmykInvalid: "Skriv fire tall fra 0 til 100: C M Y K.",
+  },
   editor: {
     titleNew: "Ny palett",
     titleEdit: "Rediger palett",
@@ -391,6 +399,14 @@ const en: Messages = {
     logoInverted: "reversed",
     ok: "passes",
     fail: "below the requirement",
+  },
+  values: {
+    title: "HEX, RGB and CMYK",
+    outOfGamut: "can't be printed exactly",
+    note: "CMYK is approximate: calculated for standard offset on coated paper (Coated FOGRA39), without color management. For print, use the values from your printer's profile. Colors marked “can't be printed exactly” are more saturated on screen than process inks can reach.",
+    cmykHelp:
+      "Enter CMYK from the brand guide, for example 0 25 100 0. Converted approximately.",
+    cmykInvalid: "Enter four numbers from 0 to 100: C M Y K.",
   },
   editor: {
     titleNew: "Create new palette",

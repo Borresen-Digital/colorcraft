@@ -10,6 +10,7 @@ import {
   type BrandNote,
   type BrandResult,
 } from "@/lib/brand";
+import { cmykToHex, formatCmyk, hexToCmyk, parseCmyk } from "@/lib/cmyk";
 import { formatRatio } from "@/lib/contrast";
 import { checkPalette } from "@/lib/contrastPairs";
 import { localizeRatio } from "@/lib/i18n";
@@ -22,7 +23,12 @@ interface BrandBuilderProps {
   onCreate: (palette: Omit<ExtendedColorPalette, "id">) => void;
 }
 
-/** Én rad med fargevelger og HEX-felt. */
+/**
+ * Én rad med fargevelger, HEX-felt og CMYK-felt. CMYK kan skrives inn fra
+ * profilmanualen, og blir omregnet til HEX (omtrentlig). Det som er skrevet,
+ * blir stående så lenge HEX-verdien er den det ga, så tallene ikke hopper
+ * mens man skriver.
+ */
 function ColorRow({
   value,
   onChange,
@@ -36,8 +42,23 @@ function ColorRow({
   removeLabel: string;
   invalidText: string;
 }) {
+  const { t } = useI18n();
   const id = useId();
   const gyldig = normalizeHex(value);
+  const [skrevet, setSkrevet] = useState<{ text: string; hex: string } | null>(
+    null,
+  );
+  const avledet = gyldig ? formatCmyk(hexToCmyk(gyldig)!.cmyk) : "";
+  // Det som er skrevet, vises så lenge HEX er den det hørte til. Endres HEX
+  // et annet sted (fargevelger eller HEX-feltet), følger CMYK etter.
+  const cmykTekst = skrevet && skrevet.hex === gyldig ? skrevet.text : avledet;
+  const cmykGyldig = cmykTekst === "" || !!parseCmyk(cmykTekst);
+  const handleCmyk = (text: string) => {
+    const cmyk = parseCmyk(text);
+    const hex = cmyk ? cmykToHex(cmyk) : (gyldig ?? "");
+    setSkrevet({ text, hex });
+    if (cmyk) onChange(hex);
+  };
   return (
     <div className="space-y-1">
       <div className="flex gap-2">
@@ -72,6 +93,30 @@ function ColorRow({
       {!gyldig && (
         <p id={`${id}-feil`} className="text-xs text-red-700">
           {invalidText}
+        </p>
+      )}
+      <div className="flex items-center gap-2 pl-14">
+        <label
+          htmlFor={`${id}-cmyk`}
+          className="shrink-0 text-xs font-medium text-gray-700"
+        >
+          CMYK ≈
+        </label>
+        <input
+          id={`${id}-cmyk`}
+          type="text"
+          inputMode="numeric"
+          value={cmykTekst}
+          onChange={(e) => handleCmyk(e.target.value)}
+          aria-invalid={!cmykGyldig}
+          aria-describedby={cmykGyldig ? undefined : `${id}-cmyk-feil`}
+          placeholder="0 25 100 0"
+          className="min-w-0 flex-1 rounded border border-gray-300 bg-white px-2 py-1 font-mono text-xs text-gray-900 focus:border-blue-500 focus:outline-none aria-[invalid=true]:border-red-500"
+        />
+      </div>
+      {!cmykGyldig && (
+        <p id={`${id}-cmyk-feil`} className="pl-14 text-[11px] text-red-700">
+          {t.values.cmykInvalid}
         </p>
       )}
     </div>
@@ -266,6 +311,7 @@ export function BrandBuilder({ onClose, onCreate }: BrandBuilderProps) {
               0,
             )}
           </div>
+          <p className="text-xs text-gray-600">{t.values.cmykHelp}</p>
 
           <section
             aria-labelledby="brand-preview"
