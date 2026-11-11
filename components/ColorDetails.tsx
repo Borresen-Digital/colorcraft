@@ -1,9 +1,9 @@
-// ================================
-// components/ColorDetails.tsx
-// ================================
+"use client";
 
 import { ColorPalette } from "@/types/palette";
+
 import { ColorSwatch } from "./ColorSwatch";
+import { useI18n } from "./I18nProvider";
 import { ContrastPanel } from "./ContrastPanel";
 import { ExportPanel } from "./ExportPanel";
 import type { ExtendedColorPalette } from "@/data/palettes";
@@ -16,39 +16,51 @@ interface ColorDetailsProps {
 }
 
 export function ColorDetails({ palette, exportPalette }: ColorDetailsProps) {
+  const { t } = useI18n();
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-xl font-semibold text-gray-900 mb-4">
-          Color Swatches
+          {t.details.swatches}
         </h2>
         <div className="grid grid-cols-3 gap-4">
-          <ColorSwatch label="Primary" color={palette.colors.primary} />
-          <ColorSwatch label="Secondary" color={palette.colors.secondary} />
-          <ColorSwatch label="Accent" color={palette.colors.accent} />
-          <ColorSwatch label="Warm" color={palette.colors.warm} />
-          <ColorSwatch label="Cool" color={palette.colors.cool} />
-          <ColorSwatch label="Surface" color={palette.colors.surface} />
+          <ColorSwatch label={t.roles.primary} color={palette.colors.primary} />
+          <ColorSwatch
+            label={t.roles.secondary}
+            color={palette.colors.secondary}
+          />
+          <ColorSwatch label={t.roles.accent} color={palette.colors.accent} />
+          <ColorSwatch label={t.roles.warm} color={palette.colors.warm} />
+          <ColorSwatch label={t.roles.cool} color={palette.colors.cool} />
+          <ColorSwatch label={t.roles.surface} color={palette.colors.surface} />
         </div>
       </div>
 
       <div>
         <h3 className="text-lg font-semibold text-gray-900 mb-3">
-          Semantic Colors
+          {t.details.semantic}
         </h3>
         <div className="grid grid-cols-4 gap-3">
           <ColorSwatch
-            label="Success"
+            label={t.roles.success}
             color={palette.colors.success}
             size="sm"
           />
           <ColorSwatch
-            label="Warning"
+            label={t.roles.warning}
             color={palette.colors.warning}
             size="sm"
           />
-          <ColorSwatch label="Error" color={palette.colors.error} size="sm" />
-          <ColorSwatch label="Info" color={palette.colors.info} size="sm" />
+          <ColorSwatch
+            label={t.roles.error}
+            color={palette.colors.error}
+            size="sm"
+          />
+          <ColorSwatch
+            label={t.roles.info}
+            color={palette.colors.info}
+            size="sm"
+          />
         </div>
       </div>
 

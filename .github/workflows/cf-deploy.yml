@@ -119,6 +119,23 @@ jobs:
                 exit 1
               fi
               echo "ok: sikkerhetshoder og $skript"
+              # Norsk på / går via en rewrite til /nb (next.config.ts). Begge
+              # språkene må svare med riktig lang, og /nb skal sende til /.
+              if ! grep -q '<html lang="nb"' forside.html; then
+                echo "::error::Forsiden er ikke norsk (mangler lang=\"nb\")."
+                exit 1
+              fi
+              en=$(curl -s --max-time 20 -A "Mozilla/5.0" "http://localhost:8787/en" || true)
+              if ! echo "$en" | grep -q '<html lang="en"'; then
+                echo "::error::/en svarer ikke med den engelske siden."
+                exit 1
+              fi
+              nb=$(curl -s -o /dev/null -w '%{http_code} %{redirect_url}' --max-time 20 "http://localhost:8787/nb" || true)
+              case "$nb" in
+                30[178]\ http://localhost:8787/) ;;
+                *) echo "::error::/nb skulle sende til /, svarte: $nb"; exit 1 ;;
+              esac
+              echo "ok: / er norsk, /en er engelsk, /nb sender til /"
               exit 0
             fi
           done

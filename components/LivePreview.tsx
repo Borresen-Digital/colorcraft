@@ -2,7 +2,10 @@
 // components/LivePreview.tsx
 // ================================
 
+"use client";
+
 import { textOn } from "@/lib/contrastPairs";
+import { useI18n } from "@/components/I18nProvider";
 import { ColorPalette } from "@/types/palette";
 
 interface LivePreviewProps {
@@ -10,6 +13,7 @@ interface LivePreviewProps {
 }
 
 export function LivePreview({ palette }: LivePreviewProps) {
+  const { t } = useI18n();
   // Samme tekstfarge som kontrastsjekken regner med.
   const onPrimary = textOn(palette, palette.colors.primary);
   const onAccent = textOn(palette, palette.colors.accent);
@@ -41,7 +45,7 @@ export function LivePreview({ palette }: LivePreviewProps) {
           border: `1px solid ${palette.colors.border}`,
         }}
       >
-        {["Home", "About", "Services", "Contact"].map((item) => (
+        {t.preview.nav.map((item) => (
           <button
             key={item}
             className="px-4 py-2 rounded-lg transition-all duration-300 hover:scale-105"
@@ -69,9 +73,11 @@ export function LivePreview({ palette }: LivePreviewProps) {
             border: `1px solid ${palette.colors.border}`,
           }}
         >
-          <h3 className="text-xl font-semibold mb-3">Primary Action</h3>
+          <h3 className="text-xl font-semibold mb-3">
+            {t.preview.primaryTitle}
+          </h3>
           <p className="mb-4" style={{ color: palette.colors.muted }}>
-            This demonstrates how primary elements look with this color palette.
+            {t.preview.primaryText}
           </p>
           <button
             className="px-6 py-3 rounded-lg font-medium transition-all duration-300 hover:scale-105"
@@ -80,7 +86,7 @@ export function LivePreview({ palette }: LivePreviewProps) {
               color: onPrimary,
             }}
           >
-            Get Started
+            {t.preview.primaryButton}
           </button>
         </div>
 
@@ -91,9 +97,11 @@ export function LivePreview({ palette }: LivePreviewProps) {
             border: `1px solid ${palette.colors.border}`,
           }}
         >
-          <h3 className="text-xl font-semibold mb-3">Secondary Action</h3>
+          <h3 className="text-xl font-semibold mb-3">
+            {t.preview.secondaryTitle}
+          </h3>
           <p className="mb-4" style={{ color: palette.colors.muted }}>
-            This shows how accent colors work within the overall design system.
+            {t.preview.secondaryText}
           </p>
           <button
             className="px-6 py-3 rounded-lg font-medium transition-all duration-300 hover:scale-105"
@@ -102,7 +110,7 @@ export function LivePreview({ palette }: LivePreviewProps) {
               color: onAccent,
             }}
           >
-            Learn More
+            {t.preview.secondaryButton}
           </button>
         </div>
       </div>
@@ -110,10 +118,10 @@ export function LivePreview({ palette }: LivePreviewProps) {
       {/* Status Messages */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { type: "Success", color: palette.colors.success, icon: "✓" },
-          { type: "Warning", color: palette.colors.warning, icon: "⚠" },
-          { type: "Error", color: palette.colors.error, icon: "✗" },
-          { type: "Info", color: palette.colors.info, icon: "i" },
+          { type: t.roles.success, color: palette.colors.success, icon: "✓" },
+          { type: t.roles.warning, color: palette.colors.warning, icon: "⚠" },
+          { type: t.roles.error, color: palette.colors.error, icon: "✗" },
+          { type: t.roles.info, color: palette.colors.info, icon: "i" },
         ].map((status) => (
           <div
             key={status.type}

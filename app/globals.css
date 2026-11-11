@@ -1,26 +1,17 @@
 @import "tailwindcss";
 
+/*
+ * Selve verktøyet er lyst. Mørk modus gjelder palettene i forhåndsvisningen,
+ * ikke rammen rundt. Før lå det en prefers-color-scheme-blokk her fra
+ * create-next-app, som ga nesten hvit tekst på hvite kort for alle med mørk
+ * modus i systemet.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light;
 }
 
+/* Fontene lastes i app/[lang]/layout.tsx med next/font. */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
 }

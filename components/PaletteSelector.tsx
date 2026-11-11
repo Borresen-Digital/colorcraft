@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ExtendedColorPalette } from "@/data/palettes";
+import { useI18n } from "@/components/I18nProvider";
 
 interface PaginatedPaletteSelectorProps {
   palettes: ExtendedColorPalette[];
@@ -18,6 +19,7 @@ export function PaginatedPaletteSelector({
   isDarkMode,
   onDarkModeToggle,
 }: PaginatedPaletteSelectorProps) {
+  const { t } = useI18n();
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
   const palettesPerPage = 6;
@@ -46,14 +48,15 @@ export function PaginatedPaletteSelector({
       {/* Header */}
       <div className="mb-6">
         <h2 className="text-xl font-semibold text-gray-900 mb-4">
-          Choose Palette
+          {t.selector.title}
         </h2>
 
         {/* Search */}
         <div className="mb-4">
           <input
             type="text"
-            placeholder="Search palettes..."
+            placeholder={t.selector.search}
+            aria-label={t.selector.searchLabel}
             value={searchTerm}
             onChange={(e) => handleSearch(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-600"
@@ -68,9 +71,13 @@ export function PaginatedPaletteSelector({
                 !isDarkMode ? "text-gray-900" : "text-gray-500"
               }`}
             >
-              Light
+              {t.app.light}
             </span>
             <button
+              type="button"
+              role="switch"
+              aria-checked={isDarkMode}
+              aria-label={t.selector.toggleDark}
               onClick={() => onDarkModeToggle(!isDarkMode)}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                 isDarkMode ? "bg-gray-600" : "bg-gray-300"
@@ -87,14 +94,14 @@ export function PaginatedPaletteSelector({
                 isDarkMode ? "text-gray-900" : "text-gray-500"
               }`}
             >
-              Dark
+              {t.app.dark}
             </span>
           </div>
         </div>
 
         {/* Results info */}
         <div className="mt-3 text-xs text-gray-500">
-          Showing {currentPalettes.length} of {filteredPalettes.length} palettes
+          {t.selector.showing(currentPalettes.length, filteredPalettes.length)}
         </div>
       </div>
 
@@ -195,7 +202,7 @@ export function PaginatedPaletteSelector({
                         />
                       </div>
                       <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                        Dark variant available
+                        {t.selector.darkAvailable}
                       </span>
                     </div>
                   )}
@@ -215,7 +222,7 @@ export function PaginatedPaletteSelector({
               disabled={currentPage === 0}
               className="px-3 py-1 text-sm bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Previous
+              {t.selector.previous}
             </button>
 
             <div className="flex space-x-1">
@@ -241,12 +248,12 @@ export function PaginatedPaletteSelector({
               disabled={currentPage === totalPages - 1}
               className="px-3 py-1 text-sm bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Next
+              {t.selector.next}
             </button>
           </div>
 
           <div className="text-center mt-2 text-xs text-gray-500">
-            Page {currentPage + 1} of {totalPages}
+            {t.selector.page(currentPage + 1, totalPages)}
           </div>
         </div>
       )}

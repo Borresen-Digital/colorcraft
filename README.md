@@ -24,10 +24,14 @@
 - ✏️ Create, edit, and delete custom color palettes
 - 💾 Local storage support for persistent custom palettes
 - 🔍 Search and filter palettes by name or description
-- 📱 Responsive design optimized for all screen sizes
 - 🎯 Live preview with realistic UI components
-- 📋 CSS export functionality for easy integration
+- ♿ Contrast check against WCAG 2.2 (AA/AAA) with suggested fixes
+- 📋 Export as CSS variables with dark mode, Tailwind 4 `@theme`, or W3C Design Tokens (JSON)
+- 🔗 Shareable links: the palette lives in the URL fragment, no database
+- 🌍 Norwegian (`/`) and English (`/en`)
 - 🏔️ Themed palettes named after places in Vestfold
+
+Live at [farger.borresendigital.no](https://farger.borresendigital.no), a free tool from [Børresen Digital](https://www.borresendigital.no).
 
 ## Screenshot
 

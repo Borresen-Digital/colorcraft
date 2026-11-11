@@ -66,6 +66,17 @@ const nextConfig: NextConfig = {
   async headers() {
     return [{ source: "/(.*)", headers: SIKKERHETSHODER }];
   },
+  /**
+   * Norsk er standard og skal ligge på `/`, ikke `/nb`. Siden bygges som
+   * app/[lang] med lang=nb, og `/` peker dit internt. `/nb` sender videre til
+   * `/`, så det bare finnes én adresse for den norske siden.
+   */
+  async rewrites() {
+    return [{ source: "/", destination: "/nb" }];
+  },
+  async redirects() {
+    return [{ source: "/nb", destination: "/", permanent: true }];
+  },
 };
 
 export default nextConfig;
