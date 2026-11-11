@@ -1,0 +1,4 @@
+# LF overalt, også i Windows-kopien, så prettier --check gir samme svar lokalt som i CI.
+* text=auto eol=lf
+*.png binary
+*.ico binary
