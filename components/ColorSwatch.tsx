@@ -39,7 +39,7 @@ export function ColorSwatch({ label, color, size = "md" }: ColorSwatchProps) {
         onClick={copyToClipboard}
       >
         {copied && (
-          <div className="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/50 rounded-lg flex items-center justify-center">
             <span className="text-white text-xs font-bold">Copied!</span>
           </div>
         )}

@@ -4,6 +4,7 @@
 
 import { ColorPalette } from "@/types/palette";
 import { ColorSwatch } from "./ColorSwatch";
+import { ContrastPanel } from "./ContrastPanel";
 
 interface ColorDetailsProps {
   palette: ColorPalette;
@@ -27,7 +28,7 @@ export function ColorDetails({ palette }: ColorDetailsProps) {
       </div>
 
       <div>
-        <h3 className="text-lg font-semibent text-gray-900 mb-3">
+        <h3 className="text-lg font-semibold text-gray-900 mb-3">
           Semantic Colors
         </h3>
         <div className="grid grid-cols-4 gap-3">
@@ -45,6 +46,8 @@ export function ColorDetails({ palette }: ColorDetailsProps) {
           <ColorSwatch label="Info" color={palette.colors.info} size="sm" />
         </div>
       </div>
+
+      <ContrastPanel palette={palette} />
 
       <div>
         <h3 className="text-lg font-semibold text-gray-800 mb-3">CSS Export</h3>

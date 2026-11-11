@@ -11,7 +11,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "preview:cf": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "deploy:cf": "opennextjs-cloudflare build && opennextjs-cloudflare deploy"
+    "deploy:cf": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "test": "vitest run"
   },
   "dependencies": {
     "clsx": "^2.1.1",
@@ -31,6 +32,7 @@
     "prettier": "^3.9.6",
     "tailwindcss": "^4",
     "typescript": "^5",
+    "vitest": "^5.1.0",
     "wrangler": "^4.160.0"
   },
   "overrides": {

@@ -80,6 +80,10 @@ jobs:
         if: steps.secrets.outputs.ready == 'true'
         run: npm run typecheck
 
+      - name: Prøver
+        if: steps.secrets.outputs.ready == 'true'
+        run: npm test
+
       - name: Bygg for Cloudflare Workers
         if: steps.secrets.outputs.ready == 'true'
         run: npx opennextjs-cloudflare build

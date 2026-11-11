@@ -2,6 +2,7 @@
 // components/LivePreview.tsx
 // ================================
 
+import { textOn } from "@/lib/contrastPairs";
 import { ColorPalette } from "@/types/palette";
 
 interface LivePreviewProps {
@@ -9,6 +10,10 @@ interface LivePreviewProps {
 }
 
 export function LivePreview({ palette }: LivePreviewProps) {
+  // Samme tekstfarge som kontrastsjekken regner med.
+  const onPrimary = textOn(palette, palette.colors.primary);
+  const onAccent = textOn(palette, palette.colors.accent);
+
   return (
     <div
       className="h-full rounded-xl p-6 transition-all duration-500"
@@ -43,7 +48,7 @@ export function LivePreview({ palette }: LivePreviewProps) {
             style={{ color: palette.colors.muted }}
             onMouseEnter={(e) => {
               e.currentTarget.style.backgroundColor = palette.colors.primary;
-              e.currentTarget.style.color = "white";
+              e.currentTarget.style.color = onPrimary;
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.backgroundColor = "transparent";
@@ -72,7 +77,7 @@ export function LivePreview({ palette }: LivePreviewProps) {
             className="px-6 py-3 rounded-lg font-medium transition-all duration-300 hover:scale-105"
             style={{
               backgroundColor: palette.colors.primary,
-              color: "white",
+              color: onPrimary,
             }}
           >
             Get Started
@@ -94,7 +99,7 @@ export function LivePreview({ palette }: LivePreviewProps) {
             className="px-6 py-3 rounded-lg font-medium transition-all duration-300 hover:scale-105"
             style={{
               backgroundColor: palette.colors.accent,
-              color: "white",
+              color: onAccent,
             }}
           >
             Learn More
