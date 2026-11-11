@@ -84,6 +84,13 @@ export default function ColorCraft() {
     return palettes[0];
   };
 
+  // Hele paletten (lys med eventuell mørk) som den viste varianten hører til.
+  const getCurrentExtendedPalette = (): ExtendedColorPalette =>
+    palettes.find(
+      (p) =>
+        p.id === selectedPaletteId || p.darkVariant?.id === selectedPaletteId,
+    ) ?? palettes[0];
+
   // Handle creating new palette
   const handleCreatePalette = () => {
     setEditingPalette(null);
@@ -235,7 +242,10 @@ export default function ColorCraft() {
           </div>
 
           <div className="col-span-3 bg-white rounded-xl p-6 shadow-lg overflow-y-auto">
-            <ColorDetails palette={currentPalette} />
+            <ColorDetails
+              palette={currentPalette}
+              exportPalette={getCurrentExtendedPalette()}
+            />
           </div>
         </div>
       </div>
