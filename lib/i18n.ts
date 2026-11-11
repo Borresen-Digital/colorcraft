@@ -140,6 +140,36 @@ const nb = {
     darkVariantComment:
       "dark: følger data-theme på <html>. Uten data-theme brukes systemvalget.",
   },
+  brand: {
+    open: "Fra profilmanual",
+    openTitle:
+      "Lag en palett fra logofargene og støttefargene i en profilmanual",
+    title: "Palett fra profilmanual",
+    intro:
+      "Legg inn fargene fra profilmanualen. Logofargene brukes til det som skal synes, som knapper, overskrifter og highlight. Støttefargene er flatefarger. Merkefargene endres ikke. Det er tekst, bakgrunn og statusfarger som tilpasses, så kontrasten består.",
+    name: "Navn på paletten",
+    defaultName: "Ny profil",
+    logo: "Logofarger",
+    logoHelp: "1–3 farger. Den første er hovedfargen.",
+    support: "Støttefarger",
+    supportHelp: "0–4 flatefarger: bakgrunner, seksjoner og infobokser.",
+    add: "Legg til farge",
+    remove: (n: number) => `Fjern farge ${n}`,
+    invalid: "Ugyldig farge. Skriv HEX, for eksempel #F2B705.",
+    preview: "Slik blir paletten",
+    light: "Lys",
+    dark: "Mørk",
+    allPass: "Alle kontrastparene består AA i begge moduser.",
+    failing: (n: number) =>
+      `${n} kontrastpar er under AA. Du ser hvilke i kontrastsjekken etterpå.`,
+    noteDark: (role: string, from: string, to: string) =>
+      `${role} er lysnet fra ${from} til ${to} i mørk modus, så den synes mot den mørke bakgrunnen.`,
+    noteLight: (role: string, color: string, ratio: string) =>
+      `${role} (${color}) har ${ratio} mot den lyse bakgrunnen. Den passer best som flate eller grafikk, ikke til tekst.`,
+    description: "Laget fra profilmanual",
+    create: "Lag palett",
+    cancel: "Avbryt",
+  },
   editor: {
     titleNew: "Ny palett",
     titleEdit: "Rediger palett",
@@ -285,6 +315,36 @@ const en: Messages = {
     madeWith: "made with",
     darkVariantComment:
       "dark: follows data-theme on <html>. Without data-theme, the system setting is used.",
+  },
+  brand: {
+    open: "From brand guide",
+    openTitle:
+      "Create a palette from the logo and support colors in a brand guide",
+    title: "Palette from brand guide",
+    intro:
+      "Enter the colors from the brand guide. Logo colors are used for what should stand out, like buttons, headings and highlights. Support colors are surface colors. The brand colors are not changed. Text, background and status colors are adjusted so the contrast passes.",
+    name: "Palette name",
+    defaultName: "New brand",
+    logo: "Logo colors",
+    logoHelp: "1–3 colors. The first one is the main color.",
+    support: "Support colors",
+    supportHelp: "0–4 surface colors: backgrounds, sections and info boxes.",
+    add: "Add color",
+    remove: (n) => `Remove color ${n}`,
+    invalid: "Invalid color. Use HEX, for example #F2B705.",
+    preview: "Your palette",
+    light: "Light",
+    dark: "Dark",
+    allPass: "All contrast pairs pass AA in both modes.",
+    failing: (n) =>
+      `${n} contrast pairs are below AA. The contrast check shows which ones afterwards.`,
+    noteDark: (role, from, to) =>
+      `${role} is lightened from ${from} to ${to} in dark mode so it stands out against the dark background.`,
+    noteLight: (role, color, ratio) =>
+      `${role} (${color}) has ${ratio} against the light background. It works best as a surface or graphic, not for text.`,
+    description: "Made from a brand guide",
+    create: "Create palette",
+    cancel: "Cancel",
   },
   editor: {
     titleNew: "Create new palette",

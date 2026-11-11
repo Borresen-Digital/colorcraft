@@ -13,6 +13,7 @@ import { PaginatedPaletteSelector } from "@/components/PaletteSelector";
 import { LivePreview } from "@/components/LivePreview";
 import { ColorDetails } from "@/components/ColorDetails";
 import { PaletteEditor } from "@/components/PaletteEditor";
+import { BrandBuilder } from "@/components/BrandBuilder";
 import { ColorPalette } from "@/types/palette";
 import { storageUtils } from "@/utils/localStorage";
 import { Logo } from "@/components/Logo";
@@ -250,6 +251,23 @@ function ColorCraft() {
     setEditorOpen(true);
   };
 
+  // «Fra profilmanual»: paletten kommer ferdig regnet ut, og blir en egen
+  // palett som lagres og velges.
+  const [brandOpen, setBrandOpen] = useState(false);
+  const handleCreateFromBrand = (p: Omit<ExtendedColorPalette, "id">) => {
+    const id = `custom-${Date.now()}`;
+    const ny: ExtendedColorPalette = {
+      ...p,
+      id,
+      ...(p.darkVariant && {
+        darkVariant: { ...p.darkVariant, id: `${id}-dark` },
+      }),
+    };
+    setPalettes((prev) => [...prev, ny]);
+    setSelectedPaletteId(isDarkMode && ny.darkVariant ? ny.darkVariant.id : id);
+    setBrandOpen(false);
+  };
+
   // Handle editing existing palette
   const handleEditPalette = () => {
     const currentExtendedPalette = palettes.find(
@@ -416,6 +434,13 @@ function ColorCraft() {
                       : t.app.share}
                 </button>
                 <button
+                  onClick={() => setBrandOpen(true)}
+                  title={t.brand.openTitle}
+                  className="px-3 py-2 sm:px-4 text-white rounded-lg transition-colors text-sm font-medium bg-violet-700 hover:bg-violet-800"
+                >
+                  {t.brand.open}
+                </button>
+                <button
                   onClick={handleCreatePalette}
                   className="px-3 py-2 sm:px-4 text-white rounded-lg transition-colors text-sm font-medium bg-blue-600 hover:bg-blue-700"
                 >
@@ -519,6 +544,13 @@ function ColorCraft() {
           Børresen Digital
         </a>
       </footer>
+
+      {brandOpen && (
+        <BrandBuilder
+          onClose={() => setBrandOpen(false)}
+          onCreate={handleCreateFromBrand}
+        />
+      )}
 
       {/* Palette Editor Modal */}
       {editorOpen && (

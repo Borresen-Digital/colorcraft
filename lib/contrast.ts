@@ -77,9 +77,9 @@ export function formatRatio(ratio: number): string {
   return `${(Math.floor(ratio * 100) / 100).toFixed(2)}:1`;
 }
 
-type Hsl = { h: number; s: number; l: number };
+export type Hsl = { h: number; s: number; l: number };
 
-function rgbToHsl({ r, g, b }: Rgb): Hsl {
+export function rgbToHsl({ r, g, b }: Rgb): Hsl {
   const rn = r / 255;
   const gn = g / 255;
   const bn = b / 255;
@@ -96,7 +96,7 @@ function rgbToHsl({ r, g, b }: Rgb): Hsl {
   return { h: h / 6, s, l };
 }
 
-function hslToRgb({ h, s, l }: Hsl): Rgb {
+export function hslToRgb({ h, s, l }: Hsl): Rgb {
   if (s === 0) return { r: l * 255, g: l * 255, b: l * 255 };
   const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
   const p = 2 * l - q;
