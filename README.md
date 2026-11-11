@@ -10,10 +10,10 @@
 
 > Professional color palette testing and visualization tool – built with Next.js and Tailwind CSS
 
-[![Next.js](https://img.shields.io/badge/Next.js-15-000000.svg)](https://nextjs.org)
+[![Next.js](https://img.shields.io/badge/Next.js-16-000000.svg)](https://nextjs.org)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-38bdf8.svg)](https://tailwindcss.com)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6.svg)](https://www.typescriptlang.org)
-[![React](https://img.shields.io/badge/React-18-61dafb.svg)](https://react.dev)
+[![React](https://img.shields.io/badge/React-19-61dafb.svg)](https://react.dev)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 </div>
 
@@ -27,7 +27,7 @@
 - 📱 Responsive design optimized for all screen sizes
 - 🎯 Live preview with realistic UI components
 - 📋 CSS export functionality for easy integration
-- 🏗️ Tolkien-inspired themed palettes included
+- 🏔️ Themed palettes named after places in Vestfold
 
 ## Screenshot
 
@@ -156,23 +156,25 @@ root {
 
 ## Included Palettes
 
-ColorCraft comes with 16 pre-built palettes inspired by various themes:
+ColorCraft comes with 15 palettes, each with a light and a dark variant. The themed palettes are named after places in Vestfold, Norway:
 
-- **Ocean Breeze** - Cool blues and teals
-- **Sunset Glow** - Warm oranges and reds
-- **Forest Deep** - Rich greens and browns
-- **Shire Harmony** - Peaceful greens and earthy tones
-- **Rivendell Elegance** - Ethereal blues and purples
-- **Rohan Earth** - Warm earth tones
-- **Gondor Royal** - Noble colors
-- **Isengard Steel** - Industrial elegance
-- **Lothlórien Gold** - Mystical forest themes
-- **Erebor Treasure** - Deep blues and rich golds
-- **Fangorn Forest** - Natural and earthy
-- **Moria Depth** - Deep elegance
-- **Valinor Divine** - Pure and heavenly
-- **Edoras Sun** - Sunny and golden
-- **Weathertop Mystery** - Cold and mysterious
+- **Havet** - Cool blues and teals
+- **Solnedgang** - Warm oranges and reds
+- **Skogen** - Rich greens and browns
+- **Sande** - Calm greens and earthy tones
+- **Verdens Ende** - Blues and purples of sea and sky
+- **Ramnes** - Warm earth tones from open fields
+- **Slottsfjellet** - Noble, regal colors
+- **Kaldnes** - Steel and copper
+- **Bøkeskogen** - Forest with gold and silver
+- **Larvikitt** - Deep blue with a sheen, like the stone
+- **Lardal** - Natural browns and greens
+- **Borre** - Burgundy and gold
+- **Mølen** - Light and pearl grey
+- **Ula** - Sun, sand and terracotta
+- **Svenner** - Cool teal and silver
+
+Palette ids from V1 (for example `shire`) are mapped to the new ones in `data/palettes.ts`.
 
 ## Browser Support
 

@@ -5,11 +5,10 @@ export interface ExtendedColorPalette extends ColorPalette {
 }
 
 export const colorPalettes: ExtendedColorPalette[] = [
-  // Dine originale paletter
   {
-    name: "Ocean Breeze",
-    id: "ocean",
-    description: "Cool blues and teals",
+    name: "Havet",
+    id: "havet",
+    description: "Kjølig blått og turkis",
     colors: {
       primary: "#0284C7",
       secondary: "#E0F2FE",
@@ -27,9 +26,9 @@ export const colorPalettes: ExtendedColorPalette[] = [
       info: "#0EA5E9",
     },
     darkVariant: {
-      name: "Ocean Breeze Dark",
-      id: "ocean-dark",
-      description: "Cool blues and teals - Dark mode",
+      name: "Havet mørk",
+      id: "havet-dark",
+      description: "Kjølig blått og turkis (mørk modus)",
       colors: {
         primary: "#38BDF8",
         secondary: "#E0F2FE",
@@ -49,9 +48,9 @@ export const colorPalettes: ExtendedColorPalette[] = [
     },
   },
   {
-    name: "Sunset Glow",
-    id: "sunset",
-    description: "Warm oranges and reds",
+    name: "Solnedgang",
+    id: "solnedgang",
+    description: "Varme oransje og røde toner",
     colors: {
       primary: "#EA580C",
       secondary: "#FED7AA",
@@ -69,9 +68,9 @@ export const colorPalettes: ExtendedColorPalette[] = [
       info: "#3B82F6",
     },
     darkVariant: {
-      name: "Sunset Glow Dark",
-      id: "sunset-dark",
-      description: "Warm oranges and reds - Dark mode",
+      name: "Solnedgang mørk",
+      id: "solnedgang-dark",
+      description: "Varme oransje og røde toner (mørk modus)",
       colors: {
         primary: "#FB923C",
         secondary: "#FED7AA",
@@ -91,9 +90,9 @@ export const colorPalettes: ExtendedColorPalette[] = [
     },
   },
   {
-    name: "Forest Deep",
-    id: "forest",
-    description: "Rich greens and browns",
+    name: "Skogen",
+    id: "skogen",
+    description: "Dype grønne og brune toner",
     colors: {
       primary: "#166534",
       secondary: "#BBF7D0",
@@ -111,9 +110,9 @@ export const colorPalettes: ExtendedColorPalette[] = [
       info: "#0284C7",
     },
     darkVariant: {
-      name: "Forest Deep Dark",
-      id: "forest-dark",
-      description: "Rich greens and browns - Dark mode",
+      name: "Skogen mørk",
+      id: "skogen-dark",
+      description: "Dype grønne og brune toner (mørk modus)",
       colors: {
         primary: "#4ADE80",
         secondary: "#BBF7D0",
@@ -132,11 +131,10 @@ export const colorPalettes: ExtendedColorPalette[] = [
       },
     },
   },
-  // Tolkien-paletter
   {
-    name: "Shire Harmony",
-    id: "shire",
-    description: "Peaceful greens and earthy tones from the Shire",
+    name: "Sande",
+    id: "sande",
+    description: "Rolig grønt og jordtoner, som jordbruksbygda",
     colors: {
       primary: "#6B8E23",
       secondary: "#C0C0C0",
@@ -154,10 +152,9 @@ export const colorPalettes: ExtendedColorPalette[] = [
       info: "#4682B4",
     },
     darkVariant: {
-      name: "Shire Harmony Dark",
-      id: "shire-dark",
-      description:
-        "Peaceful greens and earthy tones from the Shire - Dark mode",
+      name: "Sande mørk",
+      id: "sande-dark",
+      description: "Rolig grønt og jordtoner, som jordbruksbygda (mørk modus)",
       colors: {
         primary: "#7BA428",
         secondary: "#C0C0C0",
@@ -177,9 +174,9 @@ export const colorPalettes: ExtendedColorPalette[] = [
     },
   },
   {
-    name: "Rivendell Elegance",
-    id: "rivendell",
-    description: "Ethereal blues and purples inspired by Rivendell",
+    name: "Verdens Ende",
+    id: "verdens-ende",
+    description: "Blått og lilla, som hav og himmel på Tjøme",
     colors: {
       primary: "#4169E1",
       secondary: "#E6E6FA",
@@ -197,10 +194,9 @@ export const colorPalettes: ExtendedColorPalette[] = [
       info: "#20B2AA",
     },
     darkVariant: {
-      name: "Rivendell Elegance Dark",
-      id: "rivendell-dark",
-      description:
-        "Ethereal blues and purples inspired by Rivendell - Dark mode",
+      name: "Verdens Ende mørk",
+      id: "verdens-ende-dark",
+      description: "Blått og lilla, som hav og himmel på Tjøme (mørk modus)",
       colors: {
         primary: "#6A8EFF",
         secondary: "#E6E6FA",
@@ -220,9 +216,9 @@ export const colorPalettes: ExtendedColorPalette[] = [
     },
   },
   {
-    name: "Rohan Earth",
-    id: "rohan",
-    description: "Warm earth tones from the plains of Rohan",
+    name: "Ramnes",
+    id: "ramnes",
+    description: "Varme jordtoner fra åpne åkre",
     colors: {
       primary: "#A0522D",
       secondary: "#F4A460",
@@ -240,9 +236,9 @@ export const colorPalettes: ExtendedColorPalette[] = [
       info: "#2E8B57",
     },
     darkVariant: {
-      name: "Rohan Earth Dark",
-      id: "rohan-dark",
-      description: "Warm earth tones from the plains of Rohan - Dark mode",
+      name: "Ramnes mørk",
+      id: "ramnes-dark",
+      description: "Varme jordtoner fra åpne åkre (mørk modus)",
       colors: {
         primary: "#CD853F",
         secondary: "#F4A460",
@@ -262,9 +258,9 @@ export const colorPalettes: ExtendedColorPalette[] = [
     },
   },
   {
-    name: "Gondor Royal",
-    id: "gondor",
-    description: "Noble colors of the kingdom of Gondor",
+    name: "Slottsfjellet",
+    id: "slottsfjellet",
+    description: "Kongelige og edle farger, som borgen i Tønsberg",
     colors: {
       primary: "#483D8B",
       secondary: "#C0C0C0",
@@ -282,9 +278,10 @@ export const colorPalettes: ExtendedColorPalette[] = [
       info: "#4682B4",
     },
     darkVariant: {
-      name: "Gondor Royal Dark",
-      id: "gondor-dark",
-      description: "Noble colors of the kingdom of Gondor - Dark mode",
+      name: "Slottsfjellet mørk",
+      id: "slottsfjellet-dark",
+      description:
+        "Kongelige og edle farger, som borgen i Tønsberg (mørk modus)",
       colors: {
         primary: "#6A5ACD",
         secondary: "#C0C0C0",
@@ -304,9 +301,9 @@ export const colorPalettes: ExtendedColorPalette[] = [
     },
   },
   {
-    name: "Isengard Steel",
-    id: "isengard",
-    description: "Industrial elegance with steel and copper",
+    name: "Kaldnes",
+    id: "kaldnes",
+    description: "Stål og kobber, som det gamle verkstedet i Tønsberg",
     colors: {
       primary: "#2C3E50",
       secondary: "#BDC3C7",
@@ -324,9 +321,10 @@ export const colorPalettes: ExtendedColorPalette[] = [
       info: "#3498DB",
     },
     darkVariant: {
-      name: "Isengard Steel Dark",
-      id: "isengard-dark",
-      description: "Industrial elegance with steel and copper - Dark mode",
+      name: "Kaldnes mørk",
+      id: "kaldnes-dark",
+      description:
+        "Stål og kobber, som det gamle verkstedet i Tønsberg (mørk modus)",
       colors: {
         primary: "#5DADE2",
         secondary: "#BDC3C7",
@@ -346,9 +344,9 @@ export const colorPalettes: ExtendedColorPalette[] = [
     },
   },
   {
-    name: "Lothlórien Gold",
-    id: "lothlorien",
-    description: "Mystical forest with gold and silver",
+    name: "Bøkeskogen",
+    id: "bokeskogen",
+    description: "Skog med gull og sølv, som bøkeskogen i Larvik",
     colors: {
       primary: "#27AE60",
       secondary: "#F8C471",
@@ -366,9 +364,10 @@ export const colorPalettes: ExtendedColorPalette[] = [
       info: "#85C1E9",
     },
     darkVariant: {
-      name: "Lothlórien Gold Dark",
-      id: "lothlorien-dark",
-      description: "Mystical forest with gold and silver - Dark mode",
+      name: "Bøkeskogen mørk",
+      id: "bokeskogen-dark",
+      description:
+        "Skog med gull og sølv, som bøkeskogen i Larvik (mørk modus)",
       colors: {
         primary: "#58D68D",
         secondary: "#F8C471",
@@ -388,9 +387,9 @@ export const colorPalettes: ExtendedColorPalette[] = [
     },
   },
   {
-    name: "Erebor Treasure",
-    id: "erebor",
-    description: "Dwarven-inspired deep blues and rich golds",
+    name: "Larvikitt",
+    id: "larvikitt",
+    description: "Dyp blå med glans, som steinen fra Larvik",
     colors: {
       primary: "#1A237E",
       secondary: "#C5CAE9",
@@ -408,9 +407,9 @@ export const colorPalettes: ExtendedColorPalette[] = [
       info: "#0277BD",
     },
     darkVariant: {
-      name: "Erebor Treasure Dark",
-      id: "erebor-dark",
-      description: "Dwarven-inspired deep blues and rich golds - Dark mode",
+      name: "Larvikitt mørk",
+      id: "larvikitt-dark",
+      description: "Dyp blå med glans, som steinen fra Larvik (mørk modus)",
       colors: {
         primary: "#7986CB",
         secondary: "#C5CAE9",
@@ -430,9 +429,9 @@ export const colorPalettes: ExtendedColorPalette[] = [
     },
   },
   {
-    name: "Fangorn Forest",
-    id: "fangorn",
-    description: "Natural and earthy with warm browns",
+    name: "Lardal",
+    id: "lardal",
+    description: "Naturlige brune og grønne skogstoner",
     colors: {
       primary: "#8BC34A",
       secondary: "#D7CCC8",
@@ -450,9 +449,9 @@ export const colorPalettes: ExtendedColorPalette[] = [
       info: "#26A69A",
     },
     darkVariant: {
-      name: "Fangorn Forest Dark",
-      id: "fangorn-dark",
-      description: "Natural and earthy with warm browns - Dark mode",
+      name: "Lardal mørk",
+      id: "lardal-dark",
+      description: "Naturlige brune og grønne skogstoner (mørk modus)",
       colors: {
         primary: "#AED581",
         secondary: "#D7CCC8",
@@ -472,9 +471,9 @@ export const colorPalettes: ExtendedColorPalette[] = [
     },
   },
   {
-    name: "Moria Depth",
-    id: "moria",
-    description: "Deep elegance with burgundy and gold",
+    name: "Borre",
+    id: "borre",
+    description: "Burgunder og gull, som vikinghaugene i Borre",
     colors: {
       primary: "#8E2C4E",
       secondary: "#E8B4B8",
@@ -492,9 +491,9 @@ export const colorPalettes: ExtendedColorPalette[] = [
       info: "#4682B4",
     },
     darkVariant: {
-      name: "Moria Depth Dark",
-      id: "moria-dark",
-      description: "Deep elegance with burgundy and gold - Dark mode",
+      name: "Borre mørk",
+      id: "borre-dark",
+      description: "Burgunder og gull, som vikinghaugene i Borre (mørk modus)",
       colors: {
         primary: "#C75B7A",
         secondary: "#E8B4B8",
@@ -514,9 +513,9 @@ export const colorPalettes: ExtendedColorPalette[] = [
     },
   },
   {
-    name: "Valinor Divine",
-    id: "valinor",
-    description: "Pure and heavenly with lavender and pearl",
+    name: "Mølen",
+    id: "molen",
+    description: "Lyst og perlegrått, som rullesteinstranden i Larvik",
     colors: {
       primary: "#6A5ACD",
       secondary: "#E6E6FA",
@@ -534,9 +533,10 @@ export const colorPalettes: ExtendedColorPalette[] = [
       info: "#87CEEB",
     },
     darkVariant: {
-      name: "Valinor Divine Dark",
-      id: "valinor-dark",
-      description: "Pure and heavenly with lavender and pearl - Dark mode",
+      name: "Mølen mørk",
+      id: "molen-dark",
+      description:
+        "Lyst og perlegrått, som rullesteinstranden i Larvik (mørk modus)",
       colors: {
         primary: "#9A8FD9",
         secondary: "#E6E6FA",
@@ -556,9 +556,9 @@ export const colorPalettes: ExtendedColorPalette[] = [
     },
   },
   {
-    name: "Edoras Sun",
-    id: "edoras",
-    description: "Sunny and golden with terracotta and sand",
+    name: "Ula",
+    id: "ula",
+    description: "Sol, sand og terrakotta ved kysten",
     colors: {
       primary: "#C7A876",
       secondary: "#F4E4BC",
@@ -576,9 +576,9 @@ export const colorPalettes: ExtendedColorPalette[] = [
       info: "#4682B4",
     },
     darkVariant: {
-      name: "Edoras Sun Dark",
-      id: "edoras-dark",
-      description: "Sunny and golden with terracotta and sand - Dark mode",
+      name: "Ula mørk",
+      id: "ula-dark",
+      description: "Sol, sand og terrakotta ved kysten (mørk modus)",
       colors: {
         primary: "#E6C068",
         secondary: "#F4E4BC",
@@ -598,9 +598,9 @@ export const colorPalettes: ExtendedColorPalette[] = [
     },
   },
   {
-    name: "Weathertop Mystery",
-    id: "weathertop",
-    description: "Cold and mysterious with teal and silver",
+    name: "Svenner",
+    id: "svenner",
+    description: "Kaldt blågrønt og sølv, som fyret utenfor Larvik",
     colors: {
       primary: "#008B8B",
       secondary: "#B0C4DE",
@@ -618,9 +618,10 @@ export const colorPalettes: ExtendedColorPalette[] = [
       info: "#4682B4",
     },
     darkVariant: {
-      name: "Weathertop Mystery Dark",
-      id: "weathertop-dark",
-      description: "Cold and mysterious with teal and silver - Dark mode",
+      name: "Svenner mørk",
+      id: "svenner-dark",
+      description:
+        "Kaldt blågrønt og sølv, som fyret utenfor Larvik (mørk modus)",
       colors: {
         primary: "#20B2AA",
         secondary: "#B0C4DE",
@@ -640,3 +641,35 @@ export const colorPalettes: ExtendedColorPalette[] = [
     },
   },
 ];
+
+/**
+ * Id-ene fra V1 (theme-advisor.vercel.app), som hadde andre navn. Delte lenker
+ * og lagrede valg kan fortsatt bruke dem, så de oversettes til de nye i stedet
+ * for å forsvinne. Mørke varianter har samme id med `-dark` til slutt.
+ */
+export const LEGACY_PALETTE_IDS: Readonly<Record<string, string>> = {
+  ocean: "havet",
+  sunset: "solnedgang",
+  forest: "skogen",
+  shire: "sande",
+  rivendell: "verdens-ende",
+  rohan: "ramnes",
+  gondor: "slottsfjellet",
+  isengard: "kaldnes",
+  lothlorien: "bokeskogen",
+  erebor: "larvikitt",
+  fangorn: "lardal",
+  moria: "borre",
+  valinor: "molen",
+  edoras: "ula",
+  weathertop: "svenner",
+};
+
+/** Gir dagens id for en palett, også når den kommer inn med en id fra V1. */
+export function resolvePaletteId(id: string): string {
+  const mork = id.endsWith("-dark");
+  const base = mork ? id.slice(0, -"-dark".length) : id;
+  const ny = LEGACY_PALETTE_IDS[base];
+  if (!ny) return id;
+  return mork ? `${ny}-dark` : ny;
+}
