@@ -525,6 +525,7 @@ function ColorCraft() {
             <LivePreview
               palette={currentPalette}
               brand={currentExtended.brand}
+              onApply={handleApplySuggestion}
             />
           </div>
 

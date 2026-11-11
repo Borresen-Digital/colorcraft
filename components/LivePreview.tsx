@@ -9,6 +9,7 @@ import type { ExtendedColorPalette } from "@/data/palettes";
 import { textOn } from "@/lib/contrastPairs";
 import { cn } from "@/lib/utils";
 import { SurfacesPreview } from "@/components/SurfacesPreview";
+import { TonesPreview } from "@/components/TonesPreview";
 import { useI18n } from "@/components/I18nProvider";
 import { ColorPalette } from "@/types/palette";
 
@@ -16,27 +17,31 @@ interface LivePreviewProps {
   palette: ColorPalette;
   /** Merkefargene, hvis paletten er laget fra en profilmanual. */
   brand?: ExtendedColorPalette["brand"];
+  /** Bytter én farge i varianten som vises (fra «Valør og varme»). */
+  onApply?: (role: keyof ColorPalette["colors"], color: string) => void;
 }
 
-type Tab = "components" | "surfaces";
+type Tab = "components" | "surfaces" | "tones";
 
 /**
- * Forhåndsvisningen har to faner: komponenter (knapper, kort, meny) og
- * flater (støttefargene som heldekkende seksjoner og infobokser).
+ * Forhåndsvisningen har tre faner: komponenter (knapper, kort, meny), flater
+ * (støttefargene som heldekkende seksjoner og infobokser), og valør og
+ * varme (skalaer og varianter av merkefargene).
  */
-export function LivePreview({ palette, brand }: LivePreviewProps) {
+export function LivePreview({ palette, brand, onApply }: LivePreviewProps) {
   const { t } = useI18n();
   const [tab, setTab] = useState<Tab>("components");
   const faner: [Tab, string][] = [
     ["components", t.surfaces.tabComponents],
     ["surfaces", t.surfaces.tabSurfaces],
+    ["tones", t.tones.tab],
   ];
   return (
     <div className="flex h-full flex-col">
       <div
         role="tablist"
         aria-label={t.surfaces.tabsLabel}
-        className="flex gap-1 border-b border-gray-200 bg-white px-3 pt-3"
+        className="flex gap-1 overflow-x-auto border-b border-gray-200 bg-white px-2 pt-3 sm:px-3"
       >
         {faner.map(([id, label]) => (
           <button
@@ -48,7 +53,7 @@ export function LivePreview({ palette, brand }: LivePreviewProps) {
             aria-controls="preview-panel"
             onClick={() => setTab(id)}
             className={cn(
-              "-mb-px rounded-t-lg border px-4 py-2 text-sm font-medium",
+              "-mb-px shrink-0 whitespace-nowrap rounded-t-lg border px-3 py-2 text-sm font-medium sm:px-4",
               tab === id
                 ? "border-gray-200 border-b-white bg-white text-gray-900"
                 : "border-transparent text-gray-600 hover:text-gray-900",
@@ -64,10 +69,12 @@ export function LivePreview({ palette, brand }: LivePreviewProps) {
         aria-labelledby={`preview-tab-${tab}`}
         className="flex-1"
       >
-        {tab === "components" ? (
-          <ComponentsPreview palette={palette} />
-        ) : (
+        {tab === "components" && <ComponentsPreview palette={palette} />}
+        {tab === "surfaces" && (
           <SurfacesPreview palette={palette} brand={brand} />
+        )}
+        {tab === "tones" && (
+          <TonesPreview palette={palette} brand={brand} onApply={onApply} />
         )}
       </div>
     </div>
