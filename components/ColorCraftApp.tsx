@@ -82,6 +82,7 @@ function ColorCraft() {
   // Delbar lenke, del 1: les paletten fra adressen ved åpning, og når noen
   // limer inn en ny lenke i samme fane.
   const hashLest = useRef(false);
+  const previewRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const bruk = () => {
       const delt = decodeShare(window.location.hash, t.palette);
@@ -148,6 +149,17 @@ function ColorCraft() {
       } else {
         // Otherwise select the base palette
         setSelectedPaletteId(palette.id);
+      }
+      // På mobil ligger forhåndsvisningen over listen. Vis den nye paletten
+      // med en gang i stedet for å la brukeren lete etter den.
+      if (window.matchMedia("(max-width: 767px)").matches) {
+        const rolig = window.matchMedia(
+          "(prefers-reduced-motion: reduce)",
+        ).matches;
+        previewRef.current?.scrollIntoView({
+          behavior: rolig ? "auto" : "smooth",
+          block: "start",
+        });
       }
     }
   };
@@ -306,17 +318,17 @@ function ColorCraft() {
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
+        <div className="max-w-7xl mx-auto px-4 py-4 sm:py-6">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex min-w-0 items-center">
               <Logo size="xl" showText={false} />
-              <div className="ml-4">
+              <div className="ml-3 min-w-0 sm:ml-4">
                 <h1 className="sr-only">ColorCraft</h1>
                 <p className="text-gray-600 text-sm">{t.app.tagline}</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
               <a
                 href={localePath(otherLocale)}
                 hrefLang={otherLocale}
@@ -328,10 +340,10 @@ function ColorCraft() {
                 {t.app.otherLanguage}
               </a>
               {/* Palette Actions */}
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <button
                   onClick={copyShareLink}
-                  className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors text-sm font-medium"
+                  className="px-3 py-2 sm:px-4 text-white rounded-lg transition-colors text-sm font-medium bg-emerald-700 hover:bg-emerald-800"
                   title={t.app.shareTitle}
                 >
                   {linkStatus === "copied"
@@ -342,27 +354,27 @@ function ColorCraft() {
                 </button>
                 <button
                   onClick={handleCreatePalette}
-                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium"
+                  className="px-3 py-2 sm:px-4 text-white rounded-lg transition-colors text-sm font-medium bg-blue-600 hover:bg-blue-700"
                 >
                   {t.app.add}
                 </button>
                 <button
                   onClick={handleEditPalette}
-                  className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm font-medium"
+                  className="px-3 py-2 sm:px-4 text-white rounded-lg transition-colors text-sm font-medium bg-gray-600 hover:bg-gray-700"
                 >
                   {t.app.edit}
                 </button>
                 {canDelete && (
                   <button
                     onClick={handleDeletePalette}
-                    className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm font-medium"
+                    className="px-3 py-2 sm:px-4 text-white rounded-lg transition-colors text-sm font-medium bg-red-600 hover:bg-red-700"
                   >
                     {t.app.delete}
                   </button>
                 )}
               </div>
 
-              <div className="text-right text-sm text-gray-500">
+              <div className="hidden text-right text-sm text-gray-600 md:block">
                 <p>
                   {t.app.viewing}{" "}
                   <span className="font-medium text-gray-900">
@@ -392,14 +404,14 @@ function ColorCraft() {
             </span>
             <button
               onClick={handleSaveShared}
-              className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-700"
+              className="rounded-lg bg-emerald-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-800"
             >
               {t.app.saveShared}
             </button>
           </div>
         )}
-        <div className="grid grid-cols-12 gap-6 h-[850px]">
-          <div className="col-span-3 bg-white rounded-xl p-6 shadow-lg overflow-y-auto">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:h-[850px] lg:grid-cols-12 lg:gap-6">
+          <div className="bg-white rounded-xl p-4 shadow-lg sm:p-6 lg:col-span-3 lg:overflow-y-auto">
             <PaginatedPaletteSelector
               palettes={shown}
               selectedId={selectedPaletteId}
@@ -409,11 +421,14 @@ function ColorCraft() {
             />
           </div>
 
-          <div className="col-span-6 bg-white rounded-xl shadow-lg overflow-hidden">
+          <div
+            ref={previewRef}
+            className="scroll-mt-4 bg-white rounded-xl shadow-lg overflow-hidden order-first md:col-span-2 lg:order-none lg:col-span-6"
+          >
             <LivePreview palette={currentPalette} />
           </div>
 
-          <div className="col-span-3 bg-white rounded-xl p-6 shadow-lg overflow-y-auto">
+          <div className="bg-white rounded-xl p-4 shadow-lg sm:p-6 lg:col-span-3 lg:overflow-y-auto">
             <ColorDetails
               palette={currentPalette}
               exportPalette={currentExtended}

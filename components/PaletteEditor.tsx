@@ -109,7 +109,7 @@ export function PaletteEditor({
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-6 border-b sticky top-0 bg-white z-10">
+        <div className="p-4 sm:p-6 border-b sticky top-0 bg-white z-10">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold">
               {editingPalette ? t.editor.titleEdit : t.editor.titleNew}
@@ -125,9 +125,9 @@ export function PaletteEditor({
           </div>
         </div>
 
-        <div className="p-6 space-y-6 bg-gray-50">
+        <div className="p-3 sm:p-6 space-y-4 sm:space-y-6 bg-gray-50">
           {/* Basic Info */}
-          <div className="bg-white p-6 rounded-lg border border-gray-200 space-y-4">
+          <div className="bg-white p-4 sm:p-6 rounded-lg border border-gray-200 space-y-4">
             <h3 className="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2">
               {t.editor.info}
             </h3>
@@ -170,28 +170,28 @@ export function PaletteEditor({
           </div>
 
           {/* Color Grid */}
-          <div className="bg-white p-6 rounded-lg border border-gray-200">
+          <div className="bg-white p-4 sm:p-6 rounded-lg border border-gray-200">
             <h3 className="text-lg font-semibold mb-4 text-gray-900">
               {t.editor.lightColors}
             </h3>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 min-[420px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {Object.entries(palette.colors).map(([key, value]) => (
                 <div key={key} className="space-y-2">
                   <label className="block text-sm font-medium text-gray-800 capitalize">
                     {t.roles[key as Role]}
                   </label>
-                  <div className="flex space-x-2">
+                  <div className="flex gap-2">
                     <input
                       type="color"
                       value={value}
                       onChange={(e) => handleColorChange(key, e.target.value)}
-                      className="w-12 h-10 rounded border-2 border-gray-300 cursor-pointer hover:border-blue-400 transition-colors"
+                      className="w-12 h-10 shrink-0 rounded border-2 border-gray-300 cursor-pointer hover:border-blue-400 transition-colors"
                     />
                     <input
                       type="text"
                       value={value}
                       onChange={(e) => handleColorChange(key, e.target.value)}
-                      className="flex-1 p-2 border-2 border-gray-300 rounded text-sm font-mono bg-white text-gray-900 focus:border-blue-500 focus:outline-none"
+                      className="min-w-0 flex-1 p-2 border-2 border-gray-300 rounded text-sm font-mono bg-white text-gray-900 focus:border-blue-500 focus:outline-none"
                       placeholder="#000000"
                     />
                   </div>
@@ -201,7 +201,7 @@ export function PaletteEditor({
           </div>
 
           {/* Dark Variant Toggle */}
-          <div className="bg-white p-6 rounded-lg border border-gray-200">
+          <div className="bg-white p-4 sm:p-6 rounded-lg border border-gray-200">
             <div className="flex items-center space-x-3 mb-4">
               <input
                 type="checkbox"
@@ -219,24 +219,24 @@ export function PaletteEditor({
             </div>
 
             {createDarkVariant && (
-              <div className="bg-gray-800 p-6 rounded-lg border-2 border-gray-600">
+              <div className="bg-gray-800 p-4 sm:p-6 rounded-lg border-2 border-gray-600">
                 <h4 className="text-white font-medium mb-4 text-base">
                   {t.editor.darkColors}
                 </h4>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 min-[420px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {Object.entries(darkColors).map(([key, value]) => (
                     <div key={key} className="space-y-2">
                       <label className="block text-sm font-medium text-gray-200 capitalize">
                         {t.roles[key as Role]}
                       </label>
-                      <div className="flex space-x-2">
+                      <div className="flex gap-2">
                         <input
                           type="color"
                           value={value}
                           onChange={(e) =>
                             handleColorChange(key, e.target.value, true)
                           }
-                          className="w-12 h-10 rounded border-2 border-gray-500 cursor-pointer hover:border-gray-400 transition-colors"
+                          className="w-12 h-10 shrink-0 rounded border-2 border-gray-500 cursor-pointer hover:border-gray-400 transition-colors"
                         />
                         <input
                           type="text"
@@ -244,7 +244,7 @@ export function PaletteEditor({
                           onChange={(e) =>
                             handleColorChange(key, e.target.value, true)
                           }
-                          className="flex-1 p-2 bg-gray-700 border-2 border-gray-600 rounded text-sm font-mono text-white placeholder-gray-400 focus:border-blue-400 focus:outline-none"
+                          className="min-w-0 flex-1 p-2 bg-gray-700 border-2 border-gray-600 rounded text-sm font-mono text-white placeholder-gray-400 focus:border-blue-400 focus:outline-none"
                           placeholder="#000000"
                         />
                       </div>
@@ -256,7 +256,7 @@ export function PaletteEditor({
           </div>
 
           {/* Actions */}
-          <div className="bg-white p-6 rounded-lg border border-gray-200 border-t-2 border-t-gray-300">
+          <div className="bg-white p-4 sm:p-6 rounded-lg border border-gray-200 border-t-2 border-t-gray-300">
             <div className="flex justify-end space-x-3">
               <button
                 onClick={onClose}
@@ -266,7 +266,7 @@ export function PaletteEditor({
               </button>
               <button
                 onClick={handleSave}
-                className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium shadow-sm"
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm"
               >
                 {editingPalette ? t.editor.update : t.editor.create}
               </button>

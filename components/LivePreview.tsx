@@ -20,7 +20,7 @@ export function LivePreview({ palette }: LivePreviewProps) {
 
   return (
     <div
-      className="h-full rounded-xl p-6 transition-all duration-500"
+      className="h-full rounded-xl p-4 transition-all duration-500 sm:p-6"
       style={{
         backgroundColor: palette.colors.background,
         color: palette.colors.foreground,
@@ -29,7 +29,7 @@ export function LivePreview({ palette }: LivePreviewProps) {
       {/* Header */}
       <div className="text-center mb-8">
         <h1
-          className="text-4xl font-bold mb-2 transition-all duration-500"
+          className="text-3xl font-bold mb-2 transition-all duration-500 sm:text-4xl"
           style={{ color: palette.colors.primary }}
         >
           {palette.name}
@@ -39,7 +39,7 @@ export function LivePreview({ palette }: LivePreviewProps) {
 
       {/* Navigation */}
       <nav
-        className="flex justify-center space-x-4 mb-8 p-4 rounded-lg transition-all duration-500"
+        className="flex flex-wrap justify-center gap-1 mb-8 p-2 rounded-lg transition-all duration-500 sm:gap-2 sm:p-4"
         style={{
           backgroundColor: palette.colors.surface,
           border: `1px solid ${palette.colors.border}`,
@@ -48,7 +48,7 @@ export function LivePreview({ palette }: LivePreviewProps) {
         {t.preview.nav.map((item) => (
           <button
             key={item}
-            className="px-4 py-2 rounded-lg transition-all duration-300 hover:scale-105"
+            className="px-3 py-2 rounded-lg transition-all duration-300 hover:scale-105 sm:px-4"
             style={{ color: palette.colors.muted }}
             onMouseEnter={(e) => {
               e.currentTarget.style.backgroundColor = palette.colors.primary;

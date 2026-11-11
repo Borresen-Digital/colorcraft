@@ -40,7 +40,7 @@ export function ColorDetails({ palette, exportPalette }: ColorDetailsProps) {
         <h3 className="text-lg font-semibold text-gray-900 mb-3">
           {t.details.semantic}
         </h3>
-        <div className="grid grid-cols-4 gap-3">
+        <div className="grid grid-cols-4 gap-3 lg:grid-cols-2">
           <ColorSwatch
             label={t.roles.success}
             color={palette.colors.success}
