@@ -32,12 +32,15 @@ interface BrandBuilderProps {
 function ColorRow({
   value,
   onChange,
+  onCmyk,
   onRemove,
   removeLabel,
   invalidText,
 }: {
   value: string;
   onChange: (v: string) => void;
+  /** Får CMYK-teksten fra manualen og HEX-en den ga, når den er gyldig. */
+  onCmyk: (hex: string, cmyk: string) => void;
   onRemove?: () => void;
   removeLabel: string;
   invalidText: string;
@@ -57,7 +60,10 @@ function ColorRow({
     const cmyk = parseCmyk(text);
     const hex = cmyk ? cmykToHex(cmyk) : (gyldig ?? "");
     setSkrevet({ text, hex });
-    if (cmyk) onChange(hex);
+    if (cmyk) {
+      onChange(hex);
+      onCmyk(hex, formatCmyk(cmyk));
+    }
   };
   return (
     <div className="space-y-1">
@@ -165,6 +171,8 @@ export function BrandBuilder({ onClose, onCreate }: BrandBuilderProps) {
   const [name, setName] = useState<string>(b.defaultName);
   const [logo, setLogo] = useState<string[]>(["#F2B705"]);
   const [support, setSupport] = useState<string[]>(["#F5EFE0", "#2B2B2B"]);
+  // CMYK-tallene fra manualen, etter HEX-en de ga. Brukes på fargekortet.
+  const [manualCmyk, setManualCmyk] = useState<Record<string, string>>({});
 
   const alleGyldige =
     logo.length > 0 && [...logo, ...support].every((c) => normalizeHex(c));
@@ -218,6 +226,13 @@ export function BrandBuilder({ onClose, onCreate }: BrandBuilderProps) {
       brand: {
         logo: logo.map((c) => normalizeHex(c)!),
         support: support.map((c) => normalizeHex(c)!),
+        // Bare CMYK for farger som fortsatt er den HEX-en tallene ga.
+        cmyk: Object.fromEntries(
+          [...logo, ...support]
+            .map((c) => normalizeHex(c)!)
+            .filter((h) => manualCmyk[h])
+            .map((h) => [h, manualCmyk[h]]),
+        ),
       },
     });
   };
@@ -238,6 +253,7 @@ export function BrandBuilder({ onClose, onCreate }: BrandBuilderProps) {
           key={i}
           value={c}
           onChange={(v) => oppdater(liste, sett)(i, v)}
+          onCmyk={(hex, cmyk) => setManualCmyk((m) => ({ ...m, [hex]: cmyk }))}
           onRemove={
             liste.length > min
               ? () => sett(liste.filter((_, j) => j !== i))

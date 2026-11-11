@@ -3,7 +3,12 @@ import { ColorPalette } from "@/types/palette";
 export interface ExtendedColorPalette extends ColorPalette {
   darkVariant?: ColorPalette;
   /** Merkefargene paletten er laget fra (profilmanual), hvis den er det. */
-  brand?: { logo: string[]; support: string[] };
+  brand?: {
+    logo: string[];
+    support: string[];
+    /** CMYK skrevet inn fra manualen, etter HEX. Brukes på fargekortet. */
+    cmyk?: Record<string, string>;
+  };
 }
 
 export const colorPalettes: ExtendedColorPalette[] = [
