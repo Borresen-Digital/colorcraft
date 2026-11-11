@@ -520,9 +520,12 @@ function ColorCraft() {
 
           <div
             ref={previewRef}
-            className="scroll-mt-4 bg-white rounded-xl shadow-lg overflow-hidden order-first md:col-span-2 lg:order-none lg:col-span-6"
+            className="scroll-mt-4 bg-white rounded-xl shadow-lg overflow-hidden order-first md:col-span-2 lg:order-none lg:col-span-6 lg:overflow-y-auto"
           >
-            <LivePreview palette={currentPalette} />
+            <LivePreview
+              palette={currentPalette}
+              brand={currentExtended.brand}
+            />
           </div>
 
           <div className="bg-white rounded-xl p-4 shadow-lg sm:p-6 lg:col-span-3 lg:overflow-y-auto">
