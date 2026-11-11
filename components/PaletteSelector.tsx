@@ -232,7 +232,7 @@ export function PaginatedPaletteSelector({
                   onClick={() => setCurrentPage(i)}
                   className={`w-8 h-8 text-xs rounded ${
                     currentPage === i
-                      ? "bg-blue-500 text-white"
+                      ? "bg-blue-600 text-white"
                       : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                   }`}
                 >
