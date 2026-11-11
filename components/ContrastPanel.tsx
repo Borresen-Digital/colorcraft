@@ -22,9 +22,7 @@ function Badge({ label, pass }: { label: string; pass: boolean }) {
     <span
       className={cn(
         "rounded px-1.5 py-0.5 text-[10px] font-semibold tracking-wide",
-        pass
-          ? "bg-emerald-100 text-emerald-800"
-          : "bg-gray-100 text-gray-500 line-through",
+        pass ? "bg-ok-soft text-ok" : "bg-sunken text-subtle line-through",
       )}
       aria-label={`${label} ${pass ? t.contrast.passes : t.contrast.fails}`}
     >
@@ -60,22 +58,22 @@ function ContrastRow({
   };
 
   return (
-    <li className="space-y-1.5 rounded-lg border border-gray-200 p-2.5">
-      <p className="text-xs font-medium text-gray-900">
+    <li className="space-y-1.5 rounded-lg border border-line p-2.5">
+      <p className="text-xs font-medium text-ink">
         {t.contrast.pairs[pair.id] ?? pair.label}
         {pair.large && (
-          <span className="font-normal text-gray-500"> {t.contrast.large}</span>
+          <span className="font-normal text-subtle"> {t.contrast.large}</span>
         )}
       </p>
       <div className="flex flex-wrap items-center gap-2">
         <span
-          className="flex h-7 w-9 shrink-0 items-center justify-center rounded border border-gray-200 text-sm font-semibold"
+          className="flex h-7 w-9 shrink-0 items-center justify-center rounded border border-line text-sm font-semibold"
           style={{ backgroundColor: bg, color: fg }}
           aria-hidden="true"
         >
           Aa
         </span>
-        <span className="font-mono text-xs text-gray-700">
+        <span className="font-mono text-xs text-subtle">
           {ratio === null
             ? t.contrast.invalid
             : localizeRatio(formatRatio(ratio), locale)}
@@ -91,11 +89,11 @@ function ContrastRow({
           <button
             type="button"
             onClick={() => copy(suggestion.color)}
-            className="flex min-w-0 flex-1 items-center gap-2 rounded bg-amber-50 px-2 py-1 text-left text-[11px] text-amber-900 hover:bg-amber-100"
+            className="flex min-w-0 flex-1 items-center gap-2 rounded bg-warn-soft px-2 py-1 text-left text-[11px] text-warn hover:bg-warn-soft/70"
             title={t.contrast.copySuggestion}
           >
             <span
-              className="h-3.5 w-3.5 shrink-0 rounded-sm border border-amber-200"
+              className="h-3.5 w-3.5 shrink-0 rounded-sm border border-line"
               style={{ backgroundColor: suggestion.color }}
               aria-hidden="true"
             />
@@ -117,7 +115,7 @@ function ContrastRow({
                 suggestion.color,
                 t.roles[suggestion.role],
               )}
-              className="shrink-0 rounded bg-amber-800 px-2 text-[11px] font-semibold text-white hover:bg-amber-900"
+              className="shrink-0 rounded bg-ink px-2 text-[11px] font-semibold text-paper hover:bg-ink/85"
             >
               {t.contrast.apply}
             </button>
@@ -142,14 +140,14 @@ export function ContrastPanel({ palette, onApply }: ContrastPanelProps) {
       <div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-2">
         <h3
           id="contrast-heading"
-          className="text-lg font-semibold text-gray-900"
+          className="font-display text-lg font-bold text-ink"
         >
           {t.contrast.title}
         </h3>
         <span
           className={cn(
             "text-xs font-medium",
-            failing === 0 ? "text-emerald-700" : "text-amber-700",
+            failing === 0 ? "text-ok" : "text-warn",
           )}
         >
           {failing === 0 ? t.contrast.allPass : t.contrast.below(failing)}
@@ -160,7 +158,7 @@ export function ContrastPanel({ palette, onApply }: ContrastPanelProps) {
           <ContrastRow key={r.pair.id} result={r} onApply={onApply} />
         ))}
       </ul>
-      <p className="mt-2 text-[11px] text-gray-500">{t.contrast.footnote}</p>
+      <p className="mt-2 text-[11px] text-subtle">{t.contrast.footnote}</p>
     </section>
   );
 }

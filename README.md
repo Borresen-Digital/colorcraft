@@ -1,14 +1,9 @@
 <div align="center">
-  <p>
-    <img src="/public/images/MBlogo.png" alt="Personal Logo" width="150" />
-  </p>
-  <p>
-    <img src="/public/images/logo.png" alt="Theme-Advisor Logo" width="150" />
-  </p>
+  <img src="app/[lang]/icon.svg" alt="" width="72" />
 
 # ColorCraft
 
-> Professional color palette testing and visualization tool – built with Next.js and Tailwind CSS
+> Test color palettes on real components, check contrast against WCAG 2.2, and export tokens. A free tool from Børresen Digital.
 
 [![Next.js](https://img.shields.io/badge/Next.js-16-000000.svg)](https://nextjs.org)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-38bdf8.svg)](https://tailwindcss.com)
@@ -32,12 +27,6 @@
 - 🏔️ Themed palettes named after places in Vestfold
 
 Live at [farger.borresendigital.no](https://farger.borresendigital.no), a free tool from [Børresen Digital](https://www.borresendigital.no).
-
-## Screenshot
-
-<div align="center">
-  <img src="/public/images/color-craft-screenshot.png" alt="ColorCraft Screenshot" width="900" />
-</div>
 
 ## Getting Started
 

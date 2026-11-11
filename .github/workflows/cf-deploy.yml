@@ -136,6 +136,19 @@ jobs:
                 *) echo "::error::/nb skulle sende til /, svarte: $nb"; exit 1 ;;
               esac
               echo "ok: / er norsk, /en er engelsk, /nb sender til /"
+              # Favikonet ligger under [lang] og får en uvanlig adresse
+              # (/-/icon.svg). Lenken i siden må gå til noe som svarer.
+              ikon=$(grep -o '<link rel="icon" href="[^"]*' forside.html | head -1 | sed 's/.*href="//')
+              if [ -z "$ikon" ]; then
+                echo "::error::Forsiden lenker ikke til noe ikon."
+                exit 1
+              fi
+              ikonkode=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "http://localhost:8787$ikon" || true)
+              if [ "$ikonkode" != "200" ]; then
+                echo "::error::Ikonet $ikon svarte $ikonkode."
+                exit 1
+              fi
+              echo "ok: ikonet $ikon"
               exit 0
             fi
           done

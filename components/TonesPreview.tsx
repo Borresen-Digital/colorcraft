@@ -77,7 +77,7 @@ function Chip({
       aria-label={title}
       className={cn(
         "flex min-h-14 min-w-0 flex-1 flex-col items-center justify-end rounded-md px-1 pb-1 pt-2 font-mono text-[10px] transition-transform enabled:hover:scale-105 enabled:focus-visible:scale-105",
-        original && "ring-2 ring-gray-900 ring-offset-2",
+        original && "ring-2 ring-ink ring-offset-2",
       )}
       style={{ backgroundColor: hex, color: lys ? "#111111" : "#FFFFFF" }}
     >
@@ -183,7 +183,7 @@ export function TonesPreview({
                         [kilde.key]: e.target.value as Role,
                       }))
                     }
-                    className="rounded border border-gray-300 bg-white px-2 py-1 text-xs text-gray-900"
+                    className="rounded border border-line bg-panel px-2 py-1 text-xs text-ink"
                   >
                     {COLOR_ROLES.map((r) => (
                       <option key={r} value={r}>

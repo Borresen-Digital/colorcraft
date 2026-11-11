@@ -3,260 +3,110 @@
 import { useState } from "react";
 import { ExtendedColorPalette } from "@/data/palettes";
 import { useI18n } from "@/components/I18nProvider";
+import { cn } from "@/lib/utils";
+import { field } from "@/lib/ui";
 
 interface PaginatedPaletteSelectorProps {
   palettes: ExtendedColorPalette[];
   selectedId: string;
   onSelect: (id: string) => void;
-  isDarkMode: boolean;
-  onDarkModeToggle: (isDark: boolean) => void;
 }
 
+/** Fargene som vises i stripen på hver palett, lys og eventuelt mørk. */
+function stripe(p: ExtendedColorPalette): string[] {
+  const c = p.colors;
+  return [c.primary, c.accent, c.secondary, c.warm, c.cool, c.background];
+}
+
+/**
+ * Listen over paletter. Kompakt, med en fargestripe per palett, og søk i
+ * navn og beskrivelse. Listen ruller i panelet i stedet for å deles i sider.
+ */
 export function PaginatedPaletteSelector({
   palettes,
   selectedId,
   onSelect,
-  isDarkMode,
-  onDarkModeToggle,
 }: PaginatedPaletteSelectorProps) {
   const { t } = useI18n();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(0);
-  const palettesPerPage = 6;
+  const [søk, setSøk] = useState("");
 
-  // Filter palettes based on search
-  const filteredPalettes = palettes.filter(
-    (palette) =>
-      palette.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      palette.description.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
-
-  // Pagination
-  const totalPages = Math.ceil(filteredPalettes.length / palettesPerPage);
-  const startIndex = currentPage * palettesPerPage;
-  const endIndex = startIndex + palettesPerPage;
-  const currentPalettes = filteredPalettes.slice(startIndex, endIndex);
-
-  // Reset to first page when search changes
-  const handleSearch = (value: string) => {
-    setSearchTerm(value);
-    setCurrentPage(0);
-  };
+  const treff = palettes.filter((p) => {
+    const q = søk.trim().toLowerCase();
+    return (
+      !q ||
+      p.name.toLowerCase().includes(q) ||
+      p.description.toLowerCase().includes(q)
+    );
+  });
 
   return (
-    <div className="h-full flex flex-col">
-      {/* Header */}
-      <div className="mb-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">
-          {t.selector.title}
-        </h2>
-
-        {/* Search */}
-        <div className="mb-4">
-          <input
-            type="text"
-            placeholder={t.selector.search}
-            aria-label={t.selector.searchLabel}
-            value={searchTerm}
-            onChange={(e) => handleSearch(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-600"
-          />
-        </div>
-
-        {/* Dark Mode Toggle */}
-        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-          <div className="flex items-center space-x-3">
-            <span
-              className={`text-sm font-medium ${
-                !isDarkMode ? "text-gray-900" : "text-gray-500"
-              }`}
-            >
-              {t.app.light}
-            </span>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={isDarkMode}
-              aria-label={t.selector.toggleDark}
-              onClick={() => onDarkModeToggle(!isDarkMode)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                isDarkMode ? "bg-gray-600" : "bg-gray-300"
-              }`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  isDarkMode ? "translate-x-6" : "translate-x-1"
-                }`}
-              />
-            </button>
-            <span
-              className={`text-sm font-medium ${
-                isDarkMode ? "text-gray-900" : "text-gray-500"
-              }`}
-            >
-              {t.app.dark}
-            </span>
-          </div>
-        </div>
-
-        {/* Results info */}
-        <div className="mt-3 text-xs text-gray-500">
-          {t.selector.showing(currentPalettes.length, filteredPalettes.length)}
-        </div>
+    <div className="flex h-full flex-col">
+      <div className="mb-3 flex items-baseline justify-between gap-2">
+        <h2 className="font-display text-lg font-bold">{t.selector.title}</h2>
+        <span className="text-xs text-subtle" aria-live="polite">
+          {t.selector.showing(treff.length, palettes.length)}
+        </span>
       </div>
 
-      {/* Palette Grid */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="space-y-3">
-          {currentPalettes.map((palette) => {
-            const isSelected =
-              selectedId === palette.id ||
-              selectedId === palette.darkVariant?.id;
-            const hasVariants = !!palette.darkVariant;
+      <input
+        type="search"
+        placeholder={t.selector.search}
+        aria-label={t.selector.searchLabel}
+        value={søk}
+        onChange={(e) => setSøk(e.target.value)}
+        className={cn(field, "mb-3 w-full")}
+      />
 
-            return (
-              <div
-                key={palette.id}
-                className={`p-4 rounded-xl border-2 cursor-pointer transition-all hover:shadow-md ${
-                  isSelected
-                    ? "border-blue-500 bg-blue-50 shadow-md"
-                    : "border-gray-200 hover:border-gray-300 bg-white"
-                }`}
-                onClick={() => onSelect(palette.id)}
+      <ul className="-mx-1 max-h-[60vh] flex-1 space-y-1 overflow-y-auto px-1 py-0.5 lg:max-h-none">
+        {treff.map((p) => {
+          const valgt = selectedId === p.id || selectedId === p.darkVariant?.id;
+          return (
+            <li key={p.id}>
+              <button
+                type="button"
+                onClick={() => onSelect(p.id)}
+                aria-current={valgt ? "true" : undefined}
+                className={cn(
+                  "group flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left transition-colors",
+                  valgt ? "bg-sunken ring-2 ring-accent" : "hover:bg-sunken",
+                )}
               >
-                {/* Palette Info */}
-                <div className="mb-3">
-                  <div className="flex items-center justify-between">
-                    <h3
-                      className={`font-medium ${
-                        isSelected ? "text-blue-900" : "text-gray-900"
-                      }`}
-                    >
-                      {palette.name}
-                    </h3>
-                    {isSelected && (
-                      <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center">
-                        <div className="w-2 h-2 rounded-full bg-white"></div>
-                      </div>
-                    )}
-                  </div>
-                  <p className="text-xs text-gray-600 mt-1 line-clamp-2">
-                    {palette.description}
-                  </p>
-                </div>
-
-                {/* Color Swatches - Vertical Stack */}
-                <div className="space-y-2">
-                  {/* Light mode colors */}
-                  <div className="flex space-x-1">
-                    <div
-                      className="w-6 h-6 rounded border border-gray-200"
-                      style={{ backgroundColor: palette.colors.primary }}
-                      title={`Primary: ${palette.colors.primary}`}
-                    />
-                    <div
-                      className="w-6 h-6 rounded border border-gray-200"
-                      style={{ backgroundColor: palette.colors.accent }}
-                      title={`Accent: ${palette.colors.accent}`}
-                    />
-                    <div
-                      className="w-6 h-6 rounded border border-gray-200"
-                      style={{ backgroundColor: palette.colors.warm }}
-                      title={`Warm: ${palette.colors.warm}`}
-                    />
-                    <div
-                      className="w-6 h-6 rounded border border-gray-200"
-                      style={{ backgroundColor: palette.colors.cool }}
-                      title={`Cool: ${palette.colors.cool}`}
-                    />
-                  </div>
-
-                  {/* Dark mode indicator */}
-                  {hasVariants && (
-                    <div className="flex items-center justify-between">
-                      <div className="flex space-x-1">
-                        <div
-                          className="w-4 h-4 rounded border border-gray-300"
-                          style={{
-                            backgroundColor:
-                              palette.darkVariant?.colors.primary,
-                          }}
-                        />
-                        <div
-                          className="w-4 h-4 rounded border border-gray-300"
-                          style={{
-                            backgroundColor: palette.darkVariant?.colors.accent,
-                          }}
-                        />
-                        <div
-                          className="w-4 h-4 rounded border border-gray-300"
-                          style={{
-                            backgroundColor: palette.darkVariant?.colors.warm,
-                          }}
-                        />
-                        <div
-                          className="w-4 h-4 rounded border border-gray-300"
-                          style={{
-                            backgroundColor: palette.darkVariant?.colors.cool,
-                          }}
-                        />
-                      </div>
-                      <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                        {t.selector.darkAvailable}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="mt-4 pt-4 border-t border-gray-200">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
-              disabled={currentPage === 0}
-              className="px-3 py-1 text-sm bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {t.selector.previous}
-            </button>
-
-            <div className="flex space-x-1">
-              {Array.from({ length: totalPages }, (_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setCurrentPage(i)}
-                  className={`w-8 h-8 text-xs rounded ${
-                    currentPage === i
-                      ? "bg-blue-600 text-white"
-                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                  }`}
+                <span
+                  className="flex h-9 w-14 shrink-0 overflow-hidden rounded-lg border border-line"
+                  aria-hidden="true"
                 >
-                  {i + 1}
-                </button>
-              ))}
-            </div>
-
-            <button
-              onClick={() =>
-                setCurrentPage(Math.min(totalPages - 1, currentPage + 1))
-              }
-              disabled={currentPage === totalPages - 1}
-              className="px-3 py-1 text-sm bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {t.selector.next}
-            </button>
-          </div>
-
-          <div className="text-center mt-2 text-xs text-gray-500">
-            {t.selector.page(currentPage + 1, totalPages)}
-          </div>
-        </div>
-      )}
+                  {stripe(p).map((c, i) => (
+                    <span
+                      key={i}
+                      className="h-full flex-1"
+                      style={{ backgroundColor: c }}
+                    />
+                  ))}
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-semibold text-ink">
+                    {p.name}
+                  </span>
+                  <span className="block truncate text-xs text-subtle">
+                    {p.description}
+                  </span>
+                </span>
+                {p.darkVariant && (
+                  <span
+                    className="h-3 w-3 shrink-0 rounded-full border border-line"
+                    style={{
+                      background: `linear-gradient(135deg, ${p.colors.background} 50%, ${p.darkVariant.colors.background} 50%)`,
+                    }}
+                    title={t.selector.darkAvailable}
+                    aria-label={t.selector.darkAvailable}
+                    role="img"
+                  />
+                )}
+              </button>
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 }

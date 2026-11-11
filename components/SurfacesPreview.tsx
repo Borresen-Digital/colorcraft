@@ -51,7 +51,7 @@ function Badge({
     <span
       className={cn(
         "rounded px-2 py-0.5 text-[11px] font-semibold",
-        ok ? "bg-emerald-100 text-emerald-900" : "bg-red-100 text-red-900",
+        ok ? "bg-ok-soft text-ok" : "bg-bad-soft text-bad",
       )}
     >
       {label}

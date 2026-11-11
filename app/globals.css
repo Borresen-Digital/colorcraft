@@ -1,17 +1,123 @@
 @import "tailwindcss";
 
 /*
- * Selve verktøyet er lyst. Mørk modus gjelder palettene i forhåndsvisningen,
- * ikke rammen rundt. Før lå det en prefers-color-scheme-blokk her fra
- * create-next-app, som ga nesten hvit tekst på hvite kort for alle med mørk
- * modus i systemet.
+ * ColorCraft sitt eget uttrykk: varmt papir, mørkt blekk og én signaturfarge.
+ * Rammen er rolig så palettene får stå i fred. Fargen i verktøyet kommer fra
+ * palettene, ikke fra rammen.
+ *
+ * Rammen følger lys og mørk modus i systemet, og kan overstyres med
+ * data-theme på <html> (bryteren i toppen). Palettene i forhåndsvisningen
+ * vises alltid i sine egne farger.
+ *
+ * Alle par som brukes til tekst, holder WCAG AA (4,5:1), og feltkanter holder
+ * 3:1 (1.4.11). lib/designTokens.test.ts leser denne fila og måler dem, så en
+ * endring som bryter kontrasten stopper i CI.
  */
+
 :root {
   color-scheme: light;
+  --cc-paper: #f6f3ee;
+  --cc-panel: #fffdfa;
+  --cc-sunken: #ede8e0;
+  --cc-ink: #1d1b18;
+  --cc-subtle: #5e584f;
+  --cc-line: #e3ddd3;
+  --cc-field: #8c8478;
+  --cc-accent: #c2410c;
+  --cc-accent-ink: #fffdfa;
+  --cc-accent-soft: #fdf1ea;
+  --cc-ok: #1e6b3a;
+  --cc-ok-soft: #e3f1e6;
+  --cc-warn: #8a4a08;
+  --cc-warn-soft: #fbebd5;
+  --cc-bad: #b3261e;
+  --cc-bad-soft: #fbe4e1;
+}
+
+/* Mørk ramme: samme verdier på to steder, for bryteren og for systemvalget. */
+[data-theme="dark"] {
+  color-scheme: dark;
+  --cc-paper: #121110;
+  --cc-panel: #1b1916;
+  --cc-sunken: #252220;
+  --cc-ink: #f3efe8;
+  --cc-subtle: #ada597;
+  --cc-line: #2f2b27;
+  --cc-field: #7d756a;
+  --cc-accent: #ff8a5c;
+  --cc-accent-ink: #1b1916;
+  --cc-accent-soft: #3a2117;
+  --cc-ok: #6bd38f;
+  --cc-ok-soft: #183323;
+  --cc-warn: #f2b35a;
+  --cc-warn-soft: #3a2a12;
+  --cc-bad: #ff8a80;
+  --cc-bad-soft: #3d1c19;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --cc-paper: #121110;
+    --cc-panel: #1b1916;
+    --cc-sunken: #252220;
+    --cc-ink: #f3efe8;
+    --cc-subtle: #ada597;
+    --cc-line: #2f2b27;
+    --cc-field: #7d756a;
+    --cc-accent: #ff8a5c;
+    --cc-accent-ink: #1b1916;
+    --cc-accent-soft: #3a2117;
+    --cc-ok: #6bd38f;
+    --cc-ok-soft: #183323;
+    --cc-warn: #f2b35a;
+    --cc-warn-soft: #3a2a12;
+    --cc-bad: #ff8a80;
+    --cc-bad-soft: #3d1c19;
+  }
 }
 
 /* Fontene lastes i app/[lang]/layout.tsx med next/font. */
 @theme inline {
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --color-paper: var(--cc-paper);
+  --color-panel: var(--cc-panel);
+  --color-sunken: var(--cc-sunken);
+  --color-ink: var(--cc-ink);
+  --color-subtle: var(--cc-subtle);
+  --color-line: var(--cc-line);
+  --color-field: var(--cc-field);
+  --color-accent: var(--cc-accent);
+  --color-accent-ink: var(--cc-accent-ink);
+  --color-accent-soft: var(--cc-accent-soft);
+  --color-ok: var(--cc-ok);
+  --color-ok-soft: var(--cc-ok-soft);
+  --color-warn: var(--cc-warn);
+  --color-warn-soft: var(--cc-warn-soft);
+  --color-bad: var(--cc-bad);
+  --color-bad-soft: var(--cc-bad-soft);
+
+  --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-instrument), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+}
+
+body {
+  background: var(--cc-paper);
+  color: var(--cc-ink);
+}
+
+/* Synlig fokus overalt, i signaturfargen. */
+:focus-visible {
+  outline: 2px solid var(--cc-accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
