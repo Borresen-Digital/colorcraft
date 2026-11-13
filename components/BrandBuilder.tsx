@@ -16,6 +16,7 @@ import { formatRatio } from "@/lib/contrast";
 import { checkPalette } from "@/lib/contrastPairs";
 import { localizeRatio } from "@/lib/i18n";
 import { useI18n } from "@/components/I18nProvider";
+import { ManualCheck } from "@/components/ManualCheck";
 import type { ColorPalette } from "@/types/palette";
 
 type Liste = "logo" | "support" | "highlight";
@@ -390,6 +391,7 @@ export function BrandBuilder({ onClose, onCreate }: BrandBuilderProps) {
             )}
           </div>
           <p className="text-xs text-subtle">{t.values.cmykHelp}</p>
+          <ManualCheck />
 
           <section
             aria-labelledby="brand-preview"

@@ -1,7 +1,7 @@
 "use client";
 
 import type { ExtendedColorPalette } from "@/data/palettes";
-import { formatRatio } from "@/lib/contrast";
+import { contrastRatio, formatRatio } from "@/lib/contrast";
 import { textOn } from "@/lib/contrastPairs";
 import { localizeRatio } from "@/lib/i18n";
 import { LOGO_MIN, surfacesFor, TEXT_MIN, type Surface } from "@/lib/surfaces";
@@ -86,7 +86,7 @@ function SurfaceSection({
   name: string;
   brand?: ExtendedColorPalette["brand"];
 }) {
-  const { t } = useI18n();
+  const { locale, t } = useI18n();
   const f = t.surfaces;
   const tittel = surfaceTitle(s, t, brand?.names);
   // Markert tekst i highlightfargen (aksenten) hvis manualen har en, ellers i
@@ -124,6 +124,57 @@ function SurfaceSection({
         </mark>{" "}
         {harHighlight ? f.bodyEndHighlight : f.bodyEnd}
       </p>
+      {s.tints.length > 0 && (
+        <div className="pt-1">
+          <p className="mb-1 text-[11px] font-semibold opacity-80">{f.tints}</p>
+          <ul className="grid grid-cols-4 gap-1">
+            {s.tints.map((tt) => (
+              <li
+                key={tt.percent}
+                className="flex flex-col items-center gap-0.5 rounded px-1 py-1.5 text-[10px]"
+                style={{
+                  backgroundColor: tt.hex,
+                  // Prosenten er tekst og trenger lesbar farge. Logoen vises
+                  // som merket ved siden av, i sin egen farge.
+                  color:
+                    (contrastRatio("#111111", tt.hex) ?? 0) >=
+                    (contrastRatio("#FFFFFF", tt.hex) ?? 0)
+                      ? "#111111"
+                      : "#FFFFFF",
+                }}
+                aria-label={`${f.tintLabel(tt.percent)} ${tt.hex}: ${f.logo} ${localizeRatio(formatRatio(tt.logoRatio), locale)} ${tt.logoOk ? f.ok : f.fail}`}
+              >
+                <span
+                  aria-hidden="true"
+                  className="flex items-center gap-1 font-semibold"
+                >
+                  <svg width="12" height="12" viewBox="0 0 28 28">
+                    <circle
+                      cx="14"
+                      cy="14"
+                      r="11"
+                      fill="none"
+                      stroke={s.logo}
+                      strokeWidth="5"
+                    />
+                    <circle cx="14" cy="14" r="4" fill={s.logo} />
+                  </svg>
+                  {f.tintLabel(tt.percent)}
+                </span>
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    "rounded px-1 font-semibold",
+                    tt.logoOk ? "bg-ok-soft text-ok" : "bg-bad-soft text-bad",
+                  )}
+                >
+                  {localizeRatio(formatRatio(tt.logoRatio), locale)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       <div className="flex flex-wrap gap-2 pt-1">
         <Badge label={f.text} ratio={s.textRatio} min={TEXT_MIN} />
         <Badge

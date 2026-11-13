@@ -164,6 +164,20 @@ const nb = {
     highlight: "Highlight",
     highlightHelp:
       "0–2 farger som bare brukes i små doser: knapper og enkeltord. Aldri som flate.",
+    check: {
+      title: "Sjekk verdiene fra manualen",
+      help: "Skriv inn HEX, RGB og CMYK for én farge slik de står i manualen. HEX og RGB er samme tall og må stemme helt. CMYK avhenger av trykkprofilen og kan bare ligne.",
+      rgbOk: "HEX og RGB stemmer.",
+      rgbMismatch: (rgbHex: string, hex: string) =>
+        `RGB-tallene gir ${rgbHex}, men HEX er ${hex}. En av dem er trolig feil.`,
+      cmykLike: (hex: string) => `CMYK gir omtrent ${hex}. Det ligner.`,
+      cmykNear: (hex: string) =>
+        `CMYK gir omtrent ${hex}. Det ligner, men ikke helt. Det kan komme av trykkprofilen.`,
+      cmykOff: (hex: string) =>
+        `CMYK gir omtrent ${hex}, som er tydelig ulik. Sjekk tallene.`,
+      invalid: "Kan ikke lese",
+      empty: "Fyll inn minst to av feltene.",
+    },
     colorName: "Navn (valgfritt)",
     colorNamePlaceholder: "For eksempel Varm rørfarge",
     add: "Legg til farge",
@@ -208,6 +222,8 @@ const nb = {
     logoInverted: "negativ",
     ok: "består",
     fail: "under kravet",
+    tints: "Tinter av flaten, med logoen",
+    tintLabel: (p: number) => `${p} %`,
   },
   values: {
     title: "HEX, RGB og CMYK",
@@ -224,6 +240,11 @@ const nb = {
     logo: (n: number) => `Logofarge ${n}`,
     support: (n: number) => `Støttefarge ${n}`,
     highlight: (n: number) => `Highlight ${n}`,
+    tint: "Tint",
+    tintHelp:
+      "Fargen trykt med lavere rasterprosent, regnet fra CMYK. Med CMYK fra manualen blir tintene riktigst.",
+    tintTitle: (p: number, hex: string, cmyk: string) =>
+      `${p} % tint: ${hex}, CMYK ${cmyk}`,
     applyAs: "Bruk som",
     valor: "Valør",
     variants: "Varme og metning",
@@ -262,6 +283,7 @@ const nb = {
     belowAA: "under AA",
     madeBy: (navn: string) => `Laget av ${navn}`,
     madeWith: "Laget med ColorCraft · farger.borresendigital.no",
+    tintNote: "Stripene til høyre for hver farge er tint på 60, 40 og 20 %.",
     note: "CMYK merket ca. er omtrentlig: regnet ut for vanlig offset på bestrøket papir (Coated FOGRA39), uten fargestyring. Til trykk gjelder verdiene fra trykkeriets profil. Kontrast er etter WCAG 2.2: AA krever 4,5:1 for tekst.",
     filePrefix: "fargekort",
   },
@@ -435,6 +457,20 @@ const en: Messages = {
     highlight: "Highlight",
     highlightHelp:
       "0–2 colors used only in small doses: buttons and single words. Never as a surface.",
+    check: {
+      title: "Check the values from the brand guide",
+      help: "Enter HEX, RGB and CMYK for one color as they appear in the brand guide. HEX and RGB are the same numbers and must match exactly. CMYK depends on the print profile and can only be similar.",
+      rgbOk: "HEX and RGB match.",
+      rgbMismatch: (rgbHex, hex) =>
+        `The RGB numbers give ${rgbHex}, but HEX is ${hex}. One of them is probably wrong.`,
+      cmykLike: (hex) => `CMYK gives about ${hex}. That is a match.`,
+      cmykNear: (hex) =>
+        `CMYK gives about ${hex}. Close, but not quite. That can be the print profile.`,
+      cmykOff: (hex) =>
+        `CMYK gives about ${hex}, which is clearly different. Check the numbers.`,
+      invalid: "Can't read",
+      empty: "Fill in at least two of the fields.",
+    },
     colorName: "Name (optional)",
     colorNamePlaceholder: "For example Warm pipe color",
     add: "Add color",
@@ -479,6 +515,8 @@ const en: Messages = {
     logoInverted: "reversed",
     ok: "passes",
     fail: "below the requirement",
+    tints: "Tints of the surface, with the logo",
+    tintLabel: (p) => `${p}%`,
   },
   values: {
     title: "HEX, RGB and CMYK",
@@ -495,6 +533,10 @@ const en: Messages = {
     logo: (n) => `Logo color ${n}`,
     support: (n) => `Support color ${n}`,
     highlight: (n) => `Highlight ${n}`,
+    tint: "Tint",
+    tintHelp:
+      "The color printed at a lower screen percentage, calculated from CMYK. With CMYK from the brand guide, the tints are most accurate.",
+    tintTitle: (p, hex, cmyk) => `${p}% tint: ${hex}, CMYK ${cmyk}`,
     applyAs: "Use as",
     valor: "Value",
     variants: "Warmth and saturation",
@@ -531,6 +573,8 @@ const en: Messages = {
     belowAA: "below AA",
     madeBy: (name) => `Made by ${name}`,
     madeWith: "Made with ColorCraft · farger.borresendigital.no",
+    tintNote:
+      "The stripes to the right of each color are 60, 40 and 20% tints.",
     note: "CMYK marked approx. is approximate: calculated for standard offset on coated paper (Coated FOGRA39), without color management. For print, use the values from your printer's profile. Contrast follows WCAG 2.2: AA needs 4.5:1 for text.",
     filePrefix: "color-card",
   },

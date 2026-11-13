@@ -199,3 +199,9 @@ export function parseCmyk(s: string): Cmyk | null {
 export function formatCmyk({ c, m, y, k }: Cmyk): string {
   return `${Math.round(c)} ${Math.round(m)} ${Math.round(y)} ${Math.round(k)}`;
 }
+
+/** Hvor ulike to skjermfarger ser ut (OKLab). Under GAMUT_LIMIT ser de like ut. */
+export function colorDistance(a: string, b: string): number | null {
+  if (!parseHex(a) || !parseHex(b)) return null;
+  return avstand(oklab(tilLin(a)), oklab(tilLin(b)));
+}

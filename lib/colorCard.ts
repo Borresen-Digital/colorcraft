@@ -3,6 +3,10 @@ import { formatCmyk, hexToCmyk, parseCmyk, type Cmyk } from "./cmyk";
 import { contrastRatio, formatRatio, parseHex } from "./contrast";
 import { checkPalette } from "./contrastPairs";
 import { localizeRatio, MESSAGES, type Locale } from "./i18n";
+import { tints } from "./tint";
+
+/** Tintene som vises som striper ved hver merkefarge på kortet. */
+export const CARD_TINTS = [60, 40, 20] as const;
 
 /**
  * Fargekort til kunden.
@@ -33,6 +37,8 @@ export interface CardColor {
   outOfGamut: boolean;
   onWhite: number;
   onBlack: number;
+  /** Tint-striper (bare for merkefarger). CMYK når den kommer fra manualen. */
+  tints: { percent: number; hex: string; cmyk?: Cmyk }[];
 }
 
 export interface CardModel {
@@ -49,6 +55,7 @@ function color(
   hex: string,
   manual: string | undefined,
   locale: Locale,
+  medTint = false,
 ): CardColor {
   const k = MESSAGES[locale].card;
   const rgb = parseHex(hex)!;
@@ -66,6 +73,14 @@ function color(
     outOfGamut: !fraManual && omregnet.outOfGamut,
     onWhite: contrastRatio("#FFFFFF", hex) ?? 1,
     onBlack: contrastRatio("#000000", hex) ?? 1,
+    tints: medTint
+      ? tints(hex, fraManual, CARD_TINTS).map((t) => ({
+          percent: t.percent,
+          hex: t.hex,
+          // I PDF-en blir tinten ekte CMYK når manualens tall finnes.
+          cmyk: fraManual ? t.cmyk : undefined,
+        }))
+      : [],
   };
 }
 
@@ -102,14 +117,14 @@ export function buildCardModel(
     sections.push({
       heading: k.logoColors,
       colors: palette.brand.logo.map((c, i) =>
-        color(names[c] || m.tones.logo(i + 1), c, manual[c], locale),
+        color(names[c] || m.tones.logo(i + 1), c, manual[c], locale, true),
       ),
     });
     if (palette.brand.support.length > 0) {
       sections.push({
         heading: k.supportColors,
         colors: palette.brand.support.map((c, i) =>
-          color(names[c] || m.tones.support(i + 1), c, manual[c], locale),
+          color(names[c] || m.tones.support(i + 1), c, manual[c], locale, true),
         ),
       });
     }
@@ -118,7 +133,13 @@ export function buildCardModel(
       sections.push({
         heading: k.highlightColors,
         colors: highlight.map((c, i) =>
-          color(names[c] || m.tones.highlight(i + 1), c, manual[c], locale),
+          color(
+            names[c] || m.tones.highlight(i + 1),
+            c,
+            manual[c],
+            locale,
+            true,
+          ),
         ),
       });
     }
@@ -151,9 +172,11 @@ export function buildCardModel(
     year: "numeric",
   }).format(date);
 
+  const harTint = sections.some((s) => s.colors.some((c) => c.tints.length));
   const footer = [
     ...(maker.trim() ? [k.madeBy(maker.trim().slice(0, 60))] : []),
     k.madeWith,
+    ...(harTint ? [k.tintNote] : []),
     ...wrap(k.note, 120),
   ];
 
@@ -178,7 +201,8 @@ export type Op =
       y: number;
       w: number;
       h: number;
-      fill: Fill;
+      /** Uten fyll tegnes bare kanten. */
+      fill?: Fill;
       stroke?: string;
     }
   | {
@@ -197,6 +221,7 @@ const GRÅ = "#4B5563";
 const LINJE = "#D1D5DB";
 
 const SWATCH = 92;
+const STRIPE = 10;
 const BLOKK = 108;
 
 export function layoutCard(model: CardModel, locale: Locale): Op[] {
@@ -226,13 +251,34 @@ export function layoutCard(model: CardModel, locale: Locale): Op[] {
     seksjon.colors.forEach((c, i) => {
       const x = margin + (i % 2) * (kolonne + 20);
       const top = y + Math.floor(i / 2) * BLOKK;
+      // Med tint blir fargen en blokk med smale striper til høyre, slik
+      // manualer viser det.
+      const hoved = SWATCH - STRIPE * c.tints.length;
+      ops.push({
+        kind: "rect",
+        x,
+        y: top,
+        w: hoved,
+        h: SWATCH,
+        fill: { hex: c.hex, cmyk: c.cmykValue },
+      });
+      c.tints.forEach((t, j) =>
+        ops.push({
+          kind: "rect",
+          x: x + hoved + j * STRIPE,
+          y: top,
+          w: STRIPE,
+          h: SWATCH,
+          fill: { hex: t.hex, cmyk: t.cmyk },
+        }),
+      );
+      // Kanten tegnes til slutt, rundt hele blokken.
       ops.push({
         kind: "rect",
         x,
         y: top,
         w: SWATCH,
         h: SWATCH,
-        fill: { hex: c.hex, cmyk: c.cmykValue },
         stroke: LINJE,
       });
       const tx = x + SWATCH + 12;
