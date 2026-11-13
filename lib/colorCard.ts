@@ -223,6 +223,18 @@ export type Op =
       size: number;
       bold?: boolean;
       color: string;
+      /** Midtstilt om x. Tegneren måler teksten selv. */
+      align?: "center";
+    }
+  | {
+      kind: "circle";
+      cx: number;
+      cy: number;
+      r: number;
+      fill?: string;
+      /** Ring i denne fargen, med bredden `width`. */
+      stroke?: string;
+      width?: number;
     };
 
 const MØRK = "#1F2937";

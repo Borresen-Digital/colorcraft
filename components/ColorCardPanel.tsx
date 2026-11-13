@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { ExtendedColorPalette } from "@/data/palettes";
 import { buildCardModel, cardFilename, layoutCard } from "@/lib/colorCard";
+import { buildInUseModel, layoutInUse } from "@/lib/cardInUse";
 import { useI18n } from "@/components/I18nProvider";
 
 /**
@@ -13,6 +14,7 @@ export function ColorCardPanel({ palette }: { palette: ExtendedColorPalette }) {
   const { locale, t } = useI18n();
   const k = t.card;
   const [maker, setMaker] = useState("");
+  const [medIBruk, setMedIBruk] = useState(true);
   const [status, setStatus] = useState<"" | "working" | "failed">("");
 
   const lastNed = (blob: Blob, navn: string) => {
@@ -28,17 +30,19 @@ export function ColorCardPanel({ palette }: { palette: ExtendedColorPalette }) {
   const lag = async (format: "pdf" | "png") => {
     setStatus("working");
     try {
-      const ops = layoutCard(
-        buildCardModel(palette, locale, maker, new Date()),
-        locale,
-      );
+      const sider = [
+        layoutCard(buildCardModel(palette, locale, maker, new Date()), locale),
+        ...(medIBruk
+          ? [layoutInUse(buildInUseModel(palette, locale), locale)]
+          : []),
+      ];
       const { renderPdf, renderPng } = await import("@/lib/cardRender");
       const blob =
         format === "pdf"
-          ? new Blob([(await renderPdf(ops, palette.name)) as BlobPart], {
+          ? new Blob([(await renderPdf(sider, palette.name)) as BlobPart], {
               type: "application/pdf",
             })
-          : await renderPng(ops);
+          : await renderPng(sider);
       lastNed(blob, cardFilename(palette.name, locale, format));
       setStatus("");
     } catch {
@@ -67,6 +71,15 @@ export function ColorCardPanel({ palette }: { palette: ExtendedColorPalette }) {
         placeholder={k.makerPlaceholder}
         className="w-full rounded border border-line bg-panel px-2 py-1.5 text-sm text-ink focus:border-accent focus:outline-none"
       />
+      <label className="flex items-center gap-2 text-xs text-ink">
+        <input
+          type="checkbox"
+          checked={medIBruk}
+          onChange={(e) => setMedIBruk(e.target.checked)}
+          className="h-4 w-4 accent-[var(--cc-accent)]"
+        />
+        {k.withInUse}
+      </label>
       <div className="flex gap-2">
         <button
           type="button"
