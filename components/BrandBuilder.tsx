@@ -4,6 +4,7 @@ import { useId, useMemo, useState } from "react";
 import type { ExtendedColorPalette } from "@/data/palettes";
 import {
   generateFromBrand,
+  MAX_HIGHLIGHT,
   MAX_LOGO,
   MAX_SUPPORT,
   normalizeHex,
@@ -16,6 +17,8 @@ import { checkPalette } from "@/lib/contrastPairs";
 import { localizeRatio } from "@/lib/i18n";
 import { useI18n } from "@/components/I18nProvider";
 import type { ColorPalette } from "@/types/palette";
+
+type Liste = "logo" | "support" | "highlight";
 
 interface BrandBuilderProps {
   onClose: () => void;
@@ -36,6 +39,8 @@ function ColorRow({
   onRemove,
   removeLabel,
   invalidText,
+  name,
+  onName,
 }: {
   value: string;
   onChange: (v: string) => void;
@@ -44,6 +49,9 @@ function ColorRow({
   onRemove?: () => void;
   removeLabel: string;
   invalidText: string;
+  /** Eget navn på fargen, for eksempel «Varm rørfarge». */
+  name: string;
+  onName: (v: string) => void;
 }) {
   const { t } = useI18n();
   const id = useId();
@@ -125,6 +133,17 @@ function ColorRow({
           {t.values.cmykInvalid}
         </p>
       )}
+      <div className="pl-14">
+        <input
+          type="text"
+          value={name}
+          onChange={(e) => onName(e.target.value)}
+          aria-label={`${t.brand.colorName}: ${value}`}
+          placeholder={t.brand.colorNamePlaceholder}
+          maxLength={40}
+          className="w-full rounded border border-line bg-panel px-2 py-1 text-xs text-ink placeholder:text-subtle focus:border-accent focus:outline-none"
+        />
+      </div>
     </div>
   );
 }
@@ -171,20 +190,28 @@ export function BrandBuilder({ onClose, onCreate }: BrandBuilderProps) {
   const [name, setName] = useState<string>(b.defaultName);
   const [logo, setLogo] = useState<string[]>(["#F2B705"]);
   const [support, setSupport] = useState<string[]>(["#F5EFE0", "#2B2B2B"]);
+  const [highlight, setHighlight] = useState<string[]>([]);
+  // Egne navn per rad, i samme rekkefølge som fargene i hver liste.
+  const [names, setNames] = useState<Record<Liste, string[]>>({
+    logo: [],
+    support: [],
+    highlight: [],
+  });
   // CMYK-tallene fra manualen, etter HEX-en de ga. Brukes på fargekortet.
   const [manualCmyk, setManualCmyk] = useState<Record<string, string>>({});
 
   const alleGyldige =
-    logo.length > 0 && [...logo, ...support].every((c) => normalizeHex(c));
+    logo.length > 0 &&
+    [...logo, ...support, ...highlight].every((c) => normalizeHex(c));
 
   const result: BrandResult | null = useMemo(() => {
     if (!alleGyldige) return null;
     try {
-      return generateFromBrand({ logo, support });
+      return generateFromBrand({ logo, support, highlight });
     } catch {
       return null;
     }
-  }, [logo, support, alleGyldige]);
+  }, [logo, support, highlight, alleGyldige]);
 
   const stryker = result
     ? [result.light, result.dark]
@@ -197,18 +224,37 @@ export function BrandBuilder({ onClose, onCreate }: BrandBuilderProps) {
         .reduce((a, n) => a + n, 0)
     : 0;
 
-  const noteText = (n: BrandNote) =>
-    n.kind === "adjusted-dark"
-      ? b.noteDark(t.roles[n.role], n.from, n.to)
-      : b.noteLight(
+  const noteText = (n: BrandNote) => {
+    switch (n.kind) {
+      case "adjusted-dark":
+        return b.noteDark(t.roles[n.role], n.from, n.to);
+      case "logo-background":
+        return b.noteLogoBackground(n.from, n.to);
+      case "low-contrast-light":
+        return b.noteLight(
           t.roles[n.role],
           n.color,
           localizeRatio(formatRatio(n.ratio), locale),
         );
+    }
+  };
 
-  const oppdater =
-    (liste: string[], sett: (v: string[]) => void) => (i: number, v: string) =>
-      sett(liste.map((x, j) => (j === i ? v : x)));
+  const lister: Record<Liste, [string[], (v: string[]) => void]> = {
+    logo: [logo, setLogo],
+    support: [support, setSupport],
+    highlight: [highlight, setHighlight],
+  };
+  const settNavn = (l: Liste, i: number, v: string) =>
+    setNames((n) => {
+      const ny = [...n[l]];
+      ny[i] = v;
+      return { ...n, [l]: ny };
+    });
+  const fjern = (l: Liste, i: number) => {
+    const [liste, sett] = lister[l];
+    sett(liste.filter((_, j) => j !== i));
+    setNames((n) => ({ ...n, [l]: n[l].filter((_, j) => j !== i) }));
+  };
 
   const handleCreate = () => {
     if (!result) return;
@@ -226,54 +272,64 @@ export function BrandBuilder({ onClose, onCreate }: BrandBuilderProps) {
       brand: {
         logo: logo.map((c) => normalizeHex(c)!),
         support: support.map((c) => normalizeHex(c)!),
+        highlight: highlight.map((c) => normalizeHex(c)!),
         // Bare CMYK for farger som fortsatt er den HEX-en tallene ga.
         cmyk: Object.fromEntries(
-          [...logo, ...support]
+          [...logo, ...support, ...highlight]
             .map((c) => normalizeHex(c)!)
             .filter((h) => manualCmyk[h])
             .map((h) => [h, manualCmyk[h]]),
+        ),
+        names: Object.fromEntries(
+          (["logo", "support", "highlight"] as const).flatMap((l) =>
+            lister[l][0]
+              .map((c, i) => [normalizeHex(c)!, names[l][i]?.trim() ?? ""])
+              .filter(([, n]) => n),
+          ),
         ),
       },
     });
   };
 
   const seksjon = (
+    l: Liste,
     tittel: string,
     hjelp: string,
-    liste: string[],
-    sett: (v: string[]) => void,
     maks: number,
     min: number,
-  ) => (
-    <fieldset className="min-w-0 space-y-2">
-      <legend className="text-sm font-semibold text-ink">{tittel}</legend>
-      <p className="text-xs text-subtle">{hjelp}</p>
-      {liste.map((c, i) => (
-        <ColorRow
-          key={i}
-          value={c}
-          onChange={(v) => oppdater(liste, sett)(i, v)}
-          onCmyk={(hex, cmyk) => setManualCmyk((m) => ({ ...m, [hex]: cmyk }))}
-          onRemove={
-            liste.length > min
-              ? () => sett(liste.filter((_, j) => j !== i))
-              : undefined
-          }
-          removeLabel={b.remove(i + 1)}
-          invalidText={b.invalid}
-        />
-      ))}
-      {liste.length < maks && (
-        <button
-          type="button"
-          onClick={() => sett([...liste, "#888888"])}
-          className="text-sm font-medium text-accent underline-offset-4 hover:underline"
-        >
-          + {b.add}
-        </button>
-      )}
-    </fieldset>
-  );
+  ) => {
+    const [liste, sett] = lister[l];
+    return (
+      <fieldset className="min-w-0 space-y-2">
+        <legend className="text-sm font-semibold text-ink">{tittel}</legend>
+        <p className="text-xs text-subtle">{hjelp}</p>
+        {liste.map((c, i) => (
+          <ColorRow
+            key={i}
+            value={c}
+            onChange={(v) => sett(liste.map((x, j) => (j === i ? v : x)))}
+            onCmyk={(hex, cmyk) =>
+              setManualCmyk((m) => ({ ...m, [hex]: cmyk }))
+            }
+            onRemove={liste.length > min ? () => fjern(l, i) : undefined}
+            removeLabel={b.remove(i + 1)}
+            invalidText={b.invalid}
+            name={names[l][i] ?? ""}
+            onName={(v) => settNavn(l, i, v)}
+          />
+        ))}
+        {liste.length < maks && (
+          <button
+            type="button"
+            onClick={() => sett([...liste, "#888888"])}
+            className="text-sm font-medium text-accent underline-offset-4 hover:underline"
+          >
+            + {b.add}
+          </button>
+        )}
+      </fieldset>
+    );
+  };
 
   return (
     <div
@@ -323,13 +379,13 @@ export function BrandBuilder({ onClose, onCreate }: BrandBuilderProps) {
           </div>
 
           <div className="grid gap-5 sm:grid-cols-2">
-            {seksjon(b.logo, b.logoHelp, logo, setLogo, MAX_LOGO, 1)}
+            {seksjon("logo", b.logo, b.logoHelp, MAX_LOGO, 1)}
+            {seksjon("support", b.support, b.supportHelp, MAX_SUPPORT, 0)}
             {seksjon(
-              b.support,
-              b.supportHelp,
-              support,
-              setSupport,
-              MAX_SUPPORT,
+              "highlight",
+              b.highlight,
+              b.highlightHelp,
+              MAX_HIGHLIGHT,
               0,
             )}
           </div>

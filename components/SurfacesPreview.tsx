@@ -61,26 +61,42 @@ function Badge({
   );
 }
 
-/** «Støttefarge 2», «Logofargen som flate», eller rollen («Sekundær»). */
-function surfaceTitle(s: Surface, t: ReturnType<typeof useI18n>["t"]): string {
+/**
+ * Eget navn fra manualen, ellers «Støttefarge 2», «Logofargen som flate»,
+ * eller rollen («Sekundær»).
+ */
+function surfaceTitle(
+  s: Surface,
+  t: ReturnType<typeof useI18n>["t"],
+  names?: Record<string, string>,
+): string {
   if (s.kind === "logo") return t.surfaces.logoSurface;
-  return s.role ? t.roles[s.role] : t.surfaces.support(s.index);
+  if (s.role) return t.roles[s.role];
+  return names?.[s.color] || t.surfaces.support(s.index);
 }
 
 function SurfaceSection({
   s,
   palette,
   name,
+  brand,
 }: {
   s: Surface;
   palette: ColorPalette;
   name: string;
+  brand?: ExtendedColorPalette["brand"];
 }) {
   const { t } = useI18n();
   const f = t.surfaces;
-  const tittel = surfaceTitle(s, t);
-  // Markert tekst i logofargen. På selve logofargen markeres det i negativ.
-  const markBg = s.kind === "logo" ? s.logo : palette.colors.primary;
+  const tittel = surfaceTitle(s, t, brand?.names);
+  // Markert tekst i highlightfargen (aksenten) hvis manualen har en, ellers i
+  // logofargen. På selve logofargen markeres det da i negativ.
+  const harHighlight = (brand?.highlight?.length ?? 0) > 0;
+  const markBg = harHighlight
+    ? palette.colors.accent
+    : s.kind === "logo"
+      ? s.logo
+      : palette.colors.primary;
   const markText = textOn(palette, markBg);
   return (
     <section
@@ -106,7 +122,7 @@ function SurfaceSection({
         >
           {f.highlight}
         </mark>{" "}
-        {f.bodyEnd}
+        {harHighlight ? f.bodyEndHighlight : f.bodyEnd}
       </p>
       <div className="flex flex-wrap gap-2 pt-1">
         <Badge label={f.text} ratio={s.textRatio} min={TEXT_MIN} />
@@ -153,6 +169,7 @@ export function SurfacesPreview({ palette, brand }: SurfacesPreviewProps) {
           s={s}
           palette={palette}
           name={navn}
+          brand={brand}
         />
       ))}
 
@@ -166,7 +183,7 @@ export function SurfacesPreview({ palette, brand }: SurfacesPreviewProps) {
               style={{ backgroundColor: s.color, color: s.text }}
             >
               <p className="text-xs font-semibold uppercase tracking-wide opacity-80">
-                {surfaceTitle(s, t)}
+                {surfaceTitle(s, t, brand?.names)}
               </p>
               <p className="text-sm">{f.infobox}</p>
               <Badge label={f.text} ratio={s.textRatio} min={TEXT_MIN} />

@@ -168,3 +168,44 @@ describe("CMYK i PDF-en", () => {
     expect(innhold.join(" ")).toMatch(/0 0\.25 1 0 k/);
   });
 });
+
+describe("highlight og egne navn", () => {
+  const b = {
+    logo: ["#002245"],
+    support: ["#C1B694"],
+    highlight: ["#59A8BD"],
+    names: { "#002245": "Dark blue", "#C1B694": "Varm rørfarge" },
+  };
+  const p: ExtendedColorPalette = {
+    id: "custom-2",
+    name: "Erling Olsen",
+    description: "",
+    colors: generateFromBrand(b).light,
+    brand: b,
+  };
+
+  it("har en egen seksjon for highlight", () => {
+    const m = buildCardModel(p, "nb", "", dato);
+    expect(m.sections.map((s) => s.heading)).toEqual([
+      "Logofarger",
+      "Støttefarger",
+      "Highlight",
+    ]);
+    expect(m.sections[2].colors[0].hex).toBe("#59A8BD");
+  });
+
+  it("bruker egne navn, og standardnavn der det mangler", () => {
+    const m = buildCardModel(p, "nb", "", dato);
+    expect(m.sections[0].colors[0].label).toBe("Dark blue");
+    expect(m.sections[1].colors[0].label).toBe("Varm rørfarge");
+    expect(m.sections[2].colors[0].label).toBe("Highlight 1");
+  });
+
+  it("lager en PDF med highlight-seksjonen", async () => {
+    const bytes = await renderPdf(
+      layoutCard(buildCardModel(p, "nb", "", dato), "nb"),
+      p.name,
+    );
+    expect(bytes.length).toBeGreaterThan(1000);
+  });
+});

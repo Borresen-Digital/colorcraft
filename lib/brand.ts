@@ -8,6 +8,7 @@ import {
   toHex,
   type Hsl,
 } from "./contrast";
+import { hexToOklch, hueDistance, variants } from "./tones";
 
 /**
  * Palett fra en profilmanual.
@@ -20,6 +21,12 @@ import {
  * Merkefargene endres ikke i lys modus. Det er resten (tekst, muted, kanter,
  * bakgrunn og statusfarger) som tilpasses, slik at kontrasten består. I mørk
  * modus kan en logofarge måtte lysnes for å synes. Det står da i `notes`.
+ *
+ * Highlight er en egen rolle: en farge som bare brukes i små doser (knapper,
+ * enkeltord), aldri som flate. Den blir aksenten.
+ *
+ * Generatoren finner ikke på nye farger. Aksent, varm og kald hentes fra
+ * fargene i manualen, eller er en valør eller variant av dem.
  */
 
 type Colors = ColorPalette["colors"];
@@ -30,11 +37,15 @@ export interface BrandInput {
   logo: string[];
   /** 0–4 støttefarger, flatefarger fra manualen. */
   support: string[];
+  /** 0–2 highlightfarger: knapper og enkeltord, aldri flater. */
+  highlight?: string[];
 }
 
 export type BrandNote =
   | { kind: "adjusted-dark"; role: Role; from: string; to: string }
-  | { kind: "low-contrast-light"; role: Role; color: string; ratio: number };
+  | { kind: "low-contrast-light"; role: Role; color: string; ratio: number }
+  /** Logofargen er så mørk at den blir bakgrunnen i mørk modus. */
+  | { kind: "logo-background"; role: Role; from: string; to: string };
 
 export interface BrandResult {
   light: Colors;
@@ -44,6 +55,7 @@ export interface BrandResult {
 
 export const MAX_LOGO = 3;
 export const MAX_SUPPORT = 4;
+export const MAX_HIGHLIGHT = 2;
 
 /** Normaliserer til #RRGGBB, eller null hvis det ikke er en farge. */
 export function normalizeHex(s: string): string | null {
@@ -110,23 +122,33 @@ function textOn(base: string, against: string[], targets: number[]): string {
   return base;
 }
 
-/** Fargen blant kandidatene med fargetone nærmest `hue`, blant de mettede. */
-function nearestHue(candidates: string[], hue: number): string | undefined {
-  // HSL-metning er høy også for svært lyse og svært mørke farger (beige har
-  // over 0,5). En farge regnes som mettet bare med tydelig farge i midten av
-  // lysskalaen.
-  const mettede = candidates.filter((c) => {
-    const x = hsl(c);
-    return x.s > 0.35 && x.l > 0.2 && x.l < 0.8;
+/**
+ * Varm og kald hentes fra merkefargene. En farge regnes som varm med
+ * fargetone mellom rødt og gult (OKLCH 0–120°), og som kald mellom turkis og
+ * blått (170–290°). Den må ha litt farge (chroma), så grått teller ikke.
+ * Farger som alt har en rolle (primær, aksent) brukes bare hvis ingen andre
+ * passer, og blant resten vinner den mest fargerike. Finnes ingen, blir det
+ * en varmere eller kaldere variant av hovedfargen, ikke en fremmed farge.
+ */
+const VARM = { hue: 60, maxDistance: 60, minChroma: 0.03 };
+const KALD = { hue: 230, maxDistance: 60, minChroma: 0.015 };
+
+export function pickTemperature(
+  candidates: string[],
+  taken: string[],
+  kind: "warm" | "cool",
+): string | undefined {
+  const k = kind === "warm" ? VARM : KALD;
+  const treff = candidates.filter((c) => {
+    const o = hexToOklch(c);
+    return (
+      !!o && o.c >= k.minChroma && hueDistance(o.h, k.hue) <= k.maxDistance
+    );
   });
-  const avstand = (c: string) => {
-    const d = Math.abs(hsl(c).h - hue);
-    return Math.min(d, 1 - d);
-  };
-  // Bare farger som faktisk ligger nær fargetonen (innenfor 60°).
-  const nære = mettede.filter((c) => avstand(c) <= 60 / 360);
-  if (nære.length === 0) return undefined;
-  return nære.reduce((a, b) => (avstand(b) < avstand(a) ? b : a));
+  const ledige = treff.filter((c) => !taken.includes(c));
+  const liste = ledige.length > 0 ? ledige : treff;
+  if (liste.length === 0) return undefined;
+  return liste.reduce((a, b) => (hexToOklch(b)!.c > hexToOklch(a)!.c ? b : a));
 }
 
 const SEMANTIC_LIGHT = {
@@ -148,13 +170,19 @@ export function generateFromBrand(input: BrandInput): BrandResult {
   const support = input.support
     .map(normalizeHex)
     .filter((c): c is string => !!c);
+  const highlight = (input.highlight ?? [])
+    .map(normalizeHex)
+    .filter((c): c is string => !!c);
   if (logo.length === 0) throw new Error("Minst én logofarge trengs.");
 
   const notes: BrandNote[] = [];
   const hoved = logo[0];
   const h0 = hsl(hoved);
   const nøytralMetning = Math.min(h0.s, 0.35);
-  const alle = [...logo, ...support];
+  // Rekkefølgen avgjør ved likt: highlight, støttefarger, så logofargene.
+  const alle = [
+    ...new Set([...highlight, ...support, ...logo.slice(1), hoved]),
+  ];
 
   // ---------- Lys ----------
   const secondary = support[0] ?? mix(hoved, "#FFFFFF", 0.85);
@@ -176,25 +204,36 @@ export function generateFromBrand(input: BrandInput): BrandResult {
     flater,
     [7, 4.5],
   );
-  // Uten en andre logofarge blir aksenten en annen valør av hovedfargen, og
-  // den skal bære knappetekst. En mellomtone gir verken hvit eller mørk tekst
-  // nok kontrast, så valøren flyttes til en av dem består: mørkere for hvit
-  // tekst, eller lysere for mørk tekst når hovedfargen alt er veldig mørk.
-  const accent =
-    logo[1] ??
-    (h0.l > 0.3
+  // Aksenten er highlightfargen, ellers logofarge 2. Uten noen av dem er
+  // det logofargen selv (den brukes ofte til highlight), så lenge den synes
+  // mot bakgrunnen. Er logofargen for lys til det, blir aksenten en annen
+  // valør av den, og den skal bære knappetekst. En mellomtone gir verken
+  // hvit eller mørk tekst nok kontrast, så valøren flyttes til en av dem
+  // består: mørkere for hvit tekst, eller lysere for mørk tekst når
+  // hovedfargen alt er veldig mørk.
+  const avledet = () =>
+    h0.l > 0.3
       ? (ensureContrast(fromHsl(h0.h, h0.s, h0.l - 0.15), ["#FFFFFF"], 4.5) ??
         fromHsl(h0.h, h0.s, h0.l - 0.15))
       : (ensureContrast(fromHsl(h0.h, h0.s, h0.l + 0.15), [foreground], 4.5) ??
-        fromHsl(h0.h, h0.s, h0.l + 0.15)));
+        fromHsl(h0.h, h0.s, h0.l + 0.15));
+  const accent =
+    highlight[0] ??
+    logo[1] ??
+    (flater.every((f) => (contrastRatio(hoved, f) ?? 0) >= 3)
+      ? hoved
+      : avledet());
   const muted = textOn(
     fromHsl(h0.h, Math.min(h0.s, 0.25), 0.42),
     flater,
     [4.5],
   );
   const border = mix(foreground, background, 0.82);
-  const warm = nearestHue(alle, 30 / 360) ?? "#D97706";
-  const cool = nearestHue(alle, 200 / 360) ?? "#0891B2";
+  const tatt = [hoved, accent];
+  const warm =
+    pickTemperature(alle, tatt, "warm") ?? variants(hoved)?.warmer ?? hoved;
+  const cool =
+    pickTemperature(alle, tatt, "cool") ?? variants(hoved)?.cooler ?? hoved;
 
   const light: Colors = {
     primary: hoved,
@@ -222,8 +261,13 @@ export function generateFromBrand(input: BrandInput): BrandResult {
   };
 
   // Logofargen endres ikke i lys modus, men det er verdt å vite om den er
-  // for lys til tekst og bør brukes som flate eller grafikk.
-  for (const role of ["primary", "accent"] as const) {
+  // for lys til tekst og bør brukes som flate eller grafikk. En
+  // highlightfarge er laget for knapper og markering, ikke tekst, så den får
+  // ingen slik merknad.
+  const roller = highlight[0]
+    ? (["primary"] as const)
+    : (["primary", "accent"] as const);
+  for (const role of roller) {
     const r = contrastRatio(light[role], background) ?? 0;
     if (r < 3) {
       notes.push({
@@ -236,13 +280,31 @@ export function generateFromBrand(input: BrandInput): BrandResult {
   }
 
   // ---------- Mørk ----------
-  // Har manualen en mørk støttefarge, er den bakgrunnen i mørk modus. Ellers
-  // blir bakgrunnen nesten svart med en tone av hovedfargen.
+  // Har manualen en mørk støttefarge, er den bakgrunnen i mørk modus. Er
+  // logofargen selv mørk (som marineblå), blir den bakgrunnen, slik den er
+  // flaten på en rollup eller annonse, og en lys merkefarge tar plassen som
+  // primær. Ellers blir bakgrunnen nesten svart med en tone av hovedfargen.
   const mørkeste = [...support].sort((a, b) => hsl(a).l - hsl(b).l)[0];
+  const lysPåLogo = (() => {
+    if (h0.l > 0.2) return undefined;
+    const flate = [hoved, mix(hoved, "#FFFFFF", 0.06)];
+    const ok = (c: string) =>
+      flate.every((f) => (contrastRatio(c, f) ?? 0) >= 3);
+    // Highlight først, siden den er laget for å synes. Ellers den som står
+    // best frem.
+    if (highlight[0] && ok(highlight[0])) return highlight[0];
+    const kandidater = [...highlight, ...support, ...logo.slice(1)].filter(ok);
+    if (kandidater.length === 0) return undefined;
+    return kandidater.reduce((a, b) =>
+      (contrastRatio(b, hoved) ?? 0) > (contrastRatio(a, hoved) ?? 0) ? b : a,
+    );
+  })();
   const dBg =
     mørkeste && hsl(mørkeste).l <= 0.2
       ? mørkeste
-      : fromHsl(h0.h, nøytralMetning, 0.08);
+      : lysPåLogo
+        ? hoved
+        : fromHsl(h0.h, nøytralMetning, 0.08);
   const dSurface = mix(dBg, "#FFFFFF", 0.06);
   const dFlater = [dBg, dSurface];
 
@@ -259,15 +321,35 @@ export function generateFromBrand(input: BrandInput): BrandResult {
     return ny;
   };
 
+  let dPrimary: string;
+  if (dBg === hoved && lysPåLogo) {
+    dPrimary = lysPåLogo;
+    notes.push({
+      kind: "logo-background",
+      role: "primary",
+      from: hoved,
+      to: lysPåLogo,
+    });
+  } else {
+    dPrimary = synlig("primary", hoved);
+  }
+  let dAccent: string;
+  if (highlight[0] || logo[1]) {
+    dAccent = synlig("accent", accent);
+  } else if (accent === hoved) {
+    // Aksenten var logofargen, så den følger logofargen i mørk modus.
+    dAccent = dPrimary;
+  } else {
+    // En avledet aksent er ikke en merkefarge, så den kan løftes helt til
+    // mørk knappetekst består.
+    dAccent = ensureContrast(accent, dFlater, 4.5) ?? synlig("accent", accent);
+  }
+
   const sHue = support[0] ? hsl(support[0]) : h0;
   const dark: Colors = {
-    primary: synlig("primary", hoved),
+    primary: dPrimary,
     secondary: fromHsl(sHue.h, sHue.s * 0.6, 0.2),
-    // En ekte logofarge lysnes bare til den synes (3:1). En avledet aksent er
-    // ikke en merkefarge, så den kan løftes helt til mørk knappetekst består.
-    accent: logo[1]
-      ? synlig("accent", accent)
-      : (ensureContrast(accent, dFlater, 4.5) ?? synlig("accent", accent)),
+    accent: dAccent,
     warm: ensureContrast(warm, [dBg], 3) ?? warm,
     cool: ensureContrast(cool, [dBg], 3) ?? cool,
     background: dBg,
