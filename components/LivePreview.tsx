@@ -10,6 +10,7 @@ import { textOn } from "@/lib/contrastPairs";
 import { cn } from "@/lib/utils";
 import { SurfacesPreview } from "@/components/SurfacesPreview";
 import { TonesPreview } from "@/components/TonesPreview";
+import { InUsePreview } from "@/components/InUsePreview";
 import { useI18n } from "@/components/I18nProvider";
 import { ColorPalette } from "@/types/palette";
 
@@ -21,12 +22,13 @@ interface LivePreviewProps {
   onApply?: (role: keyof ColorPalette["colors"], color: string) => void;
 }
 
-type Tab = "components" | "surfaces" | "tones";
+type Tab = "components" | "surfaces" | "tones" | "inUse";
 
 /**
- * Forhåndsvisningen har tre faner: komponenter (knapper, kort, meny), flater
- * (støttefargene som heldekkende seksjoner og infobokser), og valør og
- * varme (skalaer og varianter av merkefargene).
+ * Forhåndsvisningen har fire faner: komponenter (knapper, kort, meny), flater
+ * (støttefargene som heldekkende seksjoner og infobokser), valør og varme
+ * (skalaer og varianter av merkefargene), og i bruk (trykksaker og
+ * presentasjon).
  */
 export function LivePreview({ palette, brand, onApply }: LivePreviewProps) {
   const { t } = useI18n();
@@ -35,6 +37,7 @@ export function LivePreview({ palette, brand, onApply }: LivePreviewProps) {
     ["components", t.surfaces.tabComponents],
     ["surfaces", t.surfaces.tabSurfaces],
     ["tones", t.tones.tab],
+    ["inUse", t.inUse.tab],
   ];
   return (
     <div className="flex h-full flex-col">
@@ -76,6 +79,7 @@ export function LivePreview({ palette, brand, onApply }: LivePreviewProps) {
         {tab === "tones" && (
           <TonesPreview palette={palette} brand={brand} onApply={onApply} />
         )}
+        {tab === "inUse" && <InUsePreview palette={palette} brand={brand} />}
       </div>
     </div>
   );
