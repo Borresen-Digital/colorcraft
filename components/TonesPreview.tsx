@@ -28,16 +28,23 @@ function sourcesFor(
 ): Source[] {
   if (brand && brand.logo.length > 0) {
     const logoRoller: Role[] = ["primary", "accent", "warm"];
+    const navn = brand.names ?? {};
     return [
       ...brand.logo.map((c, i) => ({
         key: `logo-${i}`,
-        label: t.tones.logo(i + 1),
+        label: navn[c] || t.tones.logo(i + 1),
         color: c,
         role: logoRoller[i] ?? "accent",
       })),
+      ...(brand.highlight ?? []).map((c, i) => ({
+        key: `highlight-${i}`,
+        label: navn[c] || t.tones.highlight(i + 1),
+        color: c,
+        role: "accent" as Role,
+      })),
       ...brand.support.map((c, i) => ({
         key: `support-${i}`,
-        label: t.tones.support(i + 1),
+        label: navn[c] || t.tones.support(i + 1),
         color: c,
         role: (i === 0 ? "secondary" : "surface") as Role,
       })),

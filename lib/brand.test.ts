@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { generateFromBrand, mix, normalizeHex, ensureContrast } from "./brand";
 import { contrastRatio } from "./contrast";
 import { checkPalette } from "./contrastPairs";
+import { variants } from "./tones";
 
 const pal = (colors: ReturnType<typeof generateFromBrand>["light"]) => ({
   id: "x",
@@ -97,7 +98,9 @@ describe("generateFromBrand", () => {
         if (r.dark.primary !== r.light.primary) {
           expect(
             r.notes.some(
-              (n) => n.kind === "adjusted-dark" && n.role === "primary",
+              (n) =>
+                (n.kind === "adjusted-dark" || n.kind === "logo-background") &&
+                n.role === "primary",
             ),
           ).toBe(true);
         }
@@ -180,5 +183,124 @@ describe("bredde: 7 logoer × 5 sett støttefarger", () => {
         }
       }
     }
+  });
+});
+
+// Mariannes testpalett (Erling Olsen) og Honeybeedesign, 12.11.2026.
+const ERLING = {
+  logo: ["#002245"],
+  support: ["#C1B694", "#9099A3", "#59A8BD"],
+};
+const HONEYBEE = {
+  logo: ["#C8AD78"],
+  support: ["#EFE6CA"],
+  highlight: ["#7E1961"],
+};
+
+describe("ingen fremmede farger", () => {
+  it("henter varm og kald fra merkefargene", () => {
+    const r = generateFromBrand(ERLING);
+    expect(r.light.warm).toBe("#C1B694");
+    expect(r.light.cool).toBe("#59A8BD");
+  });
+
+  it("bruker logofargen som aksent når den synes", () => {
+    const r = generateFromBrand(ERLING);
+    expect(r.light.accent).toBe("#002245");
+  });
+
+  it("lager varm og kald av hovedfargen når ingen merkefarge passer", () => {
+    const r = generateFromBrand({ logo: ["#C8AD78"], support: [] });
+    const v = variants("#C8AD78")!;
+    // Gull er selv varm, så den brukes. Kald finnes ikke, så den er en
+    // kaldere variant av gullet, ikke en standard turkis.
+    expect(r.light.warm).toBe("#C8AD78");
+    expect(r.light.cool).toBe(v.cooler);
+  });
+
+  it("alle farger i varm, kald og aksent kommer fra merket (eller er avledet av det)", () => {
+    const alle: { logo: string[]; support: string[]; highlight?: string[] }[] =
+      [ERLING, HONEYBEE, ...MERKER];
+    for (const m of alle) {
+      const r = generateFromBrand(m);
+      const egne = [...m.logo, ...m.support, ...(m.highlight ?? [])].map((c) =>
+        normalizeHex(c)!,
+      );
+      const v = variants(normalizeHex(m.logo[0])!)!;
+      for (const rolle of ["warm", "cool"] as const) {
+        expect([...egne, v.warmer, v.cooler]).toContain(r.light[rolle]);
+      }
+    }
+  });
+});
+
+describe("highlight", () => {
+  it("blir aksenten og beholdes i lys modus", () => {
+    const r = generateFromBrand(HONEYBEE);
+    expect(r.light.accent).toBe("#7E1961");
+    expect(r.light.primary).toBe("#C8AD78");
+    expect(r.light.secondary).toBe("#EFE6CA");
+  });
+
+  it("gir ingen «for lys til tekst»-merknad for selve highlightfargen", () => {
+    const r = generateFromBrand({
+      logo: ["#002245"],
+      support: [],
+      highlight: ["#C1B694"],
+    });
+    expect(r.light.accent).toBe("#C1B694");
+    expect(
+      r.notes.some(
+        (n) => n.kind === "low-contrast-light" && n.role === "accent",
+      ),
+    ).toBe(false);
+  });
+
+  it("knappeteksten består på highlightfargen i begge moduser", () => {
+    const r = generateFromBrand(HONEYBEE);
+    for (const c of [r.light, r.dark]) {
+      const knapp = checkPalette(pal(c)).find(
+        (x) => x.pair.id === "button-accent",
+      )!;
+      expect(knapp.ratio!).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+});
+
+describe("mørk logofarge blir bakgrunnen i mørk modus", () => {
+  it("som på rollupen: marineblå flate, beige oppå", () => {
+    const r = generateFromBrand(ERLING);
+    expect(r.dark.background).toBe("#002245");
+    expect(r.dark.primary).toBe("#C1B694");
+    expect(r.notes).toContainEqual({
+      kind: "logo-background",
+      role: "primary",
+      from: "#002245",
+      to: "#C1B694",
+    });
+    const stryk = checkPalette(pal(r.dark)).filter((x) => x.level === "fail");
+    expect(stryk).toEqual([]);
+  });
+
+  it("velger highlight foran støttefargene når den synes", () => {
+    const r = generateFromBrand({
+      logo: ["#002245"],
+      support: ["#EEF4ED"],
+      highlight: ["#C1B694"],
+    });
+    expect(r.dark.primary).toBe("#C1B694");
+  });
+
+  it("en mørk støttefarge går foran logofargen som bakgrunn", () => {
+    const r = generateFromBrand({
+      logo: ["#002245"],
+      support: ["#F5EFE0", "#1A1A1A"],
+    });
+    expect(r.dark.background).toBe("#1A1A1A");
+  });
+
+  it("uten noen lys merkefarge å legge oppå beholdes den gamle løsningen", () => {
+    const r = generateFromBrand({ logo: ["#002245"], support: [] });
+    expect(r.dark.background).not.toBe("#002245");
   });
 });

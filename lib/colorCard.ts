@@ -95,20 +95,30 @@ export function buildCardModel(
   const m = MESSAGES[locale];
   const k = m.card;
   const manual = palette.brand?.cmyk ?? {};
+  const names = palette.brand?.names ?? {};
   const sections: CardModel["sections"] = [];
 
   if (palette.brand && palette.brand.logo.length > 0) {
     sections.push({
       heading: k.logoColors,
       colors: palette.brand.logo.map((c, i) =>
-        color(m.tones.logo(i + 1), c, manual[c], locale),
+        color(names[c] || m.tones.logo(i + 1), c, manual[c], locale),
       ),
     });
     if (palette.brand.support.length > 0) {
       sections.push({
         heading: k.supportColors,
         colors: palette.brand.support.map((c, i) =>
-          color(m.tones.support(i + 1), c, manual[c], locale),
+          color(names[c] || m.tones.support(i + 1), c, manual[c], locale),
+        ),
+      });
+    }
+    const highlight = palette.brand.highlight ?? [];
+    if (highlight.length > 0) {
+      sections.push({
+        heading: k.highlightColors,
+        colors: highlight.map((c, i) =>
+          color(names[c] || m.tones.highlight(i + 1), c, manual[c], locale),
         ),
       });
     }

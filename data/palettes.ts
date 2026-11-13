@@ -6,8 +6,12 @@ export interface ExtendedColorPalette extends ColorPalette {
   brand?: {
     logo: string[];
     support: string[];
+    /** Highlightfarger: knapper og enkeltord, aldri flater. */
+    highlight?: string[];
     /** CMYK skrevet inn fra manualen, etter HEX. Brukes på fargekortet. */
     cmyk?: Record<string, string>;
+    /** Egne navn på fargene (for eksempel «Varm rørfarge»), etter HEX. */
+    names?: Record<string, string>;
   };
 }
 
