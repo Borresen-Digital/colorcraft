@@ -8,6 +8,7 @@ import {
   layoutCard,
   PAGE,
   wrap,
+  type Op,
 } from "./colorCard";
 
 const brand = {
@@ -79,12 +80,15 @@ describe("buildCardModel", () => {
   });
 });
 
+/** Firkanter og tekst (side 1 har ingen sirkler). */
+const uten = (ops: Op[]) =>
+  ops.filter((o): o is Exclude<Op, { kind: "circle" }> => o.kind !== "circle");
+
 describe("layoutCard", () => {
   it("holder alt innenfor A4 og margene", () => {
     for (const p of [merke, colorPalettes[0]]) {
-      for (const op of layoutCard(
-        buildCardModel(p, "nb", "Honeybee", dato),
-        "nb",
+      for (const op of uten(
+        layoutCard(buildCardModel(p, "nb", "Honeybee", dato), "nb"),
       )) {
         expect(op.x).toBeGreaterThanOrEqual(PAGE.margin - 0.01);
         expect(op.y).toBeGreaterThanOrEqual(0);
@@ -106,7 +110,9 @@ describe("layoutCard", () => {
         support: ["#F5EFE0", "#2B2B2B", "#8DA9C4", "#EEF4ED"],
       },
     };
-    const ops = layoutCard(buildCardModel(stor, "nb", "Honeybee", dato), "nb");
+    const ops = uten(
+      layoutCard(buildCardModel(stor, "nb", "Honeybee", dato), "nb"),
+    );
     const strek = ops.find((o) => o.kind === "rect" && o.h < 1)!;
     const innhold = ops.filter((o) => o !== strek && o.y < strek.y);
     const nederst = Math.max(
@@ -120,7 +126,7 @@ describe("renderPdf", () => {
   it("lager en PDF, også med tegn standardfonten ikke kan skrive", async () => {
     const p = { ...merke, name: "Bøkeskogen 🐝 mørk" };
     const bytes = await renderPdf(
-      layoutCard(buildCardModel(p, "nb", "Æsj Øl Å", dato), "nb"),
+      [layoutCard(buildCardModel(p, "nb", "Æsj Øl Å", dato), "nb")],
       p.name,
     );
     expect(new TextDecoder().decode(bytes.slice(0, 5))).toBe("%PDF-");
@@ -145,7 +151,7 @@ describe("CMYK i PDF-en", () => {
     const { inflateSync } = await import("node:zlib");
     const bytes = Buffer.from(
       await renderPdf(
-        layoutCard(buildCardModel(merke, "nb", "", dato), "nb"),
+        [layoutCard(buildCardModel(merke, "nb", "", dato), "nb")],
         "x",
       ),
     );
@@ -203,7 +209,7 @@ describe("highlight og egne navn", () => {
 
   it("lager en PDF med highlight-seksjonen", async () => {
     const bytes = await renderPdf(
-      layoutCard(buildCardModel(p, "nb", "", dato), "nb"),
+      [layoutCard(buildCardModel(p, "nb", "", dato), "nb")],
       p.name,
     );
     expect(bytes.length).toBeGreaterThan(1000);
