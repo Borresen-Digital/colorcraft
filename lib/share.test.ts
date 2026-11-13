@@ -122,3 +122,58 @@ describe("ugyldig innhold", () => {
     expect(s.kind === "custom" && s.palette.name).toBe("Shared palette");
   });
 });
+
+describe("palett fra profilmanualen", () => {
+  const merke: ExtendedColorPalette = {
+    ...egen,
+    brand: {
+      logo: ["#6B8E23"],
+      support: ["#F5F5DC", "#2F4F4F"],
+      highlight: ["#DAA520"],
+      internal: ["#E07A5F", "#3D405B"],
+      direction: "exclusive",
+      names: { "#6B8E23": "Gressgrønn", "#DAA520": "Gull | glans" },
+      cmyk: { "#6B8E23": "45, 0, 100, 30", "#E07A5F": "tull" },
+    },
+  };
+
+  it("tar med merkefargene, highlight, intern profil, navn og CMYK", () => {
+    const s = decodeShare(encodeShare(merke, false))!;
+    expect(s.kind).toBe("custom");
+    if (s.kind !== "custom") return;
+    expect(s.palette.brand).toEqual({
+      logo: ["#6B8E23"],
+      support: ["#F5F5DC", "#2F4F4F"],
+      highlight: ["#DAA520"],
+      internal: ["#E07A5F", "#3D405B"],
+      direction: "exclusive",
+      names: { "#6B8E23": "Gressgrønn", "#DAA520": "Gull / glans" },
+      cmyk: { "#6B8E23": "45 0 100 30" },
+    });
+  });
+
+  it("gir en annen id når bare merkefargene er forskjellige", () => {
+    const a = decodeShare(encodeShare(merke, false))!;
+    const b = decodeShare(encodeShare(egen, false))!;
+    if (a.kind === "custom" && b.kind === "custom") {
+      expect(a.palette.id).not.toBe(b.palette.id);
+      expect(b.palette.brand).toBeUndefined();
+    }
+  });
+
+  it("dropper merket hvis fargene er ødelagt, men beholder paletten", () => {
+    const lenke = encodeShare(merke, false).replace(/bl=[0-9a-f]+/, "bl=zz");
+    const s = decodeShare(lenke)!;
+    expect(s.kind).toBe("custom");
+    if (s.kind === "custom") expect(s.palette.brand).toBeUndefined();
+  });
+
+  it("ukjent retning blir nøytral", () => {
+    const lenke = encodeShare(merke, false).replace(
+      "br=exclusive",
+      "br=hacker",
+    );
+    const s = decodeShare(lenke)!;
+    if (s.kind === "custom") expect(s.palette.brand?.direction).toBe("neutral");
+  });
+});
