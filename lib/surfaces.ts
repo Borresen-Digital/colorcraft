@@ -2,6 +2,8 @@ import type { ExtendedColorPalette } from "@/data/palettes";
 import type { ColorPalette } from "@/types/palette";
 import { contrastRatio } from "./contrast";
 import { textOn } from "./contrastPairs";
+import { parseCmyk } from "./cmyk";
+import { tints } from "./tint";
 
 /**
  * Flater: støttefargene brukt slik en profilmanual bruker dem, som
@@ -33,7 +35,12 @@ export interface Surface {
   logoOk: boolean;
   /** Logoen er vist i negativ fordi flaten er selve logofargen. */
   logoInverted: boolean;
+  /** Tinter av en støtteflate, med logoens kontrast på hver. */
+  tints: { percent: number; hex: string; logoRatio: number; logoOk: boolean }[];
 }
+
+/** Trinnene som vises under hver støtteflate. 100 % er flaten selv. */
+export const SURFACE_TINTS = [80, 60, 40, 20] as const;
 
 /** Den av palettens egne tekstfarger (og hvit) som gir best kontrast. */
 function bestText(palette: ColorPalette, bg: string): string {
@@ -52,6 +59,7 @@ function surface(
   color: string,
   kind: SurfaceKind,
   index: number,
+  cmyk?: string,
 ): Surface {
   const text = bestText(palette, color);
   const inverted = kind === "logo";
@@ -67,6 +75,20 @@ function surface(
     logoRatio,
     logoOk: logoRatio >= LOGO_MIN,
     logoInverted: inverted,
+    tints:
+      kind === "support"
+        ? tints(color, cmyk ? parseCmyk(cmyk) : null, SURFACE_TINTS).map(
+            (t) => {
+              const r = contrastRatio(logo, t.hex) ?? 1;
+              return {
+                percent: t.percent,
+                hex: t.hex,
+                logoRatio: r,
+                logoOk: r >= LOGO_MIN,
+              };
+            },
+          )
+        : [],
   };
 }
 
@@ -91,7 +113,13 @@ export function surfacesFor(
   );
   return [
     ...unike.map((c, i) => ({
-      ...surface(palette, c, "support", i + 1),
+      ...surface(
+        palette,
+        c,
+        "support",
+        i + 1,
+        fraManual ? brand.cmyk?.[c] : undefined,
+      ),
       ...(!fraManual && { role: roller[støtte.indexOf(c)] }),
     })),
     surface(palette, palette.colors.primary, "logo", 0),

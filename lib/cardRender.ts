@@ -43,14 +43,16 @@ export async function renderPdf(ops: Op[], title: string): Promise<Uint8Array> {
 
   for (const op of ops) {
     if (op.kind === "rect") {
-      const farge = op.fill.cmyk
-        ? cmyk(
-            op.fill.cmyk.c / 100,
-            op.fill.cmyk.m / 100,
-            op.fill.cmyk.y / 100,
-            op.fill.cmyk.k / 100,
-          )
-        : rgbAv(op.fill.hex);
+      const farge = !op.fill
+        ? undefined
+        : op.fill.cmyk
+          ? cmyk(
+              op.fill.cmyk.c / 100,
+              op.fill.cmyk.m / 100,
+              op.fill.cmyk.y / 100,
+              op.fill.cmyk.k / 100,
+            )
+          : rgbAv(op.fill.hex);
       side.drawRectangle({
         x: op.x,
         // PDF måler fra bunnen, oppsettet fra toppen.
@@ -89,8 +91,10 @@ export async function renderPng(ops: Op[]): Promise<Blob> {
 
   for (const op of ops) {
     if (op.kind === "rect") {
-      ctx.fillStyle = op.fill.hex;
-      ctx.fillRect(op.x, op.y, op.w, op.h);
+      if (op.fill) {
+        ctx.fillStyle = op.fill.hex;
+        ctx.fillRect(op.x, op.y, op.w, op.h);
+      }
       if (op.stroke) {
         ctx.strokeStyle = op.stroke;
         ctx.lineWidth = 0.75;

@@ -71,3 +71,26 @@ describe("surfacesFor", () => {
     expect(logo.logoOk).toBe(true);
   });
 });
+
+describe("tinter av støtteflatene", () => {
+  it("viser 80–20 % for støttefarger, med logoens kontrast, og ingen for logoflaten", () => {
+    const pal = {
+      id: "x",
+      name: "x",
+      description: "",
+      colors: { ...colorPalettes[0].colors, primary: "#002245" },
+    };
+    const flater = surfacesFor(pal, {
+      logo: ["#002245"],
+      support: ["#59A8BD"],
+      cmyk: { "#59A8BD": "63 13 20 6" },
+    });
+    const støtte = flater.find((f) => f.kind === "support")!;
+    expect(støtte.tints.map((t) => t.percent)).toEqual([80, 60, 40, 20]);
+    // Jo lysere tint, jo bedre står den mørke logoen.
+    const r = støtte.tints.map((t) => t.logoRatio);
+    expect([...r].sort((a, b) => a - b)).toEqual(r);
+    expect(støtte.tints.every((t) => t.logoOk)).toBe(true);
+    expect(flater.find((f) => f.kind === "logo")!.tints).toEqual([]);
+  });
+});

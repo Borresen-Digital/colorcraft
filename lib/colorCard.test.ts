@@ -209,3 +209,41 @@ describe("highlight og egne navn", () => {
     expect(bytes.length).toBeGreaterThan(1000);
   });
 });
+
+describe("tint på fargekortet", () => {
+  const b = {
+    logo: ["#002245"],
+    support: ["#C1B694"],
+    cmyk: { "#002245": "100 56 6 72" },
+  };
+  const p: ExtendedColorPalette = {
+    id: "custom-3",
+    name: "Tint",
+    description: "",
+    colors: generateFromBrand(b).light,
+    brand: b,
+  };
+
+  it("har 60, 40 og 20 % for merkefargene, med CMYK når den er fra manualen", () => {
+    const m = buildCardModel(p, "nb", "", dato);
+    const logo = m.sections[0].colors[0];
+    expect(logo.tints.map((t) => t.percent)).toEqual([60, 40, 20]);
+    expect(logo.tints[0].cmyk).toEqual({ c: 60, m: 34, y: 4, k: 43 });
+    expect(m.sections[1].colors[0].tints[0].cmyk).toBeUndefined();
+    expect(m.footer.some((l) => l.includes("tint"))).toBe(true);
+  });
+
+  it("tegner stripene innenfor fargeblokken", () => {
+    const ops = layoutCard(buildCardModel(p, "nb", "", dato), "nb");
+    const fylte = ops.filter((o) => o.kind === "rect" && o.fill);
+    // Logofargen og tre striper fyller til sammen 92 pt i bredden.
+    const rad = fylte.filter((o) => o.kind === "rect" && o.h === 92);
+    expect(rad.length).toBe(8);
+  });
+
+  it("vanlige paletter uten manual får ingen striper", () => {
+    const m = buildCardModel(colorPalettes[0], "nb", "", dato);
+    expect(m.sections[0].colors.every((c) => c.tints.length === 0)).toBe(true);
+    expect(m.footer.some((l) => l.includes("tint"))).toBe(false);
+  });
+});

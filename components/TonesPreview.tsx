@@ -3,7 +3,9 @@
 import { useState } from "react";
 import type { ExtendedColorPalette } from "@/data/palettes";
 import { contrastRatio } from "@/lib/contrast";
+import { parseCmyk } from "@/lib/cmyk";
 import { COLOR_ROLES } from "@/lib/share";
+import { tints } from "@/lib/tint";
 import { valorScale, variants } from "@/lib/tones";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/components/I18nProvider";
@@ -218,6 +220,33 @@ export function TonesPreview({
                   />
                 ))}
               </div>
+            </div>
+
+            <div>
+              <p className="mb-1 text-xs font-medium opacity-80">{k.tint}</p>
+              <div className="grid grid-cols-5 gap-1">
+                {tints(
+                  kilde.color,
+                  brand?.cmyk?.[kilde.color]
+                    ? parseCmyk(brand.cmyk[kilde.color])
+                    : null,
+                ).map((tt) => (
+                  <Chip
+                    key={tt.percent}
+                    hex={tt.hex}
+                    label={`${tt.percent} %`}
+                    textOk={tekstOk(tt.hex)}
+                    original={tt.percent === 100}
+                    title={
+                      onApply
+                        ? `${k.tintTitle(tt.percent, tt.hex, tt.cmykText)}. ${k.apply(tt.hex, t.roles[rolle])}`
+                        : k.tintTitle(tt.percent, tt.hex, tt.cmykText)
+                    }
+                    onClick={onApply ? () => bruk(rolle, tt.hex) : undefined}
+                  />
+                ))}
+              </div>
+              <p className="mt-1 text-[11px] opacity-75">{k.tintHelp}</p>
             </div>
 
             {v && (
