@@ -4,6 +4,8 @@ import {
   type ExtendedColorPalette,
 } from "@/data/palettes";
 import type { ColorPalette } from "@/types/palette";
+import { DIRECTIONS, type Direction } from "./brand";
+import { formatCmyk, parseCmyk } from "./cmyk";
 
 /**
  * Delbar lenke: paletten ligger i adressen, så den kan sendes til en kunde
@@ -17,6 +19,14 @@ import type { ColorPalette } from "@/types/palette";
  *   #n=Min%20palett&l=<84 hex>&d=<84 hex>   en egen palett, lys og mørk
  *
  * Fargene står i fast rekkefølge (COLOR_ROLES), seks hex-tegn hver, uten #.
+ *
+ * En palett fra profilmanualen tar med merkefargene, så mottakeren får de
+ * samme flatene, highlightfargene, den interne profilen og fargekortet:
+ *
+ *   bl, bs, bh, bi   logo, støtte, highlight og intern profil (6 hex hver)
+ *   br               retningen, hvis den ikke er nøytral
+ *   bn               navnene, skilt med |, i samme rekkefølge som fargene
+ *   bc               CMYK fra manualen som c_m_y_k, skilt med ., samme rekkefølge
  * `v` er formatversjonen, så formatet kan endres uten å knekke gamle lenker.
  */
 
@@ -82,6 +92,77 @@ function cleanName(name: string | null, fallback: string): string {
   return ren || fallback;
 }
 
+const BRAND_LISTS = [
+  ["bl", "logo"],
+  ["bs", "support"],
+  ["bh", "highlight"],
+  ["bi", "internal"],
+] as const;
+const MAX_BRAND = 12;
+const MAX_COLOR_NAME = 40;
+
+type Brand = NonNullable<ExtendedColorPalette["brand"]>;
+
+function brandColors(b: Brand): string[] {
+  return BRAND_LISTS.flatMap(([, k]) => b[k] ?? []).map((h) => h.toUpperCase());
+}
+
+function encodeBrand(b: Brand, q: URLSearchParams) {
+  for (const [nøkkel, k] of BRAND_LISTS) {
+    const liste = b[k] ?? [];
+    if (liste.length > 0) {
+      q.set(
+        nøkkel,
+        liste.map((h) => h.replace(/^#/, "").toLowerCase()).join(""),
+      );
+    }
+  }
+  if (b.direction && b.direction !== "neutral") q.set("br", b.direction);
+  const alle = brandColors(b);
+  const navn = alle.map((h) =>
+    cleanName(b.names?.[h] ?? b.names?.[h.toLowerCase()] ?? "", "")
+      .replace(/\|/g, "/")
+      .slice(0, MAX_COLOR_NAME),
+  );
+  if (navn.some(Boolean)) q.set("bn", navn.join("|"));
+  const cmyk = alle.map((h) => {
+    const v = parseCmyk(b.cmyk?.[h] ?? b.cmyk?.[h.toLowerCase()] ?? "");
+    return v ? formatCmyk(v).replace(/ /g, "_") : "";
+  });
+  if (cmyk.some(Boolean)) q.set("bc", cmyk.join("."));
+}
+
+function hexList(s: string | null): string[] | null {
+  if (s === null) return [];
+  if (!/^[0-9a-fA-F]*$/.test(s) || s.length % 6 !== 0) return null;
+  return (s.match(/.{6}/g) ?? []).map((h) => `#${h.toUpperCase()}`);
+}
+
+/** Merkefargene fra lenken, eller undefined hvis det ikke er noen. */
+function decodeBrand(q: URLSearchParams): Brand | undefined {
+  const lister = BRAND_LISTS.map(([nøkkel]) => hexList(q.get(nøkkel)));
+  if (lister.some((l) => l === null)) return undefined;
+  const [logo, support, highlight, internal] = lister as string[][];
+  if (logo.length === 0) return undefined;
+  if (lister.flat().length > MAX_BRAND * 2) return undefined;
+  const alle = [...logo, ...support, ...highlight, ...internal];
+  const r = q.get("br");
+  const direction: Direction = DIRECTIONS.includes(r as Direction)
+    ? (r as Direction)
+    : "neutral";
+  const names: Record<string, string> = {};
+  (q.get("bn") ?? "").split("|").forEach((n, i) => {
+    const ren = cleanName(n, "").slice(0, MAX_COLOR_NAME);
+    if (ren && alle[i]) names[alle[i]] = ren;
+  });
+  const cmyk: Record<string, string> = {};
+  (q.get("bc") ?? "").split(".").forEach((c, i) => {
+    const v = parseCmyk(c.replace(/_/g, " "));
+    if (v && alle[i]) cmyk[alle[i]] = formatCmyk(v);
+  });
+  return { logo, support, highlight, internal, direction, names, cmyk };
+}
+
 function sameColors(a: ColorPalette, b: ColorPalette): boolean {
   return COLOR_ROLES.every(
     (r) => a.colors[r].toLowerCase() === b.colors[r].toLowerCase(),
@@ -112,6 +193,7 @@ export function encodeShare(
     q.set("n", palette.name);
     q.set("l", encodeColors(palette));
     if (palette.darkVariant) q.set("d", encodeColors(palette.darkVariant));
+    if (palette.brand) encodeBrand(palette.brand, q);
   }
   if (dark && palette.darkVariant) q.set("m", "dark");
   // URLSearchParams bruker + for mellomrom. %20 er tydeligere i en lenke som
@@ -154,10 +236,16 @@ export function decodeShare(
   const lys = decodeColors(q.get("l"));
   if (!lys) return null;
   const mork = decodeColors(q.get("d"));
+  const brand = decodeBrand(q);
+  const merke = brand
+    ? `|${new URLSearchParams(
+        [...q].filter(([k]) => k.startsWith("b")),
+      ).toString()}`
+    : "";
 
   // Id-en bygger på det som står i lenken, ikke på språket, så samme lenke
   // gir samme palett på begge sidene.
-  const id = `shared-${contentId(`${cleanName(q.get("n"), "")}|${q.get("l")}|${q.get("d") ?? ""}`)}`;
+  const id = `shared-${contentId(`${cleanName(q.get("n"), "")}|${q.get("l")}|${q.get("d") ?? ""}${merke}`)}`;
   const name = cleanName(q.get("n"), labels.sharedName);
   const palette: ExtendedColorPalette = {
     id,
@@ -172,6 +260,7 @@ export function decodeShare(
         colors: mork,
       },
     }),
+    ...(brand && { brand }),
   };
   return { kind: "custom", palette, dark: dark && !!mork };
 }

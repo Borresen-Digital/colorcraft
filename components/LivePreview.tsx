@@ -46,7 +46,9 @@ export function LivePreview({ palette, brand, onApply }: LivePreviewProps) {
     ["inUse", t.inUse.tab],
   ];
   return (
-    <div ref={rot} className="flex h-full flex-col">
+    // min-h-full, ikke h-full: en klistret fanelinje følger bare med så langt
+    // som boksen rundt den rekker, og innholdet er ofte høyere enn vinduet.
+    <div ref={rot} className="flex min-h-full flex-col">
       <div
         role="tablist"
         aria-label={t.surfaces.tabsLabel}
@@ -78,7 +80,9 @@ export function LivePreview({ palette, brand, onApply }: LivePreviewProps) {
         id="preview-panel"
         role="tabpanel"
         aria-labelledby={`preview-tab-${tab}`}
-        className="flex-1"
+        // Innholdet fyller resten av høyden, så en kort fane ikke får en
+        // stripe i feil farge nederst.
+        className="flex flex-1 flex-col [&>*]:flex-1"
       >
         {tab === "components" && <ComponentsPreview palette={palette} />}
         {tab === "surfaces" && (
@@ -101,7 +105,7 @@ function ComponentsPreview({ palette }: { palette: ColorPalette }) {
 
   return (
     <div
-      className="h-full p-4 transition-colors duration-300 sm:p-6"
+      className="p-4 transition-colors duration-300 sm:p-6"
       style={{
         backgroundColor: palette.colors.background,
         color: palette.colors.foreground,
