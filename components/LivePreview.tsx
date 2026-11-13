@@ -4,7 +4,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { ExtendedColorPalette } from "@/data/palettes";
 import { textOn } from "@/lib/contrastPairs";
 import { cn } from "@/lib/utils";
@@ -33,6 +33,12 @@ type Tab = "components" | "surfaces" | "tones" | "inUse";
 export function LivePreview({ palette, brand, onApply }: LivePreviewProps) {
   const { t } = useI18n();
   const [tab, setTab] = useState<Tab>("components");
+  const rot = useRef<HTMLDivElement>(null);
+  // En ny fane starter fra toppen, ikke midt i der forrige var rullet til.
+  const velg = (id: Tab) => {
+    setTab(id);
+    rot.current?.parentElement?.scrollTo({ top: 0 });
+  };
   const faner: [Tab, string][] = [
     ["components", t.surfaces.tabComponents],
     ["surfaces", t.surfaces.tabSurfaces],
@@ -40,11 +46,13 @@ export function LivePreview({ palette, brand, onApply }: LivePreviewProps) {
     ["inUse", t.inUse.tab],
   ];
   return (
-    <div className="flex h-full flex-col">
+    <div ref={rot} className="flex h-full flex-col">
       <div
         role="tablist"
         aria-label={t.surfaces.tabsLabel}
-        className="flex gap-1 overflow-x-auto border-b border-line bg-panel px-3 py-2.5 [scrollbar-width:none] sm:px-4"
+        // Fanene ligger i samme rulleflate som innholdet. Klistret til toppen
+        // forsvinner de ikke når man har rullet ned og bytter fane.
+        className="sticky top-0 z-10 flex gap-1 overflow-x-auto border-b border-line bg-panel px-3 py-2.5 [scrollbar-width:none] sm:px-4"
       >
         {faner.map(([id, label]) => (
           <button
@@ -54,7 +62,7 @@ export function LivePreview({ palette, brand, onApply }: LivePreviewProps) {
             id={`preview-tab-${id}`}
             aria-selected={tab === id}
             aria-controls="preview-panel"
-            onClick={() => setTab(id)}
+            onClick={() => velg(id)}
             className={cn(
               "shrink-0 whitespace-nowrap rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors",
               tab === id

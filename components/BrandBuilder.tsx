@@ -1,15 +1,17 @@
 "use client";
 
-import { useId, useMemo, useState } from "react";
+import { useId, useMemo, useState, type ReactNode } from "react";
 import type { ExtendedColorPalette } from "@/data/palettes";
 import {
   generateFromBrand,
+  DIRECTIONS,
   MAX_HIGHLIGHT,
   MAX_LOGO,
   MAX_SUPPORT,
   normalizeHex,
   type BrandNote,
   type BrandResult,
+  type Direction,
 } from "@/lib/brand";
 import { cmykToHex, formatCmyk, hexToCmyk, parseCmyk } from "@/lib/cmyk";
 import { formatRatio } from "@/lib/contrast";
@@ -17,9 +19,10 @@ import { checkPalette } from "@/lib/contrastPairs";
 import { localizeRatio } from "@/lib/i18n";
 import { useI18n } from "@/components/I18nProvider";
 import { ManualCheck } from "@/components/ManualCheck";
+import { MAX_INTERNAL, suggestInternal } from "@/lib/internal";
 import type { ColorPalette } from "@/types/palette";
 
-type Liste = "logo" | "support" | "highlight";
+type Liste = "logo" | "support" | "highlight" | "internal";
 
 interface BrandBuilderProps {
   onClose: () => void;
@@ -192,27 +195,37 @@ export function BrandBuilder({ onClose, onCreate }: BrandBuilderProps) {
   const [logo, setLogo] = useState<string[]>(["#F2B705"]);
   const [support, setSupport] = useState<string[]>(["#F5EFE0", "#2B2B2B"]);
   const [highlight, setHighlight] = useState<string[]>([]);
+  const [internal, setInternal] = useState<string[]>([]);
+  const [retning, setRetning] = useState<Direction>("neutral");
   // Egne navn per rad, i samme rekkefølge som fargene i hver liste.
   const [names, setNames] = useState<Record<Liste, string[]>>({
     logo: [],
     support: [],
     highlight: [],
+    internal: [],
   });
   // CMYK-tallene fra manualen, etter HEX-en de ga. Brukes på fargekortet.
   const [manualCmyk, setManualCmyk] = useState<Record<string, string>>({});
 
   const alleGyldige =
     logo.length > 0 &&
-    [...logo, ...support, ...highlight].every((c) => normalizeHex(c));
+    [...logo, ...support, ...highlight, ...internal].every((c) =>
+      normalizeHex(c),
+    );
 
   const result: BrandResult | null = useMemo(() => {
     if (!alleGyldige) return null;
     try {
-      return generateFromBrand({ logo, support, highlight });
+      return generateFromBrand({
+        logo,
+        support,
+        highlight,
+        direction: retning,
+      });
     } catch {
       return null;
     }
-  }, [logo, support, highlight, alleGyldige]);
+  }, [logo, support, highlight, retning, alleGyldige]);
 
   const stryker = result
     ? [result.light, result.dark]
@@ -244,6 +257,7 @@ export function BrandBuilder({ onClose, onCreate }: BrandBuilderProps) {
     logo: [logo, setLogo],
     support: [support, setSupport],
     highlight: [highlight, setHighlight],
+    internal: [internal, setInternal],
   };
   const settNavn = (l: Liste, i: number, v: string) =>
     setNames((n) => {
@@ -260,29 +274,35 @@ export function BrandBuilder({ onClose, onCreate }: BrandBuilderProps) {
   const handleCreate = () => {
     if (!result) return;
     const navn = name.trim() || b.defaultName;
+    const beskrivelse =
+      retning === "neutral"
+        ? b.description
+        : `${b.description} · ${b.directions[retning]}`;
     onCreate({
       name: navn,
-      description: b.description,
+      description: beskrivelse,
       colors: result.light,
       darkVariant: {
         id: "",
         name: `${navn} ${t.palette.darkSuffix}`,
-        description: `${b.description} ${t.palette.darkDescriptionSuffix}`,
+        description: `${beskrivelse} ${t.palette.darkDescriptionSuffix}`,
         colors: result.dark,
       },
       brand: {
         logo: logo.map((c) => normalizeHex(c)!),
         support: support.map((c) => normalizeHex(c)!),
         highlight: highlight.map((c) => normalizeHex(c)!),
+        internal: internal.map((c) => normalizeHex(c)!),
+        direction: retning,
         // Bare CMYK for farger som fortsatt er den HEX-en tallene ga.
         cmyk: Object.fromEntries(
-          [...logo, ...support, ...highlight]
+          [...logo, ...support, ...highlight, ...internal]
             .map((c) => normalizeHex(c)!)
             .filter((h) => manualCmyk[h])
             .map((h) => [h, manualCmyk[h]]),
         ),
         names: Object.fromEntries(
-          (["logo", "support", "highlight"] as const).flatMap((l) =>
+          (["logo", "support", "highlight", "internal"] as const).flatMap((l) =>
             lister[l][0]
               .map((c, i) => [normalizeHex(c)!, names[l][i]?.trim() ?? ""])
               .filter(([, n]) => n),
@@ -298,6 +318,7 @@ export function BrandBuilder({ onClose, onCreate }: BrandBuilderProps) {
     hjelp: string,
     maks: number,
     min: number,
+    ekstra?: ReactNode,
   ) => {
     const [liste, sett] = lister[l];
     return (
@@ -328,6 +349,7 @@ export function BrandBuilder({ onClose, onCreate }: BrandBuilderProps) {
             + {b.add}
           </button>
         )}
+        {ekstra}
       </fieldset>
     );
   };
@@ -389,7 +411,54 @@ export function BrandBuilder({ onClose, onCreate }: BrandBuilderProps) {
               MAX_HIGHLIGHT,
               0,
             )}
+            {seksjon(
+              "internal",
+              b.internal,
+              b.internalHelp,
+              MAX_INTERNAL,
+              0,
+              normalizeHex(logo[0] ?? "") && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setInternal(suggestInternal(normalizeHex(logo[0])!));
+                    setNames((n) => ({ ...n, internal: [] }));
+                  }}
+                  className="ml-4 text-sm font-medium text-accent underline-offset-4 hover:underline"
+                >
+                  {b.suggest}
+                </button>
+              ),
+            )}
           </div>
+
+          <fieldset className="min-w-0 space-y-2">
+            <legend className="text-sm font-semibold text-ink">
+              {b.direction}
+            </legend>
+            <p className="text-xs text-subtle">{b.directionHelp}</p>
+            <div className="flex flex-wrap gap-1.5">
+              {DIRECTIONS.map((d) => (
+                <label
+                  key={d}
+                  className="cursor-pointer rounded-full border border-field px-3 py-1 text-sm text-ink has-[:checked]:border-ink has-[:checked]:bg-ink has-[:checked]:text-paper has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-accent"
+                >
+                  <input
+                    type="radio"
+                    name="brand-direction"
+                    value={d}
+                    checked={retning === d}
+                    onChange={() => setRetning(d)}
+                    className="sr-only"
+                  />
+                  {b.directions[d]}
+                </label>
+              ))}
+            </div>
+            <p className="text-xs text-subtle" aria-live="polite">
+              {b.directionInfo[retning]}
+            </p>
+          </fieldset>
           <p className="text-xs text-subtle">{t.values.cmykHelp}</p>
           <ManualCheck />
 

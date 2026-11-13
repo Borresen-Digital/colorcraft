@@ -12,6 +12,10 @@ export interface ExtendedColorPalette extends ColorPalette {
     cmyk?: Record<string, string>;
     /** Egne navn på fargene (for eksempel «Varm rørfarge»), etter HEX. */
     names?: Record<string, string>;
+    /** Kundens føring (eksklusiv, salgsfremmende …) paletten er laget med. */
+    direction?: import("@/lib/brand").Direction;
+    /** Intern profil: friere tilleggsfarger, bare til internt bruk. */
+    internal?: string[];
   };
 }
 

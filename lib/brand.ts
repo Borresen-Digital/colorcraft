@@ -39,7 +39,32 @@ export interface BrandInput {
   support: string[];
   /** 0–2 highlightfarger: knapper og enkeltord, aldri flater. */
   highlight?: string[];
+  /** Kundens føring for uttrykket. Styrer bare de genererte fargene. */
+  direction?: Direction;
 }
+
+/**
+ * Føringer fra kunden («jeg ønsker en eksklusiv look»). Retningen endrer
+ * aldri merkefargene, bare det som lages rundt dem: bakgrunn, tekst, dempet
+ * tekst, kanter og varm og kald. Kontrastkravene gjelder i alle retninger.
+ *
+ *   neutral    Som før.
+ *   exclusive  Dempet og luftig: nesten nøytral bakgrunn, gråere tekst og
+ *              mindre mettede varm- og kaldfarger.
+ *   sales      Høy kontrast: hvit bakgrunn, nesten svart tekst og mer
+ *              mettede varm- og kaldfarger.
+ *   tonal      Ton i ton: bakgrunn, flater og kanter i hovedfargens tone, og
+ *              varm og kald som nære varianter av den.
+ *   playful    Leken: tydelig tonet bakgrunn og mer mettede farger.
+ */
+export type Direction = "neutral" | "exclusive" | "sales" | "tonal" | "playful";
+export const DIRECTIONS: Direction[] = [
+  "neutral",
+  "exclusive",
+  "sales",
+  "tonal",
+  "playful",
+];
 
 export type BrandNote =
   | { kind: "adjusted-dark"; role: Role; from: string; to: string }
@@ -176,6 +201,7 @@ export function generateFromBrand(input: BrandInput): BrandResult {
   if (logo.length === 0) throw new Error("Minst én logofarge trengs.");
 
   const notes: BrandNote[] = [];
+  const retning = input.direction ?? "neutral";
   const hoved = logo[0];
   const h0 = hsl(hoved);
   const nøytralMetning = Math.min(h0.s, 0.35);
@@ -185,24 +211,41 @@ export function generateFromBrand(input: BrandInput): BrandResult {
   ];
 
   // ---------- Lys ----------
-  const secondary = support[0] ?? mix(hoved, "#FFFFFF", 0.85);
+  const secondary =
+    support[0] ?? mix(hoved, "#FFFFFF", retning === "tonal" ? 0.75 : 0.85);
 
   // Siden trenger en lys bakgrunn å lese på. Er en støttefarge lys nok,
   // brukes den. Ellers blir bakgrunnen en svak tone av den lyseste
   // støttefargen (eller hovedfargen), så den hører til merket.
   const lyseste = [...support].sort((a, b) => hsl(b).l - hsl(a).l)[0];
-  const background =
-    lyseste && hsl(lyseste).l >= 0.9
-      ? lyseste
-      : mix(lyseste ?? hoved, "#FFFFFF", 0.92);
+  // En lys støttefarge fra manualen går foran retningen. Ellers styrer
+  // retningen hvor tonet bakgrunnen er.
+  const genBakgrunn = {
+    neutral: () => mix(lyseste ?? hoved, "#FFFFFF", 0.92),
+    exclusive: () => fromHsl(h0.h, 0.06, 0.975),
+    sales: () => "#FFFFFF",
+    tonal: () => mix(hoved, "#FFFFFF", 0.9),
+    playful: () => mix(lyseste ?? hoved, "#FFFFFF", 0.86),
+  }[retning];
+  const background = lyseste && hsl(lyseste).l >= 0.9 ? lyseste : genBakgrunn();
   const surface =
-    background === "#FFFFFF" ? mix(secondary, "#FFFFFF", 0.95) : "#FFFFFF";
+    retning === "tonal"
+      ? mix(hoved, "#FFFFFF", 0.95)
+      : background === "#FFFFFF"
+        ? mix(secondary, "#FFFFFF", 0.95)
+        : "#FFFFFF";
   const flater = [background, surface];
 
   const foreground = textOn(
-    fromHsl(h0.h, nøytralMetning * 0.6, 0.15),
+    {
+      neutral: fromHsl(h0.h, nøytralMetning * 0.6, 0.15),
+      exclusive: fromHsl(h0.h, 0.08, 0.13),
+      sales: fromHsl(h0.h, 0.2, 0.07),
+      tonal: fromHsl(h0.h, Math.min(h0.s, 0.6), 0.16),
+      playful: fromHsl(h0.h, nøytralMetning, 0.15),
+    }[retning],
     flater,
-    [7, 4.5],
+    retning === "sales" ? [12, 7, 4.5] : [7, 4.5],
   );
   // Aksenten er highlightfargen, ellers logofarge 2. Uten noen av dem er
   // det logofargen selv (den brukes ofte til highlight), så lenge den synes
@@ -224,16 +267,35 @@ export function generateFromBrand(input: BrandInput): BrandResult {
       ? hoved
       : avledet());
   const muted = textOn(
-    fromHsl(h0.h, Math.min(h0.s, 0.25), 0.42),
+    {
+      neutral: fromHsl(h0.h, Math.min(h0.s, 0.25), 0.42),
+      exclusive: fromHsl(h0.h, 0.06, 0.42),
+      sales: fromHsl(h0.h, Math.min(h0.s, 0.25), 0.35),
+      tonal: fromHsl(h0.h, Math.min(h0.s, 0.45), 0.4),
+      playful: fromHsl(h0.h, Math.min(h0.s, 0.35), 0.42),
+    }[retning],
     flater,
     [4.5],
   );
-  const border = mix(foreground, background, 0.82);
+  const border =
+    retning === "tonal"
+      ? mix(hoved, background, 0.75)
+      : mix(foreground, background, 0.82);
   const tatt = [hoved, accent];
-  const warm =
-    pickTemperature(alle, tatt, "warm") ?? variants(hoved)?.warmer ?? hoved;
-  const cool =
-    pickTemperature(alle, tatt, "cool") ?? variants(hoved)?.cooler ?? hoved;
+  // Ton i ton holder seg til hovedfargen: varm og kald er nære varianter av
+  // den. De andre retningene velger fra merket og demper eller metter.
+  const valgt = (kind: "warm" | "cool") => {
+    const v = variants(hoved);
+    const fallback = (kind === "warm" ? v?.warmer : v?.cooler) ?? hoved;
+    if (retning === "tonal") return fallback;
+    const c = pickTemperature(alle, tatt, kind) ?? fallback;
+    if (retning === "exclusive") return variants(c)?.lessSaturated ?? c;
+    if (retning === "sales" || retning === "playful")
+      return variants(c)?.moreSaturated ?? c;
+    return c;
+  };
+  const warm = valgt("warm");
+  const cool = valgt("cool");
 
   const light: Colors = {
     primary: hoved,
@@ -304,7 +366,11 @@ export function generateFromBrand(input: BrandInput): BrandResult {
       ? mørkeste
       : lysPåLogo
         ? hoved
-        : fromHsl(h0.h, nøytralMetning, 0.08);
+        : retning === "exclusive"
+          ? fromHsl(h0.h, 0.05, 0.07)
+          : retning === "tonal"
+            ? fromHsl(h0.h, Math.min(h0.s, 0.5), 0.1)
+            : fromHsl(h0.h, nøytralMetning, 0.08);
   const dSurface = mix(dBg, "#FFFFFF", 0.06);
   const dFlater = [dBg, dSurface];
 
