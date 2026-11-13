@@ -247,3 +247,24 @@ describe("tint på fargekortet", () => {
     expect(m.footer.some((l) => l.includes("tint"))).toBe(false);
   });
 });
+
+describe("intern profil på fargekortet", () => {
+  it("får en egen seksjon merket bare internt", () => {
+    const b = {
+      logo: ["#002245"],
+      support: ["#C1B694"],
+      internal: ["#E4007C", "#00843D"],
+    };
+    const p: ExtendedColorPalette = {
+      id: "custom-4",
+      name: "Intern",
+      description: "",
+      colors: generateFromBrand(b).light,
+      brand: b,
+    };
+    const m = buildCardModel(p, "nb", "", dato);
+    const s = m.sections.at(-1)!;
+    expect(s.heading).toBe("Intern profil (bare internt)");
+    expect(s.colors.map((c) => c.label)).toEqual(["Intern 1", "Intern 2"]);
+  });
+});

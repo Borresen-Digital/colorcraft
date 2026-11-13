@@ -39,6 +39,8 @@ export interface InUseColors {
   paperText: string;
   /** Logoen i egen farge, brukt på papir. */
   logo: string;
+  /** Den interne profilens farger, til den interne presentasjonen. */
+  internal: string[];
   checks: InUseCheck[];
 }
 
@@ -126,6 +128,7 @@ export function inUseColors(
     paper,
     paperText,
     logo,
+    internal: fraManual ? (brand.internal ?? []) : [],
     checks: [
       sjekk("hero", heroText, hero, TEXT_MIN),
       sjekk("band", bandText, band, TEXT_MIN),

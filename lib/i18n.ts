@@ -164,6 +164,30 @@ const nb = {
     highlight: "Highlight",
     highlightHelp:
       "0–2 farger som bare brukes i små doser: knapper og enkeltord. Aldri som flate.",
+    direction: "Retning",
+    directionHelp:
+      "Kundens føring for uttrykket. Den styrer bare fargene som lages rundt merket: bakgrunn, tekst, kanter, varm og kald. Merkefargene endres ikke.",
+    directions: {
+      neutral: "Nøytral",
+      exclusive: "Eksklusiv",
+      sales: "Salgsfremmende",
+      tonal: "Ton i ton",
+      playful: "Leken",
+    },
+    directionInfo: {
+      neutral: "Balansert, uten særlig føring.",
+      exclusive:
+        "Dempet og luftig: nesten nøytral bakgrunn, gråere tekst og mindre mettede tilleggsfarger.",
+      sales:
+        "Høy kontrast: hvit bakgrunn, nesten svart tekst og mer mettede tilleggsfarger.",
+      tonal:
+        "Ton i ton: bakgrunn, flater og kanter i hovedfargens tone, og små sprang mellom fargene.",
+      playful: "Leken: tydelig tonet bakgrunn og mer mettede tilleggsfarger.",
+    },
+    internal: "Intern profil (valgfritt)",
+    internalHelp:
+      "0–6 friere tilleggsfarger til for eksempel PowerPoint og interne dokumenter. De merkes «bare internt» og brukes ikke i paletten for skjerm.",
+    suggest: "Foreslå farger",
     check: {
       title: "Sjekk verdiene fra manualen",
       help: "Skriv inn HEX, RGB og CMYK for én farge slik de står i manualen. HEX og RGB er samme tall og må stemme helt. CMYK avhenger av trykkprofilen og kan bare ligne.",
@@ -255,6 +279,9 @@ const nb = {
     role: "Daglig leder",
     slideTitle: "Tittel på presentasjonen",
     slideSub: "Undertittel og dato",
+    internalSlide: "Intern presentasjon",
+    internalOnly: "Bare internt",
+    chartTitle: "Resultater i år",
     checksTitle: "Kontrast på trykksakene",
     checks: {
       hero: "Tekst på hovedflaten",
@@ -272,6 +299,7 @@ const nb = {
     logo: (n: number) => `Logofarge ${n}`,
     support: (n: number) => `Støttefarge ${n}`,
     highlight: (n: number) => `Highlight ${n}`,
+    internal: (n: number) => `Intern ${n}`,
     tint: "Tint",
     tintHelp:
       "Fargen trykt med lavere rasterprosent, regnet fra CMYK. Med CMYK fra manualen blir tintene riktigst.",
@@ -305,6 +333,7 @@ const nb = {
     logoColors: "Logofarger",
     supportColors: "Støttefarger",
     highlightColors: "Highlight",
+    internalColors: "Intern profil (bare internt)",
     mainColors: "Hovedfarger",
     fromManual: "(fra manualen)",
     approx: "ca.",
@@ -489,6 +518,31 @@ const en: Messages = {
     highlight: "Highlight",
     highlightHelp:
       "0–2 colors used only in small doses: buttons and single words. Never as a surface.",
+    direction: "Direction",
+    directionHelp:
+      "The client's brief for the look. It only steers the colors made around the brand: background, text, borders, warm and cool. The brand colors are not changed.",
+    directions: {
+      neutral: "Neutral",
+      exclusive: "Exclusive",
+      sales: "Sales-driven",
+      tonal: "Tone on tone",
+      playful: "Playful",
+    },
+    directionInfo: {
+      neutral: "Balanced, with no particular brief.",
+      exclusive:
+        "Muted and airy: an almost neutral background, greyer text and less saturated extra colors.",
+      sales:
+        "High contrast: white background, near-black text and more saturated extra colors.",
+      tonal:
+        "Tone on tone: background, surfaces and borders in the main color's hue, with small steps between colors.",
+      playful:
+        "Playful: a clearly tinted background and more saturated extra colors.",
+    },
+    internal: "Internal profile (optional)",
+    internalHelp:
+      "0–6 freer extra colors for things like PowerPoint and internal documents. They are marked “internal only” and are not used in the screen palette.",
+    suggest: "Suggest colors",
     check: {
       title: "Check the values from the brand guide",
       help: "Enter HEX, RGB and CMYK for one color as they appear in the brand guide. HEX and RGB are the same numbers and must match exactly. CMYK depends on the print profile and can only be similar.",
@@ -580,6 +634,9 @@ const en: Messages = {
     role: "Managing director",
     slideTitle: "Presentation title",
     slideSub: "Subtitle and date",
+    internalSlide: "Internal presentation",
+    internalOnly: "Internal only",
+    chartTitle: "Results this year",
     checksTitle: "Contrast in print",
     checks: {
       hero: "Text on the main surface",
@@ -597,6 +654,7 @@ const en: Messages = {
     logo: (n) => `Logo color ${n}`,
     support: (n) => `Support color ${n}`,
     highlight: (n) => `Highlight ${n}`,
+    internal: (n) => `Internal ${n}`,
     tint: "Tint",
     tintHelp:
       "The color printed at a lower screen percentage, calculated from CMYK. With CMYK from the brand guide, the tints are most accurate.",
@@ -627,6 +685,7 @@ const en: Messages = {
     logoColors: "Logo colors",
     supportColors: "Support colors",
     highlightColors: "Highlight",
+    internalColors: "Internal profile (internal only)",
     mainColors: "Main colors",
     fromManual: "(from the brand guide)",
     approx: "approx.",

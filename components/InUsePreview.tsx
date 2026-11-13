@@ -205,6 +205,38 @@ export function InUsePreview({
             </div>
           </div>
         </Mockup>
+
+        {/* Intern presentasjon: diagram i den interne profilens farger. */}
+        {c.internal.length > 0 && (
+          <Mockup title={k.internalSlide}>
+            <div
+              className="relative flex aspect-video w-full flex-col gap-1.5 overflow-hidden rounded-sm p-3 shadow-md"
+              style={{ backgroundColor: c.paper, color: c.paperText }}
+              aria-hidden="true"
+            >
+              <span
+                className="absolute right-1.5 top-1.5 rounded px-1.5 py-0.5 text-[7px] font-semibold uppercase tracking-wide"
+                style={{ backgroundColor: c.hero, color: c.heroText }}
+              >
+                {k.internalOnly}
+              </span>
+              <p className="text-[10px] font-bold">{k.chartTitle}</p>
+              <div className="flex flex-1 items-end gap-1.5">
+                {c.internal.map((farge, i) => (
+                  <span
+                    key={i}
+                    className="flex-1 rounded-t-sm"
+                    style={{
+                      backgroundColor: farge,
+                      height: `${[55, 80, 40, 95, 65, 75][i % 6]}%`,
+                    }}
+                  />
+                ))}
+              </div>
+              <Logo color={c.logo} name={navn} size="sm" />
+            </div>
+          </Mockup>
+        )}
       </div>
 
       <section aria-label={k.checksTitle} className="space-y-2">

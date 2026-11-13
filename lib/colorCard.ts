@@ -128,6 +128,7 @@ export function buildCardModel(
         ),
       });
     }
+    const internal = palette.brand.internal ?? [];
     const highlight = palette.brand.highlight ?? [];
     if (highlight.length > 0) {
       sections.push({
@@ -140,6 +141,14 @@ export function buildCardModel(
             locale,
             true,
           ),
+        ),
+      });
+    }
+    if (internal.length > 0) {
+      sections.push({
+        heading: k.internalColors,
+        colors: internal.map((c, i) =>
+          color(names[c] || m.tones.internal(i + 1), c, manual[c], locale),
         ),
       });
     }

@@ -71,3 +71,11 @@ describe("inUseColors", () => {
     expect(c.paper).toBe(colorPalettes[0].colors.background);
   });
 });
+
+describe("intern profil i bruk", () => {
+  it("tar med de interne fargene bare for paletter fra en manual", () => {
+    const b = { ...ERLING, internal: ["#E4007C"] };
+    expect(inUseColors(pal(b), b).internal).toEqual(["#E4007C"]);
+    expect(inUseColors(colorPalettes[0]).internal).toEqual([]);
+  });
+});

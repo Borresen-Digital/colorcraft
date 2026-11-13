@@ -50,6 +50,12 @@ function sourcesFor(
         color: c,
         role: (i === 0 ? "secondary" : "surface") as Role,
       })),
+      ...(brand.internal ?? []).map((c, i) => ({
+        key: `internal-${i}`,
+        label: navn[c] || t.tones.internal(i + 1),
+        color: c,
+        role: "accent" as Role,
+      })),
     ];
   }
   return (["primary", "accent", "secondary"] as const).map((role) => ({
