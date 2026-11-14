@@ -510,7 +510,7 @@ export const colorPalettes: ExtendedColorPalette[] = [
       id: "borre-dark",
       description: "Burgunder og gull, som vikinghaugene i Borre (mørk modus)",
       colors: {
-        primary: "#C75B7A",
+        primary: "#B84A5C",
         secondary: "#E8B4B8",
         accent: "#F4E04D",
         warm: "#CD853F",

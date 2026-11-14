@@ -378,9 +378,16 @@ export function generateFromBrand(input: BrandInput): BrandResult {
   // stor tekst). Må en farge justeres likevel, lysnes den til 4,5:1. Bare 3:1
   // ville gitt en mellomtone der verken hvit eller mørk knappetekst består.
   // Justeringen står i notes.
+  // En merkefarge som bærer knappetekst (hvit eller mørk, 4,5:1) og skiller
+  // seg litt fra bakgrunnen, beholdes som den er. Lysnes en burgunder eller
+  // plomme, blir den rosa og mister karakteren. Den brukes da som flate og
+  // knapp, og overskriftene får en annen farge (se headingColor).
+  const bærerTekst = (c: string) =>
+    Math.max(contrastRatio("#FFFFFF", c) ?? 0, contrastRatio(dBg, c) ?? 0) >=
+      4.5 && (contrastRatio(c, dBg) ?? 0) >= 1.15;
   const synlig = (role: Role, c: string) => {
     const ok = dFlater.every((f) => (contrastRatio(c, f) ?? 0) >= 3);
-    if (ok) return c;
+    if (ok || bærerTekst(c)) return c;
     const ny =
       ensureContrast(c, dFlater, 4.5) ?? ensureContrast(c, dFlater, 3) ?? c;
     if (ny !== c) notes.push({ kind: "adjusted-dark", role, from: c, to: ny });

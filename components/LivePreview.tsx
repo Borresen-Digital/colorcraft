@@ -6,7 +6,7 @@
 
 import { useRef, useState } from "react";
 import type { ExtendedColorPalette } from "@/data/palettes";
-import { textOn } from "@/lib/contrastPairs";
+import { headingColor, textOn } from "@/lib/contrastPairs";
 import { cn } from "@/lib/utils";
 import { SurfacesPreview } from "@/components/SurfacesPreview";
 import { TonesPreview } from "@/components/TonesPreview";
@@ -84,7 +84,9 @@ export function LivePreview({ palette, brand, onApply }: LivePreviewProps) {
         // stripe i feil farge nederst.
         className="flex flex-1 flex-col [&>*]:flex-1"
       >
-        {tab === "components" && <ComponentsPreview palette={palette} />}
+        {tab === "components" && (
+          <ComponentsPreview palette={palette} brand={!!brand} />
+        )}
         {tab === "surfaces" && (
           <SurfacesPreview palette={palette} brand={brand} />
         )}
@@ -97,8 +99,15 @@ export function LivePreview({ palette, brand, onApply }: LivePreviewProps) {
   );
 }
 
-function ComponentsPreview({ palette }: { palette: ColorPalette }) {
+function ComponentsPreview({
+  palette,
+  brand,
+}: {
+  palette: ColorPalette;
+  brand: boolean;
+}) {
   const { t } = useI18n();
+  const overskrift = headingColor(palette, brand);
   // Samme tekstfarge som kontrastsjekken regner med.
   const onPrimary = textOn(palette, palette.colors.primary);
   const onAccent = textOn(palette, palette.colors.accent);
@@ -115,7 +124,7 @@ function ComponentsPreview({ palette }: { palette: ColorPalette }) {
       <div className="text-center mb-8">
         <h1
           className="text-3xl font-bold mb-2 transition-all duration-500 sm:text-4xl"
-          style={{ color: palette.colors.primary }}
+          style={{ color: overskrift }}
         >
           {t.preview.siteName}
         </h1>
@@ -200,34 +209,37 @@ function ComponentsPreview({ palette }: { palette: ColorPalette }) {
         </div>
       </div>
 
-      {/* Status Messages */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {[
-          { type: t.roles.success, color: palette.colors.success, icon: "✓" },
-          { type: t.roles.warning, color: palette.colors.warning, icon: "⚠" },
-          { type: t.roles.error, color: palette.colors.error, icon: "✗" },
-          { type: t.roles.info, color: palette.colors.info, icon: "i" },
-        ].map((status) => (
-          <div
-            key={status.type}
-            className="p-4 rounded-lg text-center transition-all duration-500 hover:scale-105"
-            style={{
-              backgroundColor: status.color + "20",
-              border: `1px solid ${status.color}`,
-            }}
-          >
+      {/* Varslingsfargene hører til nettsider og apper. En palett fra en
+          profilmanual viser dem bare under «For utvikleren». */}
+      {!brand && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {[
+            { type: t.roles.success, color: palette.colors.success, icon: "✓" },
+            { type: t.roles.warning, color: palette.colors.warning, icon: "⚠" },
+            { type: t.roles.error, color: palette.colors.error, icon: "✗" },
+            { type: t.roles.info, color: palette.colors.info, icon: "i" },
+          ].map((status) => (
             <div
-              className="w-8 h-8 rounded-full mx-auto mb-2 flex items-center justify-center text-white font-bold"
-              style={{ backgroundColor: status.color }}
+              key={status.type}
+              className="p-4 rounded-lg text-center transition-all duration-500 hover:scale-105"
+              style={{
+                backgroundColor: status.color + "20",
+                border: `1px solid ${status.color}`,
+              }}
             >
-              {status.icon}
+              <div
+                className="w-8 h-8 rounded-full mx-auto mb-2 flex items-center justify-center text-white font-bold"
+                style={{ backgroundColor: status.color }}
+              >
+                {status.icon}
+              </div>
+              <p className="text-sm" style={{ color: status.color }}>
+                {status.type}
+              </p>
             </div>
-            <p className="text-sm" style={{ color: status.color }}>
-              {status.type}
-            </p>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

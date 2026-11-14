@@ -112,7 +112,11 @@ export function ColorDetails({
 
       <Glossary />
 
-      <ContrastPanel palette={palette} onApply={onApplySuggestion} />
+      <ContrastPanel
+        palette={palette}
+        brand={!!brand}
+        onApply={onApplySuggestion}
+      />
 
       <ColorCardPanel palette={exportPalette} />
 

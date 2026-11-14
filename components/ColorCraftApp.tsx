@@ -256,7 +256,34 @@ function ColorCraft() {
   // «Fra profilmanual»: paletten kommer ferdig regnet ut, og blir en egen
   // palett som lagres og velges.
   const [brandOpen, setBrandOpen] = useState(false);
+  // En palett fra en manual endres i det samme skjemaet, med fargene den har.
+  const [brandEditing, setBrandEditing] = useState<ExtendedColorPalette | null>(
+    null,
+  );
+  const lukkBrand = () => {
+    setBrandOpen(false);
+    setBrandEditing(null);
+  };
   const handleCreateFromBrand = (p: Omit<ExtendedColorPalette, "id">) => {
+    if (brandEditing) {
+      // Samme id, så den erstatter den gamle. En delt palett blir en egen.
+      let endret: ExtendedColorPalette = {
+        ...p,
+        id: brandEditing.id,
+        ...(p.darkVariant && {
+          darkVariant: { ...p.darkVariant, id: `${brandEditing.id}-dark` },
+        }),
+      };
+      if (endret.id.startsWith("shared-")) endret = toCustom(endret, t.palette);
+      setPalettes((prev) =>
+        prev.map((x) => (x.id === brandEditing.id ? endret : x)),
+      );
+      setSelectedPaletteId(
+        isDarkMode && endret.darkVariant ? endret.darkVariant.id : endret.id,
+      );
+      lukkBrand();
+      return;
+    }
     const id = `custom-${Date.now()}`;
     const ny: ExtendedColorPalette = {
       ...p,
@@ -267,7 +294,7 @@ function ColorCraft() {
     };
     setPalettes((prev) => [...prev, ny]);
     setSelectedPaletteId(isDarkMode && ny.darkVariant ? ny.darkVariant.id : id);
-    setBrandOpen(false);
+    lukkBrand();
   };
 
   // Handle editing existing palette
@@ -276,7 +303,19 @@ function ColorCraft() {
       (p) =>
         p.id === selectedPaletteId || p.darkVariant?.id === selectedPaletteId,
     );
+    // En palett fra en manual endres i «Fra profilmanual», med merkefargene.
+    if (currentExtendedPalette?.brand) {
+      setBrandEditing(currentExtendedPalette);
+      setBrandOpen(true);
+      return;
+    }
     setEditingPalette(currentExtendedPalette || null);
+    setEditorOpen(true);
+  };
+
+  // Rollene én for én, for den som vil finjustere en palett fra en manual.
+  const handleEditRoles = () => {
+    setEditingPalette(currentExtended);
     setEditorOpen(true);
   };
 
@@ -558,6 +597,16 @@ function ColorCraft() {
                   >
                     {t.app.edit}
                   </button>
+                  {currentExtended.brand && (
+                    <button
+                      type="button"
+                      onClick={handleEditRoles}
+                      title={t.app.editRolesTitle}
+                      className={btn("ghost", "sm")}
+                    >
+                      {t.app.editRoles}
+                    </button>
+                  )}
                   {canReset && (
                     <button
                       type="button"
@@ -616,7 +665,9 @@ function ColorCraft() {
 
       {brandOpen && (
         <BrandBuilder
-          onClose={() => setBrandOpen(false)}
+          key={brandEditing?.id ?? "ny"}
+          initial={brandEditing ?? undefined}
+          onClose={lukkBrand}
           onCreate={handleCreateFromBrand}
         />
       )}

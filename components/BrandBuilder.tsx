@@ -27,6 +27,8 @@ type Liste = "logo" | "support" | "highlight" | "internal";
 
 interface BrandBuilderProps {
   onClose: () => void;
+  /** En palett fra en manual som skal endres. Skjemaet starter med fargene den har. */
+  initial?: ExtendedColorPalette;
   /** Får paletten uten id. Forelderen gir den en custom-id og lagrer den. */
   onCreate: (palette: Omit<ExtendedColorPalette, "id">) => void;
 }
@@ -189,24 +191,39 @@ function Swatches({
  * med lys og mørk variant ut. Paletten regnes ut mens du skriver, så du ser
  * resultatet og kontrasten før du lager den.
  */
-export function BrandBuilder({ onClose, onCreate }: BrandBuilderProps) {
+export function BrandBuilder({
+  onClose,
+  onCreate,
+  initial,
+}: BrandBuilderProps) {
   const { locale, t } = useI18n();
   const b = t.brand;
-  const [name, setName] = useState<string>(b.defaultName);
-  const [logo, setLogo] = useState<string[]>(["#F2B705"]);
-  const [support, setSupport] = useState<string[]>(["#F5EFE0", "#2B2B2B"]);
-  const [highlight, setHighlight] = useState<string[]>([]);
-  const [internal, setInternal] = useState<string[]>([]);
-  const [retning, setRetning] = useState<Direction>("neutral");
+  const fra = initial?.brand;
+  const [name, setName] = useState<string>(initial?.name ?? b.defaultName);
+  // Én lys flatefarge som start. En mørk nummer to ble ofte stående og
+  // gjorde mørk modus grå.
+  const [logo, setLogo] = useState<string[]>(fra?.logo ?? ["#F2B705"]);
+  const [support, setSupport] = useState<string[]>(fra?.support ?? ["#F5EFE0"]);
+  const [highlight, setHighlight] = useState<string[]>(fra?.highlight ?? []);
+  const [internal, setInternal] = useState<string[]>(fra?.internal ?? []);
+  const [retning, setRetning] = useState<Direction>(
+    fra?.direction ?? "neutral",
+  );
   // Egne navn per rad, i samme rekkefølge som fargene i hver liste.
-  const [names, setNames] = useState<Record<Liste, string[]>>({
-    logo: [],
-    support: [],
-    highlight: [],
-    internal: [],
+  const [names, setNames] = useState<Record<Liste, string[]>>(() => {
+    const navn = (l: string[] = []) =>
+      l.map((c) => fra?.names?.[c] ?? fra?.names?.[c.toUpperCase()] ?? "");
+    return {
+      logo: navn(fra?.logo),
+      support: navn(fra?.support),
+      highlight: navn(fra?.highlight),
+      internal: navn(fra?.internal),
+    };
   });
   // CMYK-tallene fra manualen, etter HEX-en de ga. Brukes på fargekortet.
-  const [manualCmyk, setManualCmyk] = useState<Record<string, string>>({});
+  const [manualCmyk, setManualCmyk] = useState<Record<string, string>>(
+    fra?.cmyk ?? {},
+  );
 
   const alleGyldige =
     logo.length > 0 &&
@@ -232,9 +249,10 @@ export function BrandBuilder({ onClose, onCreate }: BrandBuilderProps) {
     ? [result.light, result.dark]
         .map(
           (colors) =>
-            checkPalette({ id: "", name: "", description: "", colors }).filter(
-              (r) => r.level === "fail",
-            ).length,
+            checkPalette(
+              { id: "", name: "", description: "", colors },
+              { brand: true },
+            ).filter((r) => r.level === "fail").length,
         )
         .reduce((a, n) => a + n, 0)
     : 0;
@@ -371,7 +389,7 @@ export function BrandBuilder({ onClose, onCreate }: BrandBuilderProps) {
             id="brand-title"
             className="font-display text-xl font-bold sm:text-2xl"
           >
-            {b.title}
+            {initial ? b.editTitle(initial.name) : b.title}
           </h2>
           <button
             type="button"
@@ -524,7 +542,7 @@ export function BrandBuilder({ onClose, onCreate }: BrandBuilderProps) {
               disabled={!result}
               className="rounded-full bg-ink px-5 py-2 font-medium text-paper hover:bg-ink/85 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {b.create}
+              {initial ? b.save : b.create}
             </button>
           </div>
         </div>

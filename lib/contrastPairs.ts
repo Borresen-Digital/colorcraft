@@ -32,6 +32,26 @@ export function textOn(palette: ColorPalette, bg: string): string {
     : mork;
 }
 
+/**
+ * Fargen overskriftene får. Vanligvis hovedfargen. En palett fra en
+ * profilmanual endrer ikke logofargen, så er den for lys (eller for mørk)
+ * til tekst, brukes den som flate og grafikk, og overskriften får
+ * uthevingsfargen eller tekstfargen i stedet.
+ */
+export function headingColor(palette: ColorPalette, brand = false): string {
+  const { primary, accent, foreground, background } = palette.colors;
+  if (!brand) return primary;
+  for (const c of [primary, accent]) {
+    if ((contrastRatio(c, background) ?? 0) >= THRESHOLDS.large.AA) return c;
+  }
+  return foreground;
+}
+
+export interface CheckOptions {
+  /** Paletten er laget fra en profilmanual (se headingColor). */
+  brand?: boolean;
+}
+
 export interface ContrastPair {
   id: string;
   label: string;
@@ -114,10 +134,15 @@ export interface ContrastResult {
 export function checkPair(
   palette: ColorPalette,
   pair: ContrastPair,
+  opts: CheckOptions = {},
 ): ContrastResult {
   const bg = palette.colors[pair.bg];
   const fg =
-    pair.fg === AUTO_TEXT ? textOn(palette, bg) : palette.colors[pair.fg];
+    pair.fg === AUTO_TEXT
+      ? textOn(palette, bg)
+      : pair.id === "heading-background"
+        ? headingColor(palette, opts.brand)
+        : palette.colors[pair.fg];
   const ratio = contrastRatio(fg, bg);
   const level = ratio === null ? "fail" : contrastLevel(ratio, pair.large);
 
@@ -135,6 +160,9 @@ export function checkPair(
   return { pair, fg, bg, ratio, level, suggestion };
 }
 
-export function checkPalette(palette: ColorPalette): ContrastResult[] {
-  return CONTRAST_PAIRS.map((pair) => checkPair(palette, pair));
+export function checkPalette(
+  palette: ColorPalette,
+  opts: CheckOptions = {},
+): ContrastResult[] {
+  return CONTRAST_PAIRS.map((pair) => checkPair(palette, pair, opts));
 }
