@@ -33,7 +33,7 @@ describe("buildCardModel", () => {
     expect(m.subtitle).toBe("Fargekort · 12. november 2026");
     expect(m.sections.map((s) => s.heading)).toEqual([
       "Logofarger",
-      "Støttefarger",
+      "Flatefarger",
     ]);
     expect(m.sections[1].colors.map((c) => c.hex)).toEqual([
       "#F5EFE0",
@@ -68,12 +68,12 @@ describe("buildCardModel", () => {
     expect(m.sections).toHaveLength(1);
     expect(m.sections[0].heading).toBe("Main colors");
     expect(m.sections[0].colors.map((c) => c.label)).toEqual([
-      "Primary",
-      "Accent",
-      "Secondary",
+      "Main color",
+      "Highlight color",
+      "Area color",
       "Background",
-      "Foreground",
-      "Muted",
+      "Text",
+      "Subtle text",
     ]);
     expect(m.contrast).toHaveLength(7);
     expect(m.footer.some((l) => l.startsWith("Made by"))).toBe(false);
@@ -194,8 +194,8 @@ describe("highlight og egne navn", () => {
     const m = buildCardModel(p, "nb", "", dato);
     expect(m.sections.map((s) => s.heading)).toEqual([
       "Logofarger",
-      "Støttefarger",
-      "Highlight",
+      "Flatefarger",
+      "Uthevingsfarger",
     ]);
     expect(m.sections[2].colors[0].hex).toBe("#59A8BD");
   });
@@ -204,7 +204,7 @@ describe("highlight og egne navn", () => {
     const m = buildCardModel(p, "nb", "", dato);
     expect(m.sections[0].colors[0].label).toBe("Dark blue");
     expect(m.sections[1].colors[0].label).toBe("Varm rørfarge");
-    expect(m.sections[2].colors[0].label).toBe("Highlight 1");
+    expect(m.sections[2].colors[0].label).toBe("Uthevingsfarge 1");
   });
 
   it("lager en PDF med highlight-seksjonen", async () => {
@@ -270,7 +270,10 @@ describe("intern profil på fargekortet", () => {
     };
     const m = buildCardModel(p, "nb", "", dato);
     const s = m.sections.at(-1)!;
-    expect(s.heading).toBe("Intern profil (bare internt)");
-    expect(s.colors.map((c) => c.label)).toEqual(["Intern 1", "Intern 2"]);
+    expect(s.heading).toBe("Ekstra farger (bare internt)");
+    expect(s.colors.map((c) => c.label)).toEqual([
+      "Ekstra farge 1",
+      "Ekstra farge 2",
+    ]);
   });
 });

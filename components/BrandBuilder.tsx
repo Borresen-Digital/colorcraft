@@ -19,6 +19,7 @@ import { checkPalette } from "@/lib/contrastPairs";
 import { localizeRatio } from "@/lib/i18n";
 import { useI18n } from "@/components/I18nProvider";
 import { ManualCheck } from "@/components/ManualCheck";
+import { Glossary } from "@/components/Glossary";
 import { MAX_INTERNAL, suggestInternal } from "@/lib/internal";
 import type { ColorPalette } from "@/types/palette";
 
@@ -384,6 +385,7 @@ export function BrandBuilder({ onClose, onCreate }: BrandBuilderProps) {
 
         <div className="space-y-5 p-4 sm:p-6">
           <p className="text-sm text-subtle">{b.intro}</p>
+          <Glossary />
 
           <div>
             <label
@@ -411,56 +413,69 @@ export function BrandBuilder({ onClose, onCreate }: BrandBuilderProps) {
               MAX_HIGHLIGHT,
               0,
             )}
-            {seksjon(
-              "internal",
-              b.internal,
-              b.internalHelp,
-              MAX_INTERNAL,
-              0,
-              normalizeHex(logo[0] ?? "") && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setInternal(suggestInternal(normalizeHex(logo[0])!));
-                    setNames((n) => ({ ...n, internal: [] }));
-                  }}
-                  className="ml-4 text-sm font-medium text-accent underline-offset-4 hover:underline"
-                >
-                  {b.suggest}
-                </button>
-              ),
-            )}
           </div>
-
-          <fieldset className="min-w-0 space-y-2">
-            <legend className="text-sm font-semibold text-ink">
-              {b.direction}
-            </legend>
-            <p className="text-xs text-subtle">{b.directionHelp}</p>
-            <div className="flex flex-wrap gap-1.5">
-              {DIRECTIONS.map((d) => (
-                <label
-                  key={d}
-                  className="cursor-pointer rounded-full border border-field px-3 py-1 text-sm text-ink has-[:checked]:border-ink has-[:checked]:bg-ink has-[:checked]:text-paper has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-accent"
-                >
-                  <input
-                    type="radio"
-                    name="brand-direction"
-                    value={d}
-                    checked={retning === d}
-                    onChange={() => setRetning(d)}
-                    className="sr-only"
-                  />
-                  {b.directions[d]}
-                </label>
-              ))}
-            </div>
-            <p className="text-xs text-subtle" aria-live="polite">
-              {b.directionInfo[retning]}
-            </p>
-          </fieldset>
           <p className="text-xs text-subtle">{t.values.cmykHelp}</p>
-          <ManualCheck />
+
+          <details
+            // Står åpen når noe der allerede er valgt, så ingenting skjules.
+            open={internal.length > 0 || retning !== "neutral" || undefined}
+            className="rounded-lg border border-line"
+          >
+            <summary className="cursor-pointer select-none px-3 py-2">
+              <span className="text-sm font-semibold text-ink">{b.more}</span>
+              <span className="block text-xs text-subtle">{b.moreHelp}</span>
+            </summary>
+            <div className="space-y-5 border-t border-line p-3">
+              {seksjon(
+                "internal",
+                b.internal,
+                b.internalHelp,
+                MAX_INTERNAL,
+                0,
+                normalizeHex(logo[0] ?? "") && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setInternal(suggestInternal(normalizeHex(logo[0])!));
+                      setNames((n) => ({ ...n, internal: [] }));
+                    }}
+                    className="ml-4 text-sm font-medium text-accent underline-offset-4 hover:underline"
+                  >
+                    {b.suggest}
+                  </button>
+                ),
+              )}
+
+              <fieldset className="min-w-0 space-y-2">
+                <legend className="text-sm font-semibold text-ink">
+                  {b.direction}
+                </legend>
+                <p className="text-xs text-subtle">{b.directionHelp}</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {DIRECTIONS.map((d) => (
+                    <label
+                      key={d}
+                      className="cursor-pointer rounded-full border border-field px-3 py-1 text-sm text-ink has-[:checked]:border-ink has-[:checked]:bg-ink has-[:checked]:text-paper has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-accent"
+                    >
+                      <input
+                        type="radio"
+                        name="brand-direction"
+                        value={d}
+                        checked={retning === d}
+                        onChange={() => setRetning(d)}
+                        className="sr-only"
+                      />
+                      {b.directions[d]}
+                    </label>
+                  ))}
+                </div>
+                <p className="text-xs text-subtle" aria-live="polite">
+                  {b.directionInfo[retning]}
+                </p>
+              </fieldset>
+              <ManualCheck />
+            </div>
+          </details>
 
           <section
             aria-labelledby="brand-preview"

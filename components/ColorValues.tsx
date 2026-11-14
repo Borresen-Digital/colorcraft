@@ -32,7 +32,12 @@ export function ColorValues({ palette }: { palette: ColorPalette }) {
                   aria-hidden="true"
                 />
                 <div className="min-w-0 text-xs">
-                  <p className="font-medium text-ink">{t.roles[role]}</p>
+                  <p className="font-medium text-ink">
+                    {t.roles[role]}{" "}
+                    <span className="font-mono text-[10px] font-normal text-subtle">
+                      {role}
+                    </span>
+                  </p>
                   <p className="font-mono text-subtle">
                     {hex}
                     {rgb && ` · ${rgb.r} ${rgb.g} ${rgb.b}`}
