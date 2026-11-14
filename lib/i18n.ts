@@ -40,6 +40,9 @@ const nb = {
     copyFailed: "Kunne ikke kopiere",
     add: "Ny palett",
     edit: "Rediger",
+    editRoles: "Juster roller",
+    editRolesTitle:
+      "Endre hver rolle for seg (hovedfarge, tekst, bakgrunn …). Endringene forsvinner hvis du senere endrer merkefargene.",
     delete: "Slett",
     viewing: "Viser:",
     mode: "Modus:",
@@ -277,6 +280,8 @@ const nb = {
       `${role} (${color}) har ${ratio} mot den lyse bakgrunnen. Den passer best som flate eller grafikk, ikke til tekst.`,
     description: "Laget fra profilmanual",
     create: "Lag palett",
+    editTitle: (name: string) => `Endre «${name}»`,
+    save: "Lagre endringer",
     cancel: "Avbryt",
   },
   surfaces: {
@@ -450,6 +455,9 @@ const en: Messages = {
     copyFailed: "Copy failed",
     add: "Add palette",
     edit: "Edit",
+    editRoles: "Adjust roles",
+    editRolesTitle:
+      "Change each role on its own (main color, text, background …). The changes are lost if you later change the brand colors.",
     delete: "Delete",
     viewing: "Viewing:",
     mode: "Mode:",
@@ -688,6 +696,8 @@ const en: Messages = {
       `${role} (${color}) has ${ratio} against the light background. It works best as a surface or graphic, not for text.`,
     description: "Made from a brand guide",
     create: "Create palette",
+    editTitle: (name) => `Edit “${name}”`,
+    save: "Save changes",
     cancel: "Cancel",
   },
   surfaces: {

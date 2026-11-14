@@ -7,7 +7,7 @@ import {
   normalizeHex,
 } from "./brand";
 import { contrastRatio } from "./contrast";
-import { checkPalette } from "./contrastPairs";
+import { checkPalette, headingColor } from "./contrastPairs";
 import { hexToOklch, hueDistance, variants } from "./tones";
 
 const pal = (colors: ReturnType<typeof generateFromBrand>["light"]) => ({
@@ -84,7 +84,7 @@ describe("generateFromBrand", () => {
 
       it("lar knappetekst bestå AA (hvit eller mørk, som i forhåndsvisningen)", () => {
         for (const c of [r.light, r.dark]) {
-          const knapper = checkPalette(pal(c)).filter((x) =>
+          const knapper = checkPalette(pal(c), { brand: true }).filter((x) =>
             x.pair.id.startsWith("button-"),
           );
           // Knappeteksten er hvit eller palettens mørke farge, den beste.
@@ -97,9 +97,18 @@ describe("generateFromBrand", () => {
         }
       });
 
-      it("gjør merkefargene synlige i mørk modus (3:1), og forteller når den justerer", () => {
-        for (const f of [r.dark.background, r.dark.surface]) {
-          expect(contrastRatio(r.dark.primary, f)!).toBeGreaterThanOrEqual(3);
+      it("beholder merkefargen i mørk modus hvis den bærer knappetekst, ellers synlig (3:1) med merknad", () => {
+        const p = r.dark.primary;
+        const bærer =
+          p === r.light.primary &&
+          Math.max(
+            contrastRatio("#FFFFFF", p)!,
+            contrastRatio(r.dark.background, p)!,
+          ) >= 4.5;
+        if (!bærer) {
+          for (const f of [r.dark.background, r.dark.surface]) {
+            expect(contrastRatio(p, f)!).toBeGreaterThanOrEqual(3);
+          }
         }
         if (r.dark.primary !== r.light.primary) {
           expect(
@@ -167,7 +176,7 @@ describe("bredde: 7 logoer × 5 sett støttefarger", () => {
     ["#E4007C"],
     ["#2E7D32"],
   ];
-  it("stryker bare der logofargen selv er for lys til tekst, og da med en merknad", () => {
+  it("stryker ingen par: en logofarge som ikke kan være tekst, gir overskriften en annen farge", () => {
     for (const logo of logoer) {
       for (const support of stotte) {
         const r = generateFromBrand({ logo, support });
@@ -175,17 +184,12 @@ describe("bredde: 7 logoer × 5 sett støttefarger", () => {
           ["lys", r.light],
           ["mørk", r.dark],
         ] as const) {
-          const stryk = checkPalette(pal(c)).filter((x) => x.level === "fail");
-          for (const s of stryk) {
-            // Det eneste tillatte: logofargen som overskrift på lys bakgrunn,
-            // og bare når brukeren har fått beskjed.
-            expect(`${logo[0]} ${modus} ${s.pair.id}`).toBe(
-              `${logo[0]} lys heading-background`,
-            );
-            expect(r.notes.some((n) => n.kind === "low-contrast-light")).toBe(
-              true,
-            );
-          }
+          const stryk = checkPalette(pal(c), { brand: true }).filter(
+            (x) => x.level === "fail",
+          );
+          expect(stryk.map((s) => `${logo[0]} ${modus} ${s.pair.id}`)).toEqual(
+            [],
+          );
         }
       }
     }
@@ -240,6 +244,28 @@ describe("ingen fremmede farger", () => {
   });
 });
 
+describe("mørk modus beholder karakteren", () => {
+  it("plomme og burgunder blir ikke lysnet til rosa, heller ikke mot grått", () => {
+    const g = generateFromBrand({
+      ...HONEYBEE,
+      support: ["#EFE6CA", "#2B2B2B"],
+    });
+    expect(g.dark.accent).toBe("#7E1961");
+    const r = generateFromBrand(HONEYBEE);
+    expect(r.dark.accent).toBe("#7E1961");
+    const b = generateFromBrand({ logo: ["#8E2C4E"], support: ["#F5EFE0"] });
+    expect(b.dark.primary).toBe("#8E2C4E");
+  });
+
+  it("overskriften får en lesbar farge når logofargen ikke kan være tekst", () => {
+    const r = generateFromBrand(HONEYBEE);
+    // Gull på nesten hvitt er for svakt til tekst, så overskriften blir
+    // plommen (highlight), og logofargen er flate og grafikk.
+    expect(headingColor(pal(r.light), true)).toBe("#7E1961");
+    expect(headingColor(pal(r.light))).toBe("#C8AD78");
+  });
+});
+
 describe("highlight", () => {
   it("blir aksenten og beholdes i lys modus", () => {
     const r = generateFromBrand(HONEYBEE);
@@ -265,7 +291,7 @@ describe("highlight", () => {
   it("knappeteksten består på highlightfargen i begge moduser", () => {
     const r = generateFromBrand(HONEYBEE);
     for (const c of [r.light, r.dark]) {
-      const knapp = checkPalette(pal(c)).find(
+      const knapp = checkPalette(pal(c), { brand: true }).find(
         (x) => x.pair.id === "button-accent",
       )!;
       expect(knapp.ratio!).toBeGreaterThanOrEqual(4.5);
@@ -284,7 +310,9 @@ describe("mørk logofarge blir bakgrunnen i mørk modus", () => {
       from: "#002245",
       to: "#C1B694",
     });
-    const stryk = checkPalette(pal(r.dark)).filter((x) => x.level === "fail");
+    const stryk = checkPalette(pal(r.dark), { brand: true }).filter(
+      (x) => x.level === "fail",
+    );
     expect(stryk).toEqual([]);
   });
 
@@ -331,11 +359,8 @@ describe("retning (kundens føring)", () => {
             ["lys", r.light],
             ["mørk", r.dark],
           ] as const) {
-            const stryk = checkPalette(pal(c)).filter(
-              (x) =>
-                x.level === "fail" &&
-                // Samme unntak som i bredden over: lys logo som overskrift.
-                !(modus === "lys" && x.pair.id === "heading-background"),
+            const stryk = checkPalette(pal(c), { brand: true }).filter(
+              (x) => x.level === "fail",
             );
             expect(
               stryk.map((x) => `${logo[0]} ${modus} ${x.pair.id}`),

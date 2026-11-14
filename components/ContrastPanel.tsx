@@ -12,6 +12,8 @@ type ApplyFn = (role: keyof ColorPalette["colors"], color: string) => void;
 
 interface ContrastPanelProps {
   palette: ColorPalette;
+  /** Paletten er laget fra en profilmanual (overskriften kan få en annen farge). */
+  brand?: boolean;
   /** Uten denne vises bare kopiering, ikke «Bruk». */
   onApply?: ApplyFn;
 }
@@ -130,9 +132,9 @@ function ContrastRow({
  * Kontrastsjekk for fargeparene i forhåndsvisningen, etter WCAG 2.2.
  * Par som stryker får et forslag til nærmeste farge som når AA.
  */
-export function ContrastPanel({ palette, onApply }: ContrastPanelProps) {
+export function ContrastPanel({ palette, brand, onApply }: ContrastPanelProps) {
   const { t } = useI18n();
-  const results = checkPalette(palette);
+  const results = checkPalette(palette, { brand });
   const failing = results.filter((r) => r.level === "fail").length;
 
   return (

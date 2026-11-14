@@ -169,11 +169,14 @@ export function buildCardModel(
     });
   }
 
-  const contrast = checkPalette(palette).map((r) => ({
-    label: m.contrast.pairs[r.pair.id] ?? r.pair.label,
-    ratio: r.ratio === null ? "–" : localizeRatio(formatRatio(r.ratio), locale),
-    level: r.level === "fail" ? k.belowAA : r.level,
-  }));
+  const contrast = checkPalette(palette, { brand: !!palette.brand }).map(
+    (r) => ({
+      label: m.contrast.pairs[r.pair.id] ?? r.pair.label,
+      ratio:
+        r.ratio === null ? "–" : localizeRatio(formatRatio(r.ratio), locale),
+      level: r.level === "fail" ? k.belowAA : r.level,
+    }),
+  );
 
   const dato = new Intl.DateTimeFormat(locale === "nb" ? "nb-NO" : "en-GB", {
     day: "numeric",
