@@ -185,8 +185,11 @@ export function PaletteEditor({
             <div className="grid grid-cols-1 min-[420px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {Object.entries(palette.colors).map(([key, value]) => (
                 <div key={key} className="space-y-2">
-                  <label className="block text-sm font-medium text-ink capitalize">
-                    {t.roles[key as Role]}
+                  <label className="block text-sm font-medium text-ink">
+                    {t.roles[key as Role]}{" "}
+                    <span className="font-mono text-[10px] font-normal text-subtle">
+                      {key}
+                    </span>
                   </label>
                   <div className="flex gap-2">
                     <input
@@ -234,8 +237,11 @@ export function PaletteEditor({
                 <div className="grid grid-cols-1 min-[420px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {Object.entries(darkColors).map(([key, value]) => (
                     <div key={key} className="space-y-2">
-                      <label className="block text-sm font-medium text-ink capitalize">
-                        {t.roles[key as Role]}
+                      <label className="block text-sm font-medium text-ink">
+                        {t.roles[key as Role]}{" "}
+                        <span className="font-mono text-[10px] font-normal text-subtle">
+                          {key}
+                        </span>
                       </label>
                       <div className="flex gap-2">
                         <input

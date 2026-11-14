@@ -78,30 +78,82 @@ const nb = {
     primaryTitle: "Hovedhandling",
     primaryText: "Slik ser de viktigste elementene ut med denne paletten.",
     primaryButton: "Kom i gang",
-    secondaryTitle: "Sekundær handling",
-    secondaryText: "Slik fungerer aksentfargen sammen med resten av paletten.",
+    secondaryTitle: "Annen handling",
+    secondaryText:
+      "Slik fungerer uthevingsfargen sammen med resten av paletten.",
     secondaryButton: "Les mer",
   },
   roles: {
-    primary: "Primær",
-    secondary: "Sekundær",
-    accent: "Aksent",
+    primary: "Hovedfarge",
+    secondary: "Flatefarge",
+    accent: "Uthevingsfarge",
     warm: "Varm",
     cool: "Kald",
     background: "Bakgrunn",
-    surface: "Flate",
-    foreground: "Forgrunn",
-    muted: "Dempet",
-    border: "Kant",
-    success: "Suksess",
+    surface: "Kort og bokser",
+    foreground: "Tekst",
+    muted: "Svak tekst",
+    border: "Linjer",
+    success: "OK",
     warning: "Advarsel",
     error: "Feil",
     info: "Info",
   } satisfies Record<Role, string>,
   details: {
-    swatches: "Fargeprøver",
-    semantic: "Statusfarger",
+    swatches: "Fargene",
+    semantic: "Varslingsfarger",
+    brandTitle: "Merkefargene",
+    brandHelp:
+      "Fargene fra profilmanualen. Resten av paletten er tilpasset dem.",
+    developer: "For utvikleren",
+    developerHelp:
+      "Paletten som roller i koden, med HEX, RGB og CMYK og eksport. Navnet i koden står i grått.",
     copied: "Kopiert!",
+  },
+  glossary: {
+    title: "Hva betyr ordene?",
+    intro:
+      "Designere bruker ulike ord om det samme. ColorCraft kaller fargene det de gjør.",
+    term: "I ColorCraft",
+    aka: "Også kalt",
+    use: "Brukes til",
+    rows: [
+      {
+        term: "Logofarge",
+        aka: "grunnfarge, primærfarge, hovedfarge",
+        use: "Logo, overskrifter og det som skal synes.",
+      },
+      {
+        term: "Flatefarger",
+        aka: "støttefarger, tilleggsfarger, sekundærfarger",
+        use: "Bakgrunner, seksjoner og infobokser.",
+      },
+      {
+        term: "Uthevingsfarge",
+        aka: "highlight, aksentfarge, signalfarge",
+        use: "Knapper og enkeltord. Aldri som flate.",
+      },
+      {
+        term: "Tekst og bakgrunn",
+        aka: "forgrunn",
+        use: "Lages automatisk, så kontrasten blir god nok.",
+      },
+      {
+        term: "Varm og kald",
+        aka: "",
+        use: "Varmere og kaldere farger fra merket, til grafikk og illustrasjoner.",
+      },
+      {
+        term: "Varslingsfarger",
+        aka: "statusfarger",
+        use: "Grønn, gul, rød og blå til meldinger på nettsiden. Lages automatisk.",
+      },
+      {
+        term: "Ekstra farger",
+        aka: "intern profil",
+        use: "Friere farger til PowerPoint og interne dokumenter. Bare internt.",
+      },
+    ],
   },
   contrast: {
     title: "Kontrastsjekk",
@@ -122,12 +174,12 @@ const nb = {
       "WCAG 2.2: AA krever 4,5:1 for tekst og 3:1 for stor tekst. AAA krever 7:1 og 4,5:1.",
     pairs: {
       "text-background": "Tekst på bakgrunn",
-      "text-surface": "Tekst på flate",
-      "muted-background": "Dempet på bakgrunn",
-      "muted-surface": "Dempet på flate",
-      "heading-background": "Overskrift (primær) på bakgrunn",
-      "button-primary": "Knappetekst på primær",
-      "button-accent": "Knappetekst på aksent",
+      "text-surface": "Tekst på kort og bokser",
+      "muted-background": "Svak tekst på bakgrunn",
+      "muted-surface": "Svak tekst på kort og bokser",
+      "heading-background": "Overskrift (hovedfarge) på bakgrunn",
+      "button-primary": "Knappetekst på hovedfargen",
+      "button-accent": "Knappetekst på uthevingsfargen",
     } as Record<string, string>,
     decimal: ",",
   },
@@ -151,19 +203,23 @@ const nb = {
   brand: {
     open: "Fra profilmanual",
     openTitle:
-      "Lag en palett fra logofargene og støttefargene i en profilmanual",
+      "Lag en palett fra logofargene og flatefargene i en profilmanual",
     title: "Palett fra profilmanual",
     intro:
-      "Legg inn fargene fra profilmanualen. Logofargene brukes til det som skal synes, som overskrifter og logo. Støttefargene er flatefarger. Highlight er farger som bare brukes i små doser, som knapper og enkeltord. Merkefargene endres ikke. Det er tekst, bakgrunn og statusfarger som tilpasses, så kontrasten består.",
+      "Legg inn fargene fra profilmanualen. Merkefargene endres ikke. Tekst, bakgrunn og varslingsfarger tilpasses, så kontrasten blir god nok.",
     name: "Navn på paletten",
     defaultName: "Ny profil",
     logo: "Logofarger",
     logoHelp: "1–3 farger. Den første er hovedfargen.",
-    support: "Støttefarger",
-    supportHelp: "0–4 flatefarger: bakgrunner, seksjoner og infobokser.",
-    highlight: "Highlight",
+    support: "Flatefarger",
+    supportHelp:
+      "0–4 farger til bakgrunner, seksjoner og infobokser. Også kalt støttefarger eller tilleggsfarger.",
+    highlight: "Uthevingsfarge",
     highlightHelp:
-      "0–2 farger som bare brukes i små doser: knapper og enkeltord. Aldri som flate.",
+      "0–2 farger til knapper og enkeltord, aldri som flate. Også kalt highlight eller aksentfarge.",
+    more: "Flere valg",
+    moreHelp:
+      "Retning, ekstra farger til internt bruk og sjekk av tallene i manualen.",
     direction: "Retning",
     directionHelp:
       "Kundens føring for uttrykket. Den styrer bare fargene som lages rundt merket: bakgrunn, tekst, kanter, varm og kald. Merkefargene endres ikke.",
@@ -177,16 +233,16 @@ const nb = {
     directionInfo: {
       neutral: "Balansert, uten særlig føring.",
       exclusive:
-        "Dempet og luftig: nesten nøytral bakgrunn, gråere tekst og mindre mettede tilleggsfarger.",
+        "Dempet og luftig: nesten nøytral bakgrunn, gråere tekst og mindre mettet varm og kald.",
       sales:
-        "Høy kontrast: hvit bakgrunn, nesten svart tekst og mer mettede tilleggsfarger.",
+        "Høy kontrast: hvit bakgrunn, nesten svart tekst og mer mettet varm og kald.",
       tonal:
         "Ton i ton: bakgrunn, flater og kanter i hovedfargens tone, og små sprang mellom fargene.",
-      playful: "Leken: tydelig tonet bakgrunn og mer mettede tilleggsfarger.",
+      playful: "Leken: tydelig tonet bakgrunn og mer mettet varm og kald.",
     },
-    internal: "Intern profil (valgfritt)",
+    internal: "Ekstra farger (bare internt)",
     internalHelp:
-      "0–6 friere tilleggsfarger til for eksempel PowerPoint og interne dokumenter. De merkes «bare internt» og brukes ikke i paletten for skjerm.",
+      "0–6 friere farger til for eksempel PowerPoint og interne dokumenter. Også kalt intern profil. De brukes ikke i paletten for skjerm.",
     suggest: "Foreslå farger",
     check: {
       title: "Sjekk verdiene fra manualen",
@@ -216,7 +272,7 @@ const nb = {
     noteDark: (role: string, from: string, to: string) =>
       `${role} er lysnet fra ${from} til ${to} i mørk modus, så den synes mot den mørke bakgrunnen.`,
     noteLogoBackground: (from: string, to: string) =>
-      `Logofargen (${from}) er bakgrunnen i mørk modus, slik den brukes som flate på trykk. ${to} er primærfargen oppå.`,
+      `Logofargen (${from}) er bakgrunnen i mørk modus, slik den brukes som flate på trykk. ${to} er hovedfargen oppå.`,
     noteLight: (role: string, color: string, ratio: string) =>
       `${role} (${color}) har ${ratio} mot den lyse bakgrunnen. Den passer best som flate eller grafikk, ikke til tekst.`,
     description: "Laget fra profilmanual",
@@ -228,17 +284,17 @@ const nb = {
     tabSurfaces: "Flater",
     tabsLabel: "Forhåndsvisning",
     intro:
-      "Støttefargene som heldekkende flater, slik en profilmanual bruker dem, med logo og tekst oppå. Logoen er grafikk og trenger 3:1. Teksten trenger 4,5:1.",
+      "Flatefargene som heldekkende flater, slik en profilmanual bruker dem, med logo og tekst oppå. Logoen er grafikk og trenger 3:1. Teksten trenger 4,5:1.",
     introNoBrand:
-      "Paletten er ikke laget fra en profilmanual, så flatene her er secondary og surface. Lag en palett med «Fra profilmanual» for å se dine egne støttefarger.",
-    support: (n: number) => `Støttefarge ${n}`,
+      "Paletten er ikke laget fra en profilmanual, så flatene her er flatefargen og kort og bokser. Lag en palett med «Fra profilmanual» for å se dine egne flatefarger.",
+    support: (n: number) => `Flatefarge ${n}`,
     logoSurface: "Logofargen som flate",
     chapter: (n: number) => `Kapittel ${n}`,
     heading: "Overskrift på flaten",
     body: "Brødtekst på flaten, med",
     highlight: "markert tekst",
     bodyEnd: "i logofargen.",
-    bodyEndHighlight: "i highlightfargen.",
+    bodyEndHighlight: "i uthevingsfargen.",
     infoboxes: "Infobokser på siden",
     infobox: "Infoboks med kort, viktig informasjon.",
     logo: "Logo",
@@ -260,9 +316,9 @@ const nb = {
   inUse: {
     tab: "I bruk",
     intro:
-      "Merkefargene på trykksaker og en presentasjon: logofargen som hovedflate, highlight eller en støttefarge på striper og knapper, og lyst papir. Trykksaker har ikke mørk modus, så her brukes merkefargene direkte.",
+      "Merkefargene på trykksaker og en presentasjon: logofargen som hovedflate, uthevingsfargen eller en flatefarge på striper og knapper, og lyst papir. Trykksaker har ikke mørk modus, så her brukes merkefargene direkte.",
     introNoBrand:
-      "Paletten på trykksaker og en presentasjon: primær som hovedflate, og sekundær eller aksent på striper og knapper. Lag en palett med «Fra profilmanual» for å se dine egne merkefarger.",
+      "Paletten på trykksaker og en presentasjon: hovedfargen som hovedflate, og flatefargen eller uthevingsfargen på striper og knapper. Lag en palett med «Fra profilmanual» for å se dine egne merkefarger.",
     rollup: "Rollup",
     ad: "Displayannonse",
     card: "Visittkort",
@@ -297,9 +353,9 @@ const nb = {
     intro:
       "Hver farge i ti valører, og varmere, kaldere, mer og mindre mettet med samme lyshet. Klikk en farge for å bruke den i paletten.",
     logo: (n: number) => `Logofarge ${n}`,
-    support: (n: number) => `Støttefarge ${n}`,
-    highlight: (n: number) => `Highlight ${n}`,
-    internal: (n: number) => `Intern ${n}`,
+    support: (n: number) => `Flatefarge ${n}`,
+    highlight: (n: number) => `Uthevingsfarge ${n}`,
+    internal: (n: number) => `Ekstra farge ${n}`,
     tint: "Tint",
     tintHelp:
       "Fargen trykt med lavere rasterprosent, regnet fra CMYK. Med CMYK fra manualen blir tintene riktigst.",
@@ -332,9 +388,9 @@ const nb = {
     working: "Lager …",
     failed: "Kunne ikke lage fargekortet",
     logoColors: "Logofarger",
-    supportColors: "Støttefarger",
-    highlightColors: "Highlight",
-    internalColors: "Intern profil (bare internt)",
+    supportColors: "Flatefarger",
+    highlightColors: "Uthevingsfarger",
+    internalColors: "Ekstra farger (bare internt)",
     mainColors: "Hovedfarger",
     fromManual: "(fra manualen)",
     approx: "ca.",
@@ -433,31 +489,82 @@ const en: Messages = {
     primaryText:
       "This demonstrates how primary elements look with this color palette.",
     primaryButton: "Get started",
-    secondaryTitle: "Secondary action",
+    secondaryTitle: "Other action",
     secondaryText:
-      "This shows how accent colors work within the overall design system.",
+      "This shows how the highlight color works with the rest of the palette.",
     secondaryButton: "Learn more",
   },
   roles: {
-    primary: "Primary",
-    secondary: "Secondary",
-    accent: "Accent",
+    primary: "Main color",
+    secondary: "Area color",
+    accent: "Highlight color",
     warm: "Warm",
     cool: "Cool",
     background: "Background",
-    surface: "Surface",
-    foreground: "Foreground",
-    muted: "Muted",
-    border: "Border",
+    surface: "Cards and boxes",
+    foreground: "Text",
+    muted: "Subtle text",
+    border: "Lines",
     success: "Success",
     warning: "Warning",
     error: "Error",
     info: "Info",
   },
   details: {
-    swatches: "Color swatches",
-    semantic: "Semantic colors",
+    swatches: "The colors",
+    semantic: "Alert colors",
+    brandTitle: "Brand colors",
+    brandHelp:
+      "The colors from the brand guide. The rest of the palette is fitted to them.",
+    developer: "For developers",
+    developerHelp:
+      "The palette as roles in code, with HEX, RGB and CMYK and export. The name in code is shown in grey.",
     copied: "Copied!",
+  },
+  glossary: {
+    title: "What do the words mean?",
+    intro:
+      "Designers use different words for the same thing. ColorCraft names the colors after what they do.",
+    term: "In ColorCraft",
+    aka: "Also called",
+    use: "Used for",
+    rows: [
+      {
+        term: "Logo color",
+        aka: "base color, primary color, main color",
+        use: "The logo, headings and what should stand out.",
+      },
+      {
+        term: "Area colors",
+        aka: "support colors, additional colors, secondary colors",
+        use: "Backgrounds, sections and info boxes.",
+      },
+      {
+        term: "Highlight color",
+        aka: "accent color, signal color",
+        use: "Buttons and single words. Never as an area.",
+      },
+      {
+        term: "Text and background",
+        aka: "foreground",
+        use: "Made automatically, so the contrast is good enough.",
+      },
+      {
+        term: "Warm and cool",
+        aka: "",
+        use: "Warmer and cooler colors from the brand, for graphics and illustrations.",
+      },
+      {
+        term: "Alert colors",
+        aka: "status colors, semantic colors",
+        use: "Green, yellow, red and blue for messages on the website. Made automatically.",
+      },
+      {
+        term: "Extra colors",
+        aka: "internal profile",
+        use: "Freer colors for PowerPoint and internal documents. Internal only.",
+      },
+    ],
   },
   contrast: {
     title: "Contrast check",
@@ -477,12 +584,12 @@ const en: Messages = {
       "WCAG 2.2: AA needs 4.5:1 for text and 3:1 for large text. AAA needs 7:1 and 4.5:1.",
     pairs: {
       "text-background": "Text on background",
-      "text-surface": "Text on surface",
-      "muted-background": "Muted on background",
-      "muted-surface": "Muted on surface",
-      "heading-background": "Heading (primary) on background",
-      "button-primary": "Button text on primary",
-      "button-accent": "Button text on accent",
+      "text-surface": "Text on cards and boxes",
+      "muted-background": "Subtle text on background",
+      "muted-surface": "Subtle text on cards and boxes",
+      "heading-background": "Heading (main color) on background",
+      "button-primary": "Button text on the main color",
+      "button-accent": "Button text on the highlight color",
     },
     decimal: ".",
   },
@@ -506,19 +613,23 @@ const en: Messages = {
   brand: {
     open: "From brand guide",
     openTitle:
-      "Create a palette from the logo and support colors in a brand guide",
+      "Create a palette from the logo and area colors in a brand guide",
     title: "Palette from brand guide",
     intro:
-      "Enter the colors from the brand guide. Logo colors are used for what should stand out, like headings and the logo. Support colors are surface colors. Highlight colors are only used in small doses, like buttons and single words. The brand colors are not changed. Text, background and status colors are adjusted so the contrast passes.",
+      "Enter the colors from the brand guide. The brand colors are not changed. Text, background and alert colors are adjusted so the contrast is good enough.",
     name: "Palette name",
     defaultName: "New brand",
     logo: "Logo colors",
     logoHelp: "1–3 colors. The first one is the main color.",
-    support: "Support colors",
-    supportHelp: "0–4 surface colors: backgrounds, sections and info boxes.",
-    highlight: "Highlight",
+    support: "Area colors",
+    supportHelp:
+      "0–4 colors for backgrounds, sections and info boxes. Also called support or additional colors.",
+    highlight: "Highlight color",
     highlightHelp:
-      "0–2 colors used only in small doses: buttons and single words. Never as a surface.",
+      "0–2 colors for buttons and single words, never as an area. Also called accent color.",
+    more: "More options",
+    moreHelp:
+      "Direction, extra colors for internal use and a check of the numbers in the brand guide.",
     direction: "Direction",
     directionHelp:
       "The client's brief for the look. It only steers the colors made around the brand: background, text, borders, warm and cool. The brand colors are not changed.",
@@ -532,17 +643,17 @@ const en: Messages = {
     directionInfo: {
       neutral: "Balanced, with no particular brief.",
       exclusive:
-        "Muted and airy: an almost neutral background, greyer text and less saturated extra colors.",
+        "Muted and airy: an almost neutral background, greyer text and less saturated warm and cool.",
       sales:
-        "High contrast: white background, near-black text and more saturated extra colors.",
+        "High contrast: white background, near-black text and more saturated warm and cool.",
       tonal:
         "Tone on tone: background, surfaces and borders in the main color's hue, with small steps between colors.",
       playful:
-        "Playful: a clearly tinted background and more saturated extra colors.",
+        "Playful: a clearly tinted background and more saturated warm and cool.",
     },
-    internal: "Internal profile (optional)",
+    internal: "Extra colors (internal only)",
     internalHelp:
-      "0–6 freer extra colors for things like PowerPoint and internal documents. They are marked “internal only” and are not used in the screen palette.",
+      "0–6 freer colors for things like PowerPoint and internal documents. Also called an internal profile. They are not used in the screen palette.",
     suggest: "Suggest colors",
     check: {
       title: "Check the values from the brand guide",
@@ -572,7 +683,7 @@ const en: Messages = {
     noteDark: (role, from, to) =>
       `${role} is lightened from ${from} to ${to} in dark mode so it stands out against the dark background.`,
     noteLogoBackground: (from, to) =>
-      `The logo color (${from}) is the background in dark mode, the way it is used as a surface in print. ${to} is the primary color on top.`,
+      `The logo color (${from}) is the background in dark mode, the way it is used as a surface in print. ${to} is the main color on top.`,
     noteLight: (role, color, ratio) =>
       `${role} (${color}) has ${ratio} against the light background. It works best as a surface or graphic, not for text.`,
     description: "Made from a brand guide",
@@ -584,10 +695,10 @@ const en: Messages = {
     tabSurfaces: "Surfaces",
     tabsLabel: "Preview",
     intro:
-      "The support colors as full surfaces, the way a brand guide uses them, with the logo and text on top. The logo is a graphic and needs 3:1. Text needs 4.5:1.",
+      "The area colors as full surfaces, the way a brand guide uses them, with the logo and text on top. The logo is a graphic and needs 3:1. Text needs 4.5:1.",
     introNoBrand:
-      "This palette was not made from a brand guide, so the surfaces here are secondary and surface. Create a palette with “From brand guide” to see your own support colors.",
-    support: (n) => `Support color ${n}`,
+      "This palette was not made from a brand guide, so the surfaces here are the area color and cards and boxes. Create a palette with “From brand guide” to see your own area colors.",
+    support: (n) => `Area color ${n}`,
     logoSurface: "Logo color as a surface",
     chapter: (n) => `Chapter ${n}`,
     heading: "Heading on the surface",
@@ -616,9 +727,9 @@ const en: Messages = {
   inUse: {
     tab: "In use",
     intro:
-      "The brand colors on print and a presentation: the logo color as the main surface, the highlight or a support color on stripes and buttons, and light paper. Print has no dark mode, so the brand colors are used directly.",
+      "The brand colors on print and a presentation: the logo color as the main surface, the highlight color or an area color on stripes and buttons, and light paper. Print has no dark mode, so the brand colors are used directly.",
     introNoBrand:
-      "The palette on print and a presentation: primary as the main surface, and secondary or accent on stripes and buttons. Create a palette with “From brand guide” to see your own brand colors.",
+      "The palette on print and a presentation: the main color as the main surface, and the area color or highlight color on stripes and buttons. Create a palette with “From brand guide” to see your own brand colors.",
     rollup: "Roll-up banner",
     ad: "Display ad",
     card: "Business card",
@@ -653,9 +764,9 @@ const en: Messages = {
     intro:
       "Each color in ten values, plus warmer, cooler, more and less saturated at the same lightness. Click a color to use it in the palette.",
     logo: (n) => `Logo color ${n}`,
-    support: (n) => `Support color ${n}`,
-    highlight: (n) => `Highlight ${n}`,
-    internal: (n) => `Internal ${n}`,
+    support: (n) => `Area color ${n}`,
+    highlight: (n) => `Highlight color ${n}`,
+    internal: (n) => `Extra color ${n}`,
     tint: "Tint",
     tintHelp:
       "The color printed at a lower screen percentage, calculated from CMYK. With CMYK from the brand guide, the tints are most accurate.",
@@ -685,9 +796,9 @@ const en: Messages = {
     working: "Working …",
     failed: "Could not create the color card",
     logoColors: "Logo colors",
-    supportColors: "Support colors",
-    highlightColors: "Highlight",
-    internalColors: "Internal profile (internal only)",
+    supportColors: "Area colors",
+    highlightColors: "Highlight colors",
+    internalColors: "Extra colors (internal only)",
     mainColors: "Main colors",
     fromManual: "(from the brand guide)",
     approx: "approx.",
