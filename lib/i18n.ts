@@ -376,6 +376,13 @@ const nb = {
       `Én regel per linje blir en punktliste. Lagres i lenken, opptil ${maks} tegn.`,
     rulesGeneralHelp:
       "For eksempel hvor logoen kan stå, minste størrelse, eller farger som ikke skal brukes sammen.",
+    pantoneAdd: "+ Pantone",
+    pantoneChange: "Endre Pantone",
+    pantoneLabel: (farge: string) => `Pantone for ${farge}`,
+    pantonePlaceholder: "f.eks. 2945 C",
+    pantoneHelp:
+      "Skriv nummeret fra manualen. ColorCraft regner ikke om til Pantone.",
+    pantoneSource: "Pantone fra manualen",
     figma: "Til Figma",
     figmaHelp:
       "Fargene, tonetrappen og typografien som variabler. I Figma: åpne Variables, lag en ny samling og dra filen inn.",
@@ -979,6 +986,13 @@ const en: Messages = {
       `One rule per line becomes a bulleted list. Saved in the link, up to ${max} characters.`,
     rulesGeneralHelp:
       "For example where the logo may be placed, minimum size, or colors that must not be used together.",
+    pantoneAdd: "+ Pantone",
+    pantoneChange: "Edit Pantone",
+    pantoneLabel: (color: string) => `Pantone for ${color}`,
+    pantonePlaceholder: "e.g. 2945 C",
+    pantoneHelp:
+      "Enter the number from the brand guide. ColorCraft does not convert to Pantone.",
+    pantoneSource: "Pantone from the brand guide",
     figma: "For Figma",
     figmaHelp:
       "The colors, tone scale and typography as variables. In Figma: open Variables, create a new collection and drag the file in.",

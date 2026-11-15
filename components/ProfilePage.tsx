@@ -24,6 +24,14 @@ import {
 } from "@/lib/profile";
 import { decodeShare } from "@/lib/share";
 import { toneCss, toneScale } from "@/lib/toneScale";
+import {
+  cleanPantone,
+  pantoneKey,
+  readPantone,
+  withoutPantone,
+  withPantone,
+  type PantoneMap,
+} from "@/lib/pantone";
 import { toFigmaTokens } from "@/lib/figmaExport";
 import { fileSlug } from "@/lib/export";
 import {
@@ -196,6 +204,7 @@ function Profile() {
   const [maker, setMaker] = useState("");
   const [regler, setRegler] = useState<Rules>({});
   const [typo, setTypo] = useState<TypeSpec[]>([]);
+  const [pantone, setPantone] = useState<PantoneMap>({});
   const [syn, setSyn] = useState<Vision | "normal">("normal");
   const [lenke, setLenke] = useState<"" | "copied" | "failed">("");
   const [medLogo, setMedLogo] = useState(true);
@@ -208,6 +217,7 @@ function Profile() {
       setMaker(readMaker(h));
       setRegler(readRules(h));
       setTypo(readTypography(h));
+      setPantone(readPantone(h));
     };
     les();
     window.addEventListener("hashchange", les);
@@ -254,7 +264,7 @@ function Profile() {
   const profil = buildProfile(palette, locale);
   const navn = maker.trim();
   // Verktøyet leser ikke logoen fra lenken. Den følger med i nettleseren.
-  const tilVerktøy = `${localePath(locale)}#${withLogo(withoutTypography(withoutRules(withoutMaker(hash))), null)}`;
+  const tilVerktøy = `${localePath(locale)}#${withLogo(withoutPantone(withoutTypography(withoutRules(withoutMaker(hash)))), null)}`;
   const farger = profil.sections.flatMap((s) => s.colors.map((c) => c.hex));
   // Tonetrappen og Figma-filen: merkefargene uten intern profil, og for en
   // palett uten profil bare hovedfarge, uthevingsfarge og flatefarge.
@@ -277,7 +287,14 @@ function Profile() {
         colors: s.colors.map((c) => ({
           label: c.label,
           hex: c.hex,
-          description: `CMYK ${c.cmyk}`,
+          description: [
+            `CMYK ${c.cmyk}`,
+            cleanPantone(pantone[pantoneKey(c.hex)])
+              ? `Pantone ${cleanPantone(pantone[pantoneKey(c.hex)])}`
+              : "",
+          ]
+            .filter(Boolean)
+            .join(" · "),
         })),
       })),
       tones: unikeTonefarger.map((f) => ({
@@ -302,6 +319,15 @@ function Profile() {
     const ny = withMaker(hash, v);
     setHash(ny);
     window.history.replaceState(null, "", `#${ny}`);
+  };
+
+  // Feltet viser det som skrives. Lenken får det rensede.
+  const endrePantone = (hex: string, v: string) => {
+    const ny = { ...pantone, [pantoneKey(hex)]: v };
+    setPantone(ny);
+    const h = withPantone(hash, ny);
+    setHash(h);
+    window.history.replaceState(null, "", `#${h}`);
   };
 
   const endreTypo = (liste: TypeSpec[]) => {
@@ -472,6 +498,8 @@ function Profile() {
             s={s}
             regel={regler[s.kind] ?? ""}
             onRegel={(v) => endreRegel(s.kind, v)}
+            pantone={pantone}
+            onPantone={endrePantone}
           />
         ))}
 
@@ -664,10 +692,14 @@ function Section({
   s,
   regel,
   onRegel,
+  pantone,
+  onPantone,
 }: {
   s: ProfileSection;
   regel: string;
   onRegel: (v: string) => void;
+  pantone: PantoneMap;
+  onPantone: (hex: string, v: string) => void;
 }) {
   const { t } = useI18n();
   const p = t.profile;
@@ -707,7 +739,12 @@ function Section({
       </div>
       <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {s.colors.map((c) => (
-          <ColorCard key={c.hex + c.label} c={c} />
+          <ColorCard
+            key={c.hex + c.label}
+            c={c}
+            pantone={pantone[pantoneKey(c.hex)] ?? ""}
+            onPantone={(v) => onPantone(c.hex, v)}
+          />
         ))}
       </ul>
     </section>
@@ -1213,10 +1250,20 @@ function GeneralRules({
   );
 }
 
-function ColorCard({ c }: { c: ProfileColor }) {
+function ColorCard({
+  c,
+  pantone,
+  onPantone,
+}: {
+  c: ProfileColor;
+  pantone: string;
+  onPantone: (v: string) => void;
+}) {
   const { locale, t } = useI18n();
   const p = t.profile;
   const { kopiert, kopier } = useCopy();
+  const [endrer, setEndrer] = useState(false);
+  const pms = cleanPantone(pantone);
   const ratio = (r: number) => localizeRatio(formatRatio(r), locale);
   const nivå = (r: number) => {
     const l = contrastLevel(r);
@@ -1233,6 +1280,7 @@ function ColorCard({ c }: { c: ProfileColor }) {
         : c.cmyk.slice(t.card.approx.length + 1),
     ],
   ];
+  if (pms) verdier.push(["Pantone", pms]);
   const cmykKilde = c.cmykFromManual ? p.cmykManual : p.cmykApprox;
 
   return (
@@ -1278,7 +1326,39 @@ function ColorCard({ c }: { c: ProfileColor }) {
             </dd>
           </div>
         ))}
-        <p className="text-right text-[11px] text-subtle">{cmykKilde}</p>
+        <p className="text-right text-[11px] text-subtle">
+          {cmykKilde}
+          {pms && <> · {p.pantoneSource}</>}
+        </p>
+        {endrer ? (
+          <div className="space-y-1 pt-1 print:hidden">
+            <input
+              type="text"
+              aria-label={p.pantoneLabel(c.label)}
+              value={pantone}
+              maxLength={30}
+              placeholder={p.pantonePlaceholder}
+              autoFocus
+              onChange={(e) => onPantone(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === "Escape") setEndrer(false);
+              }}
+              onBlur={() => setEndrer(false)}
+              className={`${field} w-full`}
+            />
+            <p className="text-[11px] text-subtle">{p.pantoneHelp}</p>
+          </div>
+        ) : (
+          <div className="text-right print:hidden">
+            <button
+              type="button"
+              onClick={() => setEndrer(true)}
+              className="text-[11px] text-subtle underline hover:text-ink"
+            >
+              {pms ? p.pantoneChange : p.pantoneAdd}
+            </button>
+          </div>
+        )}
       </dl>
       <div className="flex flex-wrap gap-2 border-t border-line px-4 py-3 text-xs">
         <span
