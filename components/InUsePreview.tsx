@@ -7,17 +7,42 @@ import { localizeRatio } from "@/lib/i18n";
 import { inUseColors, type InUseColors } from "@/lib/inUse";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/components/I18nProvider";
+import { BrandLogo } from "@/components/BrandLogo";
 import type { ColorPalette } from "@/types/palette";
 
-/** Logomerket fra Flater, i én farge og valgfri størrelse. */
+/**
+ * Logomerket fra Flater, i én farge og valgfri størrelse. Er logoen lastet
+ * opp, vises den i stedet: fargeversjonen på papiret, og sort eller hvit på
+ * hovedflaten.
+ */
 function Logo({
   color,
   name,
   size = "md",
+  bg,
+  inColor,
 }: {
   color: string;
   name: string;
   size?: "sm" | "md" | "lg";
+  bg: string;
+  inColor: boolean;
+}) {
+  return (
+    <BrandLogo bg={bg} inColor={inColor} size={size === "sm" ? "sm" : "md"}>
+      <LogoPlassholder color={color} name={name} size={size} />
+    </BrandLogo>
+  );
+}
+
+function LogoPlassholder({
+  color,
+  name,
+  size,
+}: {
+  color: string;
+  name: string;
+  size: "sm" | "md" | "lg";
 }) {
   const px = { sm: 14, md: 20, lg: 26 }[size];
   return (
@@ -110,7 +135,13 @@ export function InUsePreview({
             aria-hidden="true"
           >
             <div className="space-y-2 p-3">
-              <Logo color={c.heroText} name={navn} size="sm" />
+              <Logo
+                color={c.heroText}
+                name={navn}
+                size="sm"
+                bg={c.hero}
+                inColor={false}
+              />
               <p className="pt-2 text-sm font-bold leading-tight">
                 {k.headline}
               </p>
@@ -148,7 +179,13 @@ export function InUsePreview({
               >
                 {k.cta}
               </span>
-              <Logo color={c.heroText} name={navn} size="sm" />
+              <Logo
+                color={c.heroText}
+                name={navn}
+                size="sm"
+                bg={c.hero}
+                inColor={false}
+              />
             </div>
           </div>
         </Mockup>
@@ -163,13 +200,18 @@ export function InUsePreview({
               className="flex aspect-[85/55] flex-col items-center justify-center rounded-sm shadow-md"
               style={{ backgroundColor: c.hero }}
             >
-              <Logo color={c.heroText} name={navn} />
+              <Logo
+                color={c.heroText}
+                name={navn}
+                bg={c.hero}
+                inColor={false}
+              />
             </div>
             <div
               className="relative flex aspect-[85/55] flex-col justify-between overflow-hidden rounded-sm p-2.5 shadow-md"
               style={{ backgroundColor: c.paper, color: c.paperText }}
             >
-              <Logo color={c.logo} name={navn} size="sm" />
+              <Logo color={c.logo} name={navn} size="sm" bg={c.paper} inColor />
               <div>
                 <p className="text-[10px] font-bold">{k.person}</p>
                 <p className="text-[8px] opacity-80">{k.role}</p>
@@ -192,7 +234,13 @@ export function InUsePreview({
           >
             <div className="w-1/3" style={{ backgroundColor: c.hero }}>
               <div className="flex h-full items-end p-2">
-                <Logo color={c.heroText} name="" size="sm" />
+                <Logo
+                  color={c.heroText}
+                  name=""
+                  size="sm"
+                  bg={c.hero}
+                  inColor={false}
+                />
               </div>
             </div>
             <div className="flex flex-1 flex-col justify-center gap-1 p-3">
@@ -233,7 +281,7 @@ export function InUsePreview({
                   />
                 ))}
               </div>
-              <Logo color={c.logo} name={navn} size="sm" />
+              <Logo color={c.logo} name={navn} size="sm" bg={c.paper} inColor />
             </div>
           </Mockup>
         )}

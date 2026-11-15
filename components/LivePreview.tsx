@@ -12,6 +12,12 @@ import { SurfacesPreview } from "@/components/SurfacesPreview";
 import { TonesPreview } from "@/components/TonesPreview";
 import { InUsePreview } from "@/components/InUsePreview";
 import { useI18n } from "@/components/I18nProvider";
+import {
+  BrandLogo,
+  LogoProvider,
+  LogoUpload,
+  useLogos,
+} from "@/components/BrandLogo";
 import { ColorPalette } from "@/types/palette";
 
 interface LivePreviewProps {
@@ -30,8 +36,19 @@ type Tab = "components" | "surfaces" | "tones" | "inUse";
  * (skalaer og varianter av merkefargene), og i bruk (trykksaker og
  * presentasjon).
  */
-export function LivePreview({ palette, brand, onApply }: LivePreviewProps) {
+export function LivePreview(props: LivePreviewProps) {
+  return (
+    <LogoProvider>
+      <Preview {...props} />
+    </LogoProvider>
+  );
+}
+
+function Preview({ palette, brand, onApply }: LivePreviewProps) {
   const { t } = useI18n();
+  const { logos } = useLogos();
+  const harLogo = Object.keys(logos).length > 0;
+  const [visLogo, setVisLogo] = useState(false);
   const [tab, setTab] = useState<Tab>("components");
   const rot = useRef<HTMLDivElement>(null);
   // En ny fane starter fra toppen, ikke midt i der forrige var rullet til.
@@ -75,7 +92,32 @@ export function LivePreview({ palette, brand, onApply }: LivePreviewProps) {
             {label}
           </button>
         ))}
+        <button
+          type="button"
+          aria-expanded={visLogo}
+          aria-controls="logo-upload"
+          onClick={() => setVisLogo((v) => !v)}
+          className={cn(
+            "ml-auto shrink-0 whitespace-nowrap rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors",
+            visLogo
+              ? "border-ink bg-sunken text-ink"
+              : "border-line text-subtle hover:border-ink hover:text-ink",
+          )}
+        >
+          {t.logo.button}
+          {harLogo && (
+            <span
+              aria-hidden="true"
+              className="ml-1.5 inline-block h-1.5 w-1.5 rounded-full bg-signal align-middle"
+            />
+          )}
+        </button>
       </div>
+      {visLogo && (
+        <div id="logo-upload">
+          <LogoUpload />
+        </div>
+      )}
       <div
         id="preview-panel"
         role="tabpanel"
@@ -122,6 +164,11 @@ function ComponentsPreview({
     >
       {/* Header */}
       <div className="text-center mb-8">
+        <div className="mb-3 flex justify-center empty:hidden">
+          <BrandLogo bg={palette.colors.background} inColor size="lg">
+            {null}
+          </BrandLogo>
+        </div>
         <h1
           className="text-3xl font-bold mb-2 transition-all duration-500 sm:text-4xl"
           style={{ color: overskrift }}
