@@ -10,6 +10,7 @@ import {
   isModifiedBuiltin,
 } from "@/lib/builtin";
 import { PaginatedPaletteSelector } from "@/components/PaletteSelector";
+import { SimpleToggle, useSimple } from "@/components/SimpleMode";
 import { LivePreview } from "@/components/LivePreview";
 import { ColorDetails } from "@/components/ColorDetails";
 import { PaletteEditor } from "@/components/PaletteEditor";
@@ -63,6 +64,7 @@ function ColorCraft() {
     colorPalettes[0].id,
   );
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const { simple } = useSimple();
   const [editorOpen, setEditorOpen] = useState(false);
   const [editingPalette, setEditingPalette] =
     useState<ExtendedColorPalette | null>(null);
@@ -153,6 +155,14 @@ function ColorCraft() {
       }
     }
   };
+
+  // Enkel visning har bare lys modus. Står mørk på (fra en lenke eller fra
+  // «Alt»), byttes det til lys når enkel visning slås på.
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (simple && isDarkMode) handleDarkModeToggle(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [simple, isDarkMode]);
 
   // Handle palette selection - respects current dark mode state
   const handlePaletteSelect = (paletteId: string) => {
@@ -443,7 +453,8 @@ function ColorCraft() {
     currentPalette.colors.secondary,
     currentPalette.colors.warm,
   ];
-  const harMørk = !!currentExtended.darkVariant;
+  // Enkel visning viser bare lys modus: fargene slik de står i manualen.
+  const harMørk = !!currentExtended.darkVariant && !simple;
 
   return (
     <div className="min-h-screen bg-paper text-ink">
@@ -474,6 +485,7 @@ function ColorCraft() {
             >
               {t.app.otherLanguage}
             </a>
+            <SimpleToggle />
             <ThemeToggle />
             <button
               type="button"
@@ -487,13 +499,15 @@ function ColorCraft() {
                   ? t.app.copyFailed
                   : t.app.share}
             </button>
-            <button
-              type="button"
-              onClick={handleCreatePalette}
-              className={btn("outline", "sm")}
-            >
-              {t.app.add}
-            </button>
+            {!simple && (
+              <button
+                type="button"
+                onClick={handleCreatePalette}
+                className={btn("outline", "sm")}
+              >
+                {t.app.add}
+              </button>
+            )}
             <button
               type="button"
               onClick={() => setBrandOpen(true)}
@@ -597,7 +611,7 @@ function ColorCraft() {
                   >
                     {t.app.edit}
                   </button>
-                  {currentExtended.brand && (
+                  {currentExtended.brand && !simple && (
                     <button
                       type="button"
                       onClick={handleEditRoles}
@@ -633,7 +647,7 @@ function ColorCraft() {
               <LivePreview
                 palette={currentPalette}
                 brand={currentExtended.brand}
-                onApply={handleApplySuggestion}
+                onApply={simple ? undefined : handleApplySuggestion}
               />
             </div>
           </section>

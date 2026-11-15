@@ -13,6 +13,7 @@ import { TonesPreview } from "@/components/TonesPreview";
 import { InUsePreview } from "@/components/InUsePreview";
 import { useI18n } from "@/components/I18nProvider";
 import { BrandLogo, LogoUpload, useLogos } from "@/components/BrandLogo";
+import { useSimple } from "@/components/SimpleMode";
 import { ColorPalette } from "@/types/palette";
 
 interface LivePreviewProps {
@@ -36,7 +37,10 @@ export function LivePreview({ palette, brand, onApply }: LivePreviewProps) {
   const { logos } = useLogos();
   const harLogo = Object.keys(logos).length > 0;
   const [visLogo, setVisLogo] = useState(false);
-  const [tab, setTab] = useState<Tab>("components");
+  const [valgt, setTab] = useState<Tab>("components");
+  const { simple } = useSimple();
+  // Valør og varme er automatikk og valg. Den er med i «Alt», ikke i enkel.
+  const tab = simple && valgt === "tones" ? "components" : valgt;
   const rot = useRef<HTMLDivElement>(null);
   // En ny fane starter fra toppen, ikke midt i der forrige var rullet til.
   const velg = (id: Tab) => {
@@ -49,6 +53,7 @@ export function LivePreview({ palette, brand, onApply }: LivePreviewProps) {
     ["tones", t.tones.tab],
     ["inUse", t.inUse.tab],
   ];
+  const synlige = faner.filter(([id]) => !(simple && id === "tones"));
   return (
     // min-h-full, ikke h-full: en klistret fanelinje følger bare med så langt
     // som boksen rundt den rekker, og innholdet er ofte høyere enn vinduet.
@@ -60,7 +65,7 @@ export function LivePreview({ palette, brand, onApply }: LivePreviewProps) {
         // forsvinner de ikke når man har rullet ned og bytter fane.
         className="sticky top-0 z-10 flex gap-1 overflow-x-auto border-b border-line bg-panel px-3 py-2.5 [scrollbar-width:none] sm:px-4"
       >
-        {faner.map(([id, label]) => (
+        {synlige.map(([id, label]) => (
           <button
             key={id}
             type="button"

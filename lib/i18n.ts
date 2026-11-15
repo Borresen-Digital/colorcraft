@@ -270,6 +270,7 @@ const nb = {
     light: "Lys",
     dark: "Mørk",
     allPass: "Alle kontrastparene består AA i begge moduser.",
+    allPassLight: "Alle kontrastparene består AA.",
     failing: (n: number) =>
       `${n} kontrastpar er under AA. Du ser hvilke i kontrastsjekken etterpå.`,
     noteDark: (role: string, from: string, to: string) =>
@@ -309,6 +310,15 @@ const nb = {
     fail: "under kravet",
     tints: "Tinter av flaten, med logoen",
     tintLabel: (p: number) => `${p} %`,
+  },
+  simple: {
+    label: "Visning",
+    simple: "Enkel",
+    all: "Alt",
+    simpleHelp:
+      "Enkel: fargene vises slik de står i manualen, i lys modus, uten automatikk og ekstra valg. Velg «Alt» for hele verktøyet.",
+    allHelp:
+      "Alt: hele verktøyet, med mørk modus, valør og varme, forslag, flere valg og utviklerdelen.",
   },
   logoColors: {
     title: "Farger fra logoen",
@@ -718,6 +728,7 @@ const en: Messages = {
     light: "Light",
     dark: "Dark",
     allPass: "All contrast pairs pass AA in both modes.",
+    allPassLight: "All contrast pairs pass AA.",
     failing: (n) =>
       `${n} contrast pairs are below AA. The contrast check shows which ones afterwards.`,
     noteDark: (role, from, to) =>
@@ -757,6 +768,15 @@ const en: Messages = {
     fail: "below the requirement",
     tints: "Tints of the surface, with the logo",
     tintLabel: (p) => `${p}%`,
+  },
+  simple: {
+    label: "View",
+    simple: "Simple",
+    all: "All",
+    simpleHelp:
+      "Simple: the colors are shown as they are in the brand guide, in light mode, without automation and extra options. Choose “All” for the whole tool.",
+    allHelp:
+      "All: the whole tool, with dark mode, tints and temperature, suggestions, more options and the developer section.",
   },
   logoColors: {
     title: "Colors from the logo",
