@@ -20,6 +20,7 @@ import { localizeRatio } from "@/lib/i18n";
 import { useI18n } from "@/components/I18nProvider";
 import { ManualCheck } from "@/components/ManualCheck";
 import { Glossary } from "@/components/Glossary";
+import { LogoColors, type LogoColorTarget } from "@/components/LogoColors";
 import { MAX_INTERNAL, suggestInternal } from "@/lib/internal";
 import type { ColorPalette } from "@/types/palette";
 
@@ -290,6 +291,36 @@ export function BrandBuilder({
     setNames((n) => ({ ...n, [l]: n[l].filter((_, j) => j !== i) }));
   };
 
+  // Fra «Farger fra logoen».
+  const maks: Record<LogoColorTarget, number> = {
+    logo: MAX_LOGO,
+    support: MAX_SUPPORT,
+    highlight: MAX_HIGHLIGHT,
+  };
+  const iListe = (l: LogoColorTarget, hex: string) =>
+    lister[l][0].some((c) => normalizeHex(c) === hex);
+  // Står fargen i en annen liste, flyttes den. En farge kan bare stå ett sted.
+  const leggTil = (l: LogoColorTarget, hex: string) => {
+    const [liste, sett] = lister[l];
+    if (liste.length >= maks[l] || iListe(l, hex)) return;
+    for (const annen of ["logo", "support", "highlight"] as const) {
+      if (annen === l) continue;
+      const i = lister[annen][0].findIndex((c) => normalizeHex(c) === hex);
+      // Logofargene må ha minst én farge.
+      if (i >= 0 && !(annen === "logo" && logo.length === 1)) fjern(annen, i);
+    }
+    sett([...liste, hex]);
+  };
+  const brukSomLogo = (hexes: string[]) => {
+    setLogo(hexes);
+    setNames((n) => ({ ...n, logo: [] }));
+    // En farge kan bare stå ett sted.
+    setSupport((s) => s.filter((c) => !hexes.includes(normalizeHex(c) ?? "")));
+    setHighlight((h) =>
+      h.filter((c) => !hexes.includes(normalizeHex(c) ?? "")),
+    );
+  };
+
   const handleCreate = () => {
     if (!result) return;
     const navn = name.trim() || b.defaultName;
@@ -420,6 +451,13 @@ export function BrandBuilder({
               className="w-full rounded-lg border border-field p-2 text-ink focus:border-accent focus:outline-none"
             />
           </div>
+
+          <LogoColors
+            onUseAsLogo={brukSomLogo}
+            onAdd={leggTil}
+            has={(hex, l) => iListe(l, hex)}
+            full={(l) => lister[l][0].length >= maks[l]}
+          />
 
           <div className="grid gap-5 sm:grid-cols-2">
             {seksjon("logo", b.logo, b.logoHelp, MAX_LOGO, 1)}
