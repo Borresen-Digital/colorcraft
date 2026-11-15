@@ -3,7 +3,7 @@ import { contrastRatio } from "@/lib/contrast";
 /**
  * Logoen kunden har i profilmanualen, i tre versjoner. Bildene lastes bare inn
  * i nettleseren (som blob-adresser) og forsvinner når siden lukkes. De lagres
- * ikke og kommer ikke med i delte lenker.
+ * ikke. Bare profilsiden kan legge fargeversjonen i lenken (lib/logoLink.ts).
  */
 export type LogoVariant = "color" | "black" | "white";
 export const LOGO_VARIANTS: LogoVariant[] = ["color", "black", "white"];

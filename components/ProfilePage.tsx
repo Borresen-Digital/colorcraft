@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { colorPalettes, type ExtendedColorPalette } from "@/data/palettes";
 import { formatCmyk } from "@/lib/cmyk";
 import { contrastLevel, contrastRatio, formatRatio } from "@/lib/contrast";
@@ -15,8 +15,14 @@ import {
   type ProfileSection,
 } from "@/lib/profile";
 import { decodeShare } from "@/lib/share";
+import {
+  decodeLogo,
+  encodeLogo,
+  readLogoParam,
+  withLogo,
+} from "@/lib/logoLink";
 import { btn, field, panel } from "@/lib/ui";
-import { BrandLogo, LogoUpload } from "@/components/BrandLogo";
+import { BrandLogo, LogoUpload, useLogos } from "@/components/BrandLogo";
 import { ColorCardPanel } from "@/components/ColorCardPanel";
 import { FanMark } from "@/components/FanMark";
 import { I18nProvider, useI18n } from "@/components/I18nProvider";
@@ -52,6 +58,107 @@ function useCopy() {
   return { kopiert, kopier };
 }
 
+/** Høyden en bildefil gjøres om til før den legges i lenken. */
+const LENKE_HØYDE = 240;
+
+/**
+ * En bildefil som en liten WebP (eller PNG der nettleseren ikke lager WebP),
+ * så den får plass i lenken. Tegnes i nettleseren, ingenting sendes.
+ */
+async function småBilde(blob: Blob): Promise<Blob | null> {
+  const url = URL.createObjectURL(blob);
+  try {
+    const img = new Image();
+    img.src = url;
+    await img.decode();
+    const nh = img.naturalHeight || LENKE_HØYDE;
+    const nw = img.naturalWidth || nh * 3;
+    const h = Math.min(LENKE_HØYDE, nh);
+    const w = Math.max(1, Math.round((nw * h) / nh));
+    const c = document.createElement("canvas");
+    c.width = w;
+    c.height = h;
+    c.getContext("2d")?.drawImage(img, 0, 0, w, h);
+    const lag = (type: string, q?: number) =>
+      new Promise<Blob | null>((r) => c.toBlob(r, type, q));
+    const webp = await lag("image/webp", 0.85);
+    if (webp?.type === "image/webp") return webp;
+    return await lag("image/png");
+  } catch {
+    return null;
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
+async function logoTilLenke(blob: Blob): Promise<string | null> {
+  if (blob.type === "image/svg+xml") {
+    const svg = await encodeLogo(
+      new Uint8Array(await blob.arrayBuffer()),
+      blob.type,
+    );
+    if (svg) return svg;
+  }
+  const liten = await småBilde(blob);
+  if (!liten) return null;
+  return encodeLogo(new Uint8Array(await liten.arrayBuffer()), liten.type);
+}
+
+type LogoILenke =
+  | { status: "none" }
+  | { status: "working" }
+  | { status: "ok"; verdi: string }
+  | { status: "too-big" };
+
+/**
+ * Logoen i lenken, begge veier: en logo i lenken lastes inn som
+ * fargeversjonen, og fargeversjonen som er lastet opp, gjøres klar til
+ * lenken, så «Kopier lenke» ikke trenger å vente.
+ */
+function useLogoILenke(hash: string | null): LogoILenke {
+  const { files, set } = useLogos();
+  const lest = useRef<string | null>(null);
+  const [klar, setKlar] = useState<LogoILenke>({ status: "none" });
+
+  useEffect(() => {
+    const verdi = hash ? readLogoParam(hash) : null;
+    if (!verdi || verdi === lest.current) return;
+    lest.current = verdi;
+    let avbrutt = false;
+    decodeLogo(verdi).then((logo) => {
+      if (avbrutt || !logo) return;
+      const ext = logo.mime.split("/")[1].replace("svg+xml", "svg");
+      set(
+        "color",
+        new File([logo.bytes as BlobPart], `logo.${ext}`, { type: logo.mime }),
+      );
+    });
+    return () => {
+      avbrutt = true;
+    };
+  }, [hash, set]);
+
+  const fil = files.color;
+  useEffect(() => {
+    let avbrutt = false;
+    if (!fil) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setKlar({ status: "none" });
+      return;
+    }
+    setKlar({ status: "working" });
+    logoTilLenke(fil).then((verdi) => {
+      if (avbrutt) return;
+      setKlar(verdi ? { status: "ok", verdi } : { status: "too-big" });
+    });
+    return () => {
+      avbrutt = true;
+    };
+  }, [fil]);
+
+  return klar;
+}
+
 function Profile() {
   const { locale, t } = useI18n();
   const p = t.profile;
@@ -59,6 +166,8 @@ function Profile() {
   const [hash, setHash] = useState<string | null>(null);
   const [maker, setMaker] = useState("");
   const [lenke, setLenke] = useState<"" | "copied" | "failed">("");
+  const [medLogo, setMedLogo] = useState(true);
+  const logoLenke = useLogoILenke(hash);
 
   useEffect(() => {
     const les = () => {
@@ -110,7 +219,8 @@ function Profile() {
 
   const profil = buildProfile(palette, locale);
   const navn = maker.trim();
-  const tilVerktøy = `${localePath(locale)}#${withoutMaker(hash)}`;
+  // Verktøyet leser ikke logoen fra lenken. Den følger med i nettleseren.
+  const tilVerktøy = `${localePath(locale)}#${withLogo(withoutMaker(hash), null)}`;
   const farger = profil.sections.flatMap((s) => s.colors.map((c) => c.hex));
 
   const endreMaker = (v: string) => {
@@ -120,8 +230,12 @@ function Profile() {
   };
 
   const kopierLenke = async () => {
+    const logo = medLogo && logoLenke.status === "ok" ? logoLenke.verdi : null;
+    const { origin, pathname } = window.location;
     try {
-      await navigator.clipboard.writeText(window.location.href);
+      await navigator.clipboard.writeText(
+        `${origin}${pathname}#${withLogo(hash, logo)}`,
+      );
       setLenke("copied");
     } catch {
       setLenke("failed");
@@ -188,8 +302,27 @@ function Profile() {
             <div className="mt-2 overflow-hidden rounded-xl border border-line">
               <LogoUpload />
             </div>
-            <p className="mt-1 text-subtle">{p.logoNote}</p>
           </details>
+          {logoLenke.status !== "none" && (
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+              <label className="flex items-center gap-2 font-medium">
+                <input
+                  type="checkbox"
+                  checked={medLogo && logoLenke.status === "ok"}
+                  disabled={logoLenke.status !== "ok"}
+                  onChange={(e) => setMedLogo(e.target.checked)}
+                  className="h-4 w-4 accent-[var(--cc-accent)]"
+                />
+                {p.logoInLink}
+              </label>
+              <span className="text-subtle" role="status">
+                {logoLenke.status === "working" && p.logoWorking}
+                {logoLenke.status === "ok" &&
+                  p.logoSize(logoLenke.verdi.length + 4)}
+                {logoLenke.status === "too-big" && p.logoTooBig}
+              </span>
+            </div>
+          )}
           <p className="text-[11px] text-subtle">{p.toolbarHelp}</p>
         </div>
       </aside>
