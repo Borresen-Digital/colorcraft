@@ -33,8 +33,8 @@ Live at [farger.borresendigital.no](https://farger.borresendigital.no), a free t
 1. **Clone the repository**
 
 ```bash
-git clone https://github.com/yourusername/ColorCraft.git
-cd ColorCraft
+git clone https://github.com/Borresen-Digital/colorcraft.git
+cd colorcraft
 ```
 
 2. **Install dependencies**
@@ -186,7 +186,7 @@ The optimized build will be available in the `.next/` directory.
 
 ## Contributing
 
-Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/yourusername/ColorCraft/issues).
+Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/Borresen-Digital/colorcraft/issues).
 
 ### Development Guidelines
 
