@@ -62,6 +62,8 @@ const nb = {
     paletteMode: "Vis paletten i",
     paletteActions: "Handlinger for paletten",
     paletteList: "Paletter",
+    profile: "Profilside",
+    profileTitle: "Åpne fargeprofilen som en side du kan sende til kunden",
   },
   selector: {
     title: "Velg palett",
@@ -311,6 +313,54 @@ const nb = {
     tints: "Tinter av flaten, med logoen",
     tintLabel: (p: number) => `${p} %`,
   },
+  profile: {
+    metaTitle: "Fargeprofil · ColorCraft",
+    metaDescription:
+      "Fargeprofilen til en merkevare: fargene med HEX, RGB og CMYK, tinter, kontrast og eksempler i bruk.",
+    eyebrow: "Fargeprofil",
+    madeBy: (navn: string) => `Laget av ${navn}`,
+    madeWith: "Laget med ColorCraft",
+    usage: {
+      logo: "Fargene i logoen. De bærer merket og brukes der det skal kjennes igjen.",
+      support:
+        "Flatefarger: heldekkende bakgrunner, inndeling av større områder, infobokser og kapitler. Tintene kan brukes som lysere flater.",
+      highlight:
+        "Brukes i små doser: knapper, linjer, ikoner og enkeltord. Ikke som flate.",
+      internal:
+        "Bare til intern bruk, for eksempel i presentasjoner. Ikke en del av den eksterne profilen.",
+      main: "Hovedfargene i paletten.",
+    },
+    copy: (verdi: string) => `Kopier ${verdi}`,
+    copied: "Kopiert",
+    tints: "Tinter",
+    cmykManual: "CMYK fra manualen",
+    cmykApprox: "CMYK omtrentlig, se merknaden nederst",
+    whiteText: "Hvit tekst",
+    blackText: "Svart tekst",
+    belowAA: "under AA",
+    inUse: "Slik ser det ut",
+    surfaces: "Flatene",
+    contrast: "Kontrast i paletten",
+    contrastHelp: "Tekst skal ha minst 4,5:1 (AA etter WCAG 2.2).",
+    download: "Fargekort til utskrift",
+    empty: "Det er ingen fargeprofil i denne lenken.",
+    emptyHelp:
+      "Lag eller velg en palett i ColorCraft, og trykk «Profilside» øverst.",
+    openTool: "Åpne ColorCraft",
+    toolbar: "For deg som designer",
+    toolbarHelp:
+      "Denne linjen vises ikke for utskrift. Lenken til kunden inneholder fargene og navnet ditt.",
+    maker: "Laget av",
+    makerPlaceholder: "Ditt navn eller firma",
+    copyLink: "Kopier lenke til kunden",
+    linkCopied: "Lenke kopiert!",
+    copyFailed: "Kunne ikke kopiere",
+    print: "Skriv ut",
+    edit: "Rediger i ColorCraft",
+    logo: "Logo",
+    logoNote:
+      "Logoen ligger ikke i lenken. Den vises bare i nettleseren der den er lastet opp.",
+  },
   simple: {
     label: "Visning",
     simple: "Enkel",
@@ -519,6 +569,8 @@ const en: Messages = {
     paletteMode: "Show the palette in",
     paletteActions: "Palette actions",
     paletteList: "Palettes",
+    profile: "Profile page",
+    profileTitle: "Open the color profile as a page you can send to the client",
   },
   selector: {
     title: "Choose palette",
@@ -768,6 +820,54 @@ const en: Messages = {
     fail: "below the requirement",
     tints: "Tints of the surface, with the logo",
     tintLabel: (p) => `${p}%`,
+  },
+  profile: {
+    metaTitle: "Color profile · ColorCraft",
+    metaDescription:
+      "A brand's color profile: the colors with HEX, RGB and CMYK, tints, contrast and examples in use.",
+    eyebrow: "Color profile",
+    madeBy: (name: string) => `Made by ${name}`,
+    madeWith: "Made with ColorCraft",
+    usage: {
+      logo: "The colors in the logo. They carry the brand and are used where it should be recognized.",
+      support:
+        "Surface colors: full-bleed backgrounds, dividing larger areas, info boxes and chapters. The tints can be used as lighter surfaces.",
+      highlight:
+        "Used in small doses: buttons, lines, icons and single words. Not as a surface.",
+      internal:
+        "For internal use only, for example in presentations. Not part of the external profile.",
+      main: "The main colors of the palette.",
+    },
+    copy: (value: string) => `Copy ${value}`,
+    copied: "Copied",
+    tints: "Tints",
+    cmykManual: "CMYK from the brand guide",
+    cmykApprox: "CMYK approximate, see the note at the bottom",
+    whiteText: "White text",
+    blackText: "Black text",
+    belowAA: "below AA",
+    inUse: "How it looks",
+    surfaces: "The surfaces",
+    contrast: "Contrast in the palette",
+    contrastHelp: "Text needs at least 4.5:1 (AA under WCAG 2.2).",
+    download: "Color card for print",
+    empty: "There is no color profile in this link.",
+    emptyHelp:
+      "Create or pick a palette in ColorCraft, and press “Profile page” at the top.",
+    openTool: "Open ColorCraft",
+    toolbar: "For you as the designer",
+    toolbarHelp:
+      "This bar is hidden when printing. The link for your client contains the colors and your name.",
+    maker: "Made by",
+    makerPlaceholder: "Your name or company",
+    copyLink: "Copy link for the client",
+    linkCopied: "Link copied!",
+    copyFailed: "Could not copy",
+    print: "Print",
+    edit: "Edit in ColorCraft",
+    logo: "Logo",
+    logoNote:
+      "The logo is not in the link. It only shows in the browser where it was uploaded.",
   },
   simple: {
     label: "View",

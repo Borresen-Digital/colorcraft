@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef } from "react";
 import { colorPalettes, ExtendedColorPalette } from "@/data/palettes";
 import { decodeShare, encodeShare } from "@/lib/share";
+import { profilePath } from "@/lib/profile";
+import Link from "next/link";
 import {
   applyOverrides,
   builtinOriginal,
@@ -499,6 +501,13 @@ function ColorCraft() {
                   ? t.app.copyFailed
                   : t.app.share}
             </button>
+            <Link
+              href={`${profilePath(locale)}#${encodeShare(currentExtended, false)}`}
+              className={btn("outline", "sm")}
+              title={t.app.profileTitle}
+            >
+              {t.app.profile}
+            </Link>
             {!simple && (
               <button
                 type="button"
