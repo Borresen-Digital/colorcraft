@@ -94,6 +94,7 @@ const nextConfig: NextConfig = {
       { source: "/profil", destination: "/nb/profil" },
       { source: "/konto", destination: "/nb/konto" },
       { source: "/personvern", destination: "/nb/personvern" },
+      { source: "/p/:slug", destination: "/nb/p/:slug" },
     ];
   },
   async redirects() {
@@ -102,6 +103,7 @@ const nextConfig: NextConfig = {
       { source: "/nb/profil", destination: "/profil", permanent: true },
       { source: "/nb/konto", destination: "/konto", permanent: true },
       { source: "/nb/personvern", destination: "/personvern", permanent: true },
+      { source: "/nb/p/:slug", destination: "/p/:slug", permanent: true },
     ];
   },
 };

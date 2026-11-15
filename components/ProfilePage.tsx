@@ -35,6 +35,8 @@ import {
 import { ProfileExport } from "@/components/ProfileExport";
 import { SectionNav, type NavItem } from "@/components/SectionNav";
 import { ViewSwitch } from "@/components/ViewSwitch";
+import { SaveToAccount } from "@/components/SaveToAccount";
+import { withSaved, withoutSaved } from "@/lib/savedProfiles";
 import type { ProfileExportInput } from "@/lib/profileExport";
 import {
   filterMatrix,
@@ -75,10 +77,23 @@ import type { Locale } from "@/lib/i18n";
  * ingenting lagres eller sendes. Siden viser alltid lys modus: fargene slik
  * de står i manualen.
  */
-export function ProfilePage({ locale }: { locale: Locale }) {
+/**
+ * `initialHash`: profilen kommer fra serveren (den korte lenken /p/…) i
+ * stedet for fra adressen. `readonly`: kunden ser profilen uten knappene
+ * for å redigere den.
+ */
+export function ProfilePage({
+  locale,
+  initialHash,
+  readonly = false,
+}: {
+  locale: Locale;
+  initialHash?: string;
+  readonly?: boolean;
+}) {
   return (
     <I18nProvider locale={locale}>
-      <Profile />
+      <Profile initialHash={initialHash} readonly={readonly} />
     </I18nProvider>
   );
 }
@@ -198,7 +213,13 @@ function useLogoILenke(hash: string | null): LogoILenke {
   return klar;
 }
 
-function Profile() {
+function Profile({
+  initialHash,
+  readonly,
+}: {
+  initialHash?: string;
+  readonly: boolean;
+}) {
   const { locale, t } = useI18n();
   const p = t.profile;
   // null til fragmentet er lest. Det finnes bare i nettleseren.
@@ -214,7 +235,7 @@ function Profile() {
 
   useEffect(() => {
     const les = () => {
-      const h = window.location.hash.replace(/^#/, "");
+      const h = initialHash ?? window.location.hash.replace(/^#/, "");
       setHash(h);
       setMaker(readMaker(h));
       setRegler(readRules(h));
@@ -222,9 +243,11 @@ function Profile() {
       setPantone(readPantone(h));
     };
     les();
+    // En lagret profil kommer fra serveren og endres ikke av adressen.
+    if (initialHash !== undefined) return;
     window.addEventListener("hashchange", les);
     return () => window.removeEventListener("hashchange", les);
-  }, []);
+  }, [initialHash]);
 
   // Profilen er et dokument til kunden, og vises alltid på lyst papir,
   // uansett hva rammen er satt til. Valget i verktøyet settes tilbake når
@@ -266,7 +289,7 @@ function Profile() {
   const profil = buildProfile(palette, locale);
   const navn = maker.trim();
   // Verktøyet leser ikke logoen fra lenken. Den følger med i nettleseren.
-  const tilVerktøy = `${localePath(locale)}#${withLogo(withoutPantone(withoutTypography(withoutRules(withoutMaker(hash)))), null)}`;
+  const tilVerktøy = `${localePath(locale)}#${withLogo(withoutSaved(withoutPantone(withoutTypography(withoutRules(withoutMaker(hash))))), null)}`;
   const farger = profil.sections.flatMap((s) => s.colors.map((c) => c.hex));
   // Tonetrappen og Figma-filen: merkefargene uten intern profil, og for en
   // palett uten profil bare hovedfarge, uthevingsfarge og flatefarge.
@@ -378,7 +401,7 @@ function Profile() {
     const { origin, pathname } = window.location;
     try {
       await navigator.clipboard.writeText(
-        `${origin}${pathname}#${withLogo(hash, logo)}`,
+        `${origin}${pathname}#${withLogo(withoutSaved(hash), logo)}`,
       );
       setLenke("copied");
     } catch {
@@ -388,52 +411,26 @@ function Profile() {
   };
 
   return (
-    <div className="min-h-screen bg-paper text-ink">
+    <div
+      className="min-h-screen bg-paper text-ink"
+      data-les={readonly ? "" : undefined}
+    >
       {/* Verktøylinjen er for designeren og skrives ikke ut. */}
-      <aside
-        aria-label={p.toolbar}
-        className="border-b border-line bg-panel print:hidden"
-      >
-        <div className="mx-auto max-w-5xl space-y-3 px-4 py-3 sm:px-6">
-          <div className="flex flex-wrap items-end gap-2">
-            <Link
-              href={tilVerktøy}
-              className="flex items-center gap-2 rounded-lg"
-              title={p.edit}
+      {readonly ? (
+        <aside
+          aria-label={p.toolbar}
+          className="border-b border-line bg-panel print:hidden"
+        >
+          <div className="mx-auto flex max-w-5xl flex-wrap items-end gap-2 px-4 py-3 sm:px-6">
+            <a
+              href={localePath(locale)}
+              className="mr-auto flex items-center gap-2 rounded-lg"
             >
               <FanMark colors={farger} size={28} />
               <span className="font-display text-lg font-extrabold tracking-tight">
                 Color<span className="font-semibold text-subtle">Craft</span>
               </span>
-            </Link>
-            <ViewSwitch
-              active="profile"
-              toolHref={tilVerktøy}
-              profileHref={`#${hash}`}
-              className="mr-auto"
-            />
-            <label className="flex min-w-48 flex-col gap-1 text-xs font-medium">
-              {p.maker}
-              <input
-                type="text"
-                value={maker}
-                maxLength={60}
-                placeholder={p.makerPlaceholder}
-                onChange={(e) => endreMaker(e.target.value)}
-                className={field}
-              />
-            </label>
-            <button
-              type="button"
-              onClick={kopierLenke}
-              className={btn("primary", "md")}
-            >
-              {lenke === "copied"
-                ? p.linkCopied
-                : lenke === "failed"
-                  ? p.copyFailed
-                  : p.copyLink}
-            </button>
+            </a>
             <label className="flex flex-col gap-1 text-xs font-medium">
               {p.vision}
               <select
@@ -457,37 +454,125 @@ function Profile() {
               {p.print}
             </button>
           </div>
-          <details className="text-xs">
-            <summary className="cursor-pointer text-subtle hover:text-ink">
-              {p.logo}
-            </summary>
-            <div className="mt-2 overflow-hidden rounded-xl border border-line">
-              <LogoUpload />
-            </div>
-          </details>
-          {logoLenke.status !== "none" && (
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
-              <label className="flex items-center gap-2 font-medium">
+        </aside>
+      ) : (
+        <aside
+          aria-label={p.toolbar}
+          className="border-b border-line bg-panel print:hidden"
+        >
+          <div className="mx-auto max-w-5xl space-y-3 px-4 py-3 sm:px-6">
+            <div className="flex flex-wrap items-end gap-2">
+              <Link
+                href={tilVerktøy}
+                className="flex items-center gap-2 rounded-lg"
+                title={p.edit}
+              >
+                <FanMark colors={farger} size={28} />
+                <span className="font-display text-lg font-extrabold tracking-tight">
+                  Color<span className="font-semibold text-subtle">Craft</span>
+                </span>
+              </Link>
+              <ViewSwitch
+                active="profile"
+                toolHref={tilVerktøy}
+                profileHref={`#${hash}`}
+                className="mr-auto"
+              />
+              <label className="flex min-w-48 flex-col gap-1 text-xs font-medium">
+                {p.maker}
                 <input
-                  type="checkbox"
-                  checked={medLogo && logoLenke.status === "ok"}
-                  disabled={logoLenke.status !== "ok"}
-                  onChange={(e) => setMedLogo(e.target.checked)}
-                  className="h-4 w-4 accent-[var(--cc-accent)]"
+                  type="text"
+                  value={maker}
+                  maxLength={60}
+                  placeholder={p.makerPlaceholder}
+                  onChange={(e) => endreMaker(e.target.value)}
+                  className={field}
                 />
-                {p.logoInLink}
               </label>
-              <span className="text-subtle" role="status">
-                {logoLenke.status === "working" && p.logoWorking}
-                {logoLenke.status === "ok" &&
-                  p.logoSize(logoLenke.verdi.length + 4)}
-                {logoLenke.status === "too-big" && p.logoTooBig}
-              </span>
+              <button
+                type="button"
+                onClick={kopierLenke}
+                className={btn("primary", "md")}
+              >
+                {lenke === "copied"
+                  ? p.linkCopied
+                  : lenke === "failed"
+                    ? p.copyFailed
+                    : p.copyLink}
+              </button>
+              <label className="flex flex-col gap-1 text-xs font-medium">
+                {p.vision}
+                <select
+                  value={syn}
+                  onChange={(e) => setSyn(e.target.value as Vision | "normal")}
+                  className={field}
+                >
+                  <option value="normal">{p.visionNormal}</option>
+                  {VISIONS.map((v) => (
+                    <option key={v} value={v}>
+                      {p.visions[v]}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <button
+                type="button"
+                onClick={() => window.print()}
+                className={btn("outline", "md")}
+              >
+                {p.print}
+              </button>
+              <SaveToAccount
+                hash={hash}
+                lagreHash={() =>
+                  withLogo(
+                    withoutSaved(hash),
+                    medLogo && logoLenke.status === "ok"
+                      ? logoLenke.verdi
+                      : null,
+                  )
+                }
+                title={profil.title}
+                locale={locale}
+                onSaved={(id) => {
+                  const ny = withSaved(hash, id);
+                  setHash(ny);
+                  window.history.replaceState(null, "", `#${ny}`);
+                }}
+              />
             </div>
-          )}
-          <p className="text-[11px] text-subtle">{p.toolbarHelp}</p>
-        </div>
-      </aside>
+            <details className="text-xs">
+              <summary className="cursor-pointer text-subtle hover:text-ink">
+                {p.logo}
+              </summary>
+              <div className="mt-2 overflow-hidden rounded-xl border border-line">
+                <LogoUpload />
+              </div>
+            </details>
+            {logoLenke.status !== "none" && (
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+                <label className="flex items-center gap-2 font-medium">
+                  <input
+                    type="checkbox"
+                    checked={medLogo && logoLenke.status === "ok"}
+                    disabled={logoLenke.status !== "ok"}
+                    onChange={(e) => setMedLogo(e.target.checked)}
+                    className="h-4 w-4 accent-[var(--cc-accent)]"
+                  />
+                  {p.logoInLink}
+                </label>
+                <span className="text-subtle" role="status">
+                  {logoLenke.status === "working" && p.logoWorking}
+                  {logoLenke.status === "ok" &&
+                    p.logoSize(logoLenke.verdi.length + 4)}
+                  {logoLenke.status === "too-big" && p.logoTooBig}
+                </span>
+              </div>
+            )}
+            <p className="text-[11px] text-subtle">{p.toolbarHelp}</p>
+          </div>
+        </aside>
+      )}
 
       <SectionNav label={p.onThisPage} items={navItems} />
 
@@ -772,6 +857,7 @@ function Section({
                 if (!egen) onRegel(s.usage);
                 setÅpen(true);
               }}
+              data-rediger
               className="text-xs font-medium text-subtle underline hover:text-ink print:hidden"
             >
               {egen ? p.rulesChange : p.rulesWrite}
@@ -836,7 +922,7 @@ function Typography({
 
   if (fonter.length === 0 && !åpen) {
     return (
-      <div className="print:hidden">
+      <div data-rediger className="print:hidden">
         <button
           type="button"
           onClick={() => {
@@ -959,6 +1045,7 @@ function Typography({
           <button
             type="button"
             onClick={() => setÅpen(true)}
+            data-rediger
             className="text-xs font-medium text-subtle underline hover:text-ink print:hidden"
           >
             {p.typeChange}
@@ -1241,7 +1328,7 @@ function GeneralRules({
 
   if (!egen && !åpen) {
     return (
-      <div className="print:hidden">
+      <div data-rediger className="print:hidden">
         <button
           type="button"
           onClick={() => setÅpen(true)}
@@ -1282,6 +1369,7 @@ function GeneralRules({
           <button
             type="button"
             onClick={() => setÅpen(true)}
+            data-rediger
             className="text-xs font-medium text-subtle underline hover:text-ink print:hidden"
           >
             {p.rulesChange}
@@ -1391,7 +1479,7 @@ function ColorCard({
             <p className="text-[11px] text-subtle">{p.pantoneHelp}</p>
           </div>
         ) : (
-          <div className="text-right print:hidden">
+          <div data-rediger className="text-right print:hidden">
             <button
               type="button"
               onClick={() => setEndrer(true)}

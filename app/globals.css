@@ -112,6 +112,11 @@ body {
   outline-offset: 2px;
 }
 
+/* Profilen på den korte lenken er for kunden: ingen redigeringsknapper. */
+[data-les] [data-rediger] {
+  display: none !important;
+}
+
 /* Seksjonene på profilsiden havner under menyen som står fast øverst. */
 [id^="profil-"] {
   scroll-margin-top: 4rem;

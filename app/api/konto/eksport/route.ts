@@ -35,6 +35,10 @@ export async function GET(req: Request): Promise<Response> {
     passkeys: await rader(
       'select "name", "deviceType", "backedUp", "createdAt", "aaguid" from "passkey" where "userId" = ?',
     ),
+    // Fragmentet er hele profilen, som den vises på den korte lenken.
+    profiles: await rader(
+      'select "slug", "locale", "title", "hash", "createdAt", "updatedAt" from "savedProfile" where "userId" = ? order by "createdAt"',
+    ),
   };
   return new Response(JSON.stringify(data, null, 2) + "\n", {
     headers: {
