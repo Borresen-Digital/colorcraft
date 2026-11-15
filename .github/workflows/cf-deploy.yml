@@ -152,6 +152,18 @@ jobs:
                 exit 1
               fi
               echo "ok: /profil og /en/profil"
+              # Formatbeskrivelsen for andre verktøy og AI.
+              llms=$(curl -s --max-time 20 "http://localhost:8787/llms.txt" || true)
+              if ! echo "$llms" | grep -q "colorcraft-profile"; then
+                echo "::error::/llms.txt mangler eller er feil."
+                exit 1
+              fi
+              skjema=$(curl -s --max-time 20 "http://localhost:8787/schema/colorcraft-profile-1.schema.json" || true)
+              if ! echo "$skjema" | grep -q '"const": "colorcraft-profile"'; then
+                echo "::error::Skjemaet for profilfilen mangler."
+                exit 1
+              fi
+              echo "ok: /llms.txt og skjemaet"
               # Favikonet ligger under [lang] og får en uvanlig adresse
               # (/-/icon.svg). Lenken i siden må gå til noe som svarer.
               ikon=$(grep -o '<link rel="icon" href="[^"]*' forside.html | head -1 | sed 's/.*href="//')
