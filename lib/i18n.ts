@@ -310,6 +310,20 @@ const nb = {
     tints: "Tinter av flaten, med logoen",
     tintLabel: (p: number) => `${p} %`,
   },
+  logo: {
+    button: "Din logo",
+    help: "Last opp logoen i farge, sort og hvit (SVG, PNG, JPG eller WebP). Den vises i forhåndsvisningen i stedet for plassholderen: fargeversjonen der logoen står i logofargen, og sort eller hvit der flaten krever det.",
+    privacy:
+      "Logoen blir i nettleseren og sendes ingen steder. Den lagres ikke og forsvinner når du lukker siden.",
+    variants: { color: "Farge", black: "Sort", white: "Hvit" },
+    choose: "Velg eller slipp fil",
+    upload: (v: string) => `Last opp logo: ${v}`,
+    remove: "Fjern",
+    removeLabel: (v: string) => `Fjern logo: ${v}`,
+    alt: "Logoen",
+    errorType: "Bruk SVG, PNG, JPG eller WebP.",
+    errorSize: "Filen er større enn 5 MB.",
+  },
   values: {
     title: "HEX, RGB og CMYK",
     outOfGamut: "kan ikke trykkes likt",
@@ -725,6 +739,20 @@ const en: Messages = {
     fail: "below the requirement",
     tints: "Tints of the surface, with the logo",
     tintLabel: (p) => `${p}%`,
+  },
+  logo: {
+    button: "Your logo",
+    help: "Upload the logo in colour, black and white (SVG, PNG, JPG or WebP). It replaces the placeholder in the preview: the colour version where the logo appears in the logo colour, and black or white where the surface calls for it.",
+    privacy:
+      "The logo stays in your browser and is sent nowhere. It is not saved and disappears when you close the page.",
+    variants: { color: "Colour", black: "Black", white: "White" },
+    choose: "Choose or drop a file",
+    upload: (v: string) => `Upload logo: ${v}`,
+    remove: "Remove",
+    removeLabel: (v: string) => `Remove logo: ${v}`,
+    alt: "The logo",
+    errorType: "Use SVG, PNG, JPG or WebP.",
+    errorSize: "The file is larger than 5 MB.",
   },
   values: {
     title: "HEX, RGB and CMYK",

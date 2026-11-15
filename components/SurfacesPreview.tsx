@@ -7,6 +7,7 @@ import { localizeRatio } from "@/lib/i18n";
 import { LOGO_MIN, surfacesFor, TEXT_MIN, type Surface } from "@/lib/surfaces";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/components/I18nProvider";
+import { BrandLogo } from "@/components/BrandLogo";
 import type { ColorPalette } from "@/types/palette";
 
 interface SurfacesPreviewProps {
@@ -105,7 +106,10 @@ function SurfaceSection({
       aria-label={`${tittel} ${s.color}`}
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <LogoMark color={s.logo} name={name} />
+        {/* På selve logofargen står logoen i negativ (sort eller hvit). */}
+        <BrandLogo bg={s.color} inColor={!s.logoInverted}>
+          <LogoMark color={s.logo} name={name} />
+        </BrandLogo>
         <span className="font-mono text-xs opacity-80">
           {tittel} · {s.color}
         </span>
@@ -148,17 +152,19 @@ function SurfaceSection({
                   aria-hidden="true"
                   className="flex items-center gap-1 font-semibold"
                 >
-                  <svg width="12" height="12" viewBox="0 0 28 28">
-                    <circle
-                      cx="14"
-                      cy="14"
-                      r="11"
-                      fill="none"
-                      stroke={s.logo}
-                      strokeWidth="5"
-                    />
-                    <circle cx="14" cy="14" r="4" fill={s.logo} />
-                  </svg>
+                  <BrandLogo bg={tt.hex} inColor size="xs">
+                    <svg width="12" height="12" viewBox="0 0 28 28">
+                      <circle
+                        cx="14"
+                        cy="14"
+                        r="11"
+                        fill="none"
+                        stroke={s.logo}
+                        strokeWidth="5"
+                      />
+                      <circle cx="14" cy="14" r="4" fill={s.logo} />
+                    </svg>
+                  </BrandLogo>
                   {f.tintLabel(tt.percent)}
                 </span>
                 <span
