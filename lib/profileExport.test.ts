@@ -65,8 +65,10 @@ describe("eksport av profilen", () => {
         expect(ut).not.toContain("*/ <!--");
       }
     }
-    expect(r("css").match(/\*\//g)).toHaveLength(1);
-    expect(r("android").match(/-->/g)).toHaveLength(1);
+    expect(r("css").split("*/").length - 1).toBe(1);
+    // Navnet kan ikke avslutte XML-kommentaren: «--» tas ut av navnet.
+    const xml = r("android");
+    expect(xml.split("--").length - 1).toBe(2);
   });
 
   it("CSS og Tailwind har farger, tonetrapp og fonter", () => {
