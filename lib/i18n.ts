@@ -64,12 +64,24 @@ const nb = {
     passkeyAddFailed: "Passkeyen ble ikke lagt til.",
     passkeyRemoveFailed: "Kunne ikke fjerne passkeyen.",
     remove: "Fjern",
+    profiles: "Mine profiler",
+    profilesHelp:
+      "Profiler du har lagret fra profilsiden. Den korte lenken viser alltid siste lagrede versjon.",
+    noProfiles:
+      "Ingen lagrede profiler ennå. Åpne en profilside og trykk «Lagre i kontoen».",
+    open: "Åpne",
+    copyLink: "Kopier lenke",
+    copied: "Kopiert",
+    deleteProfile: "Slett",
+    deleteProfileConfirm: (tittel: string) =>
+      `Slette «${tittel}»? Den korte lenken slutter å virke.`,
+    updated: "Oppdatert",
     yourData: "Dine data",
     exportHelp: "Last ned alt vi har lagret om kontoen din, som en JSON-fil.",
     export: "Last ned mine data",
     deleteTitle: "Slett kontoen",
     deleteHelp:
-      "Kontoen, innloggingene og passkeyene slettes for godt. Paletter i nettleseren og lenker du har delt, påvirkes ikke.",
+      "Kontoen, innloggingene, passkeyene og de lagrede profilene slettes for godt, og de korte lenkene slutter å virke. Paletter i nettleseren og vanlige lenker du har delt, påvirkes ikke.",
     deleteConfirm: (epost: string) => `Skriv ${epost} for å bekrefte`,
     deleteButton: "Slett kontoen for godt",
     deleteNeedsFresh:
@@ -92,7 +104,7 @@ const nb = {
       },
       {
         heading: "Hva vi lagrer",
-        body: "E-postadressen din. For hver innlogging: når den startet og utløper, og IP-adressen og nettleseren du brukte, for sikkerhet og mot misbruk. For passkeys: navnet, når den ble laget og den offentlige nøkkelen. Den private nøkkelen forlater aldri enheten din. Innloggingslenken har en engangskode som virker i ti minutter.",
+        body: "E-postadressen din. For hver innlogging: når den startet og utløper, og IP-adressen og nettleseren du brukte, for sikkerhet og mot misbruk. For passkeys: navnet, når den ble laget og den offentlige nøkkelen. Den private nøkkelen forlater aldri enheten din. Innloggingslenken har en engangskode som virker i ti minutter. Profilene du lagrer, med farger, tekst og logo, vises for alle som har den korte lenken.",
       },
       {
         heading: "Hvorfor",
@@ -532,6 +544,16 @@ const nb = {
       size: "Størrelse",
       note: "Merknad",
     },
+    saveToAccount: "Lagre i kontoen",
+    saveUpdate: "Oppdater lagret profil",
+    saveAsNew: "Lagre som ny",
+    saveSignIn: "Logg inn for å lagre",
+    saving: "Lagrer …",
+    saved: "Lagret.",
+    saveFailed: "Kunne ikke lagre profilen.",
+    saveLimit: "Du har nådd grensen på 100 profiler. Slett noen på kontosiden.",
+    shortLink: "Kort lenke",
+    copyShort: "Kopier",
     tones: "Tonetrapp",
     tonesHelp:
       "Hver farge i elleve trinn fra 50 (lysest) til 950 (mørkest), som i Tailwind og de fleste designsystemer. Trinnene har lik lyshet på tvers av fargene. Fargen selv står uendret på trinnet som passer best, merket med en prikk. Teksten på hvert trinn er hvit eller svart, den som står best.",
@@ -806,13 +828,25 @@ const en: Messages = {
     passkeyAddFailed: "The passkey was not added.",
     passkeyRemoveFailed: "Could not remove the passkey.",
     remove: "Remove",
+    profiles: "My profiles",
+    profilesHelp:
+      "Profiles you have saved from the profile page. The short link always shows the latest saved version.",
+    noProfiles:
+      "No saved profiles yet. Open a profile page and press “Save to account”.",
+    open: "Open",
+    copyLink: "Copy link",
+    copied: "Copied",
+    deleteProfile: "Delete",
+    deleteProfileConfirm: (title: string) =>
+      `Delete “${title}”? The short link stops working.`,
+    updated: "Updated",
     yourData: "Your data",
     exportHelp:
       "Download everything we store about your account, as a JSON file.",
     export: "Download my data",
     deleteTitle: "Delete the account",
     deleteHelp:
-      "The account, sign-ins and passkeys are deleted for good. Palettes in your browser and links you have shared are not affected.",
+      "The account, sign-ins, passkeys and saved profiles are deleted for good, and the short links stop working. Palettes in your browser and regular links you have shared are not affected.",
     deleteConfirm: (email: string) => `Type ${email} to confirm`,
     deleteButton: "Delete the account for good",
     deleteNeedsFresh:
@@ -835,7 +869,7 @@ const en: Messages = {
       },
       {
         heading: "What we store",
-        body: "Your email address. For each sign-in: when it started and expires, and the IP address and browser you used, for security and against abuse. For passkeys: the name, when it was created and the public key. The private key never leaves your device. The sign-in link has a one-time code that works for ten minutes.",
+        body: "Your email address. For each sign-in: when it started and expires, and the IP address and browser you used, for security and against abuse. For passkeys: the name, when it was created and the public key. The private key never leaves your device. The sign-in link has a one-time code that works for ten minutes. The profiles you save, with colors, text and logo, are shown to anyone who has the short link.",
       },
       {
         heading: "Why",
@@ -1276,6 +1310,17 @@ const en: Messages = {
       size: "Size",
       note: "Note",
     },
+    saveToAccount: "Save to account",
+    saveUpdate: "Update saved profile",
+    saveAsNew: "Save as new",
+    saveSignIn: "Sign in to save",
+    saving: "Saving …",
+    saved: "Saved.",
+    saveFailed: "Could not save the profile.",
+    saveLimit:
+      "You have reached the limit of 100 profiles. Delete some on the account page.",
+    shortLink: "Short link",
+    copyShort: "Copy",
     tones: "Tone scale",
     tonesHelp:
       "Each color in eleven steps from 50 (lightest) to 950 (darkest), as in Tailwind and most design systems. The steps have the same lightness across colors. The color itself stays unchanged at the step that fits best, marked with a dot. The text on each step is white or black, whichever works best.",

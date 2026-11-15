@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 import {
   authClient,
@@ -9,6 +10,8 @@ import {
 } from "@/lib/authClient";
 import { localePath, type Locale } from "@/lib/i18n";
 import { kontoPath, personvernPath } from "@/lib/accountPaths";
+import { profilePath } from "@/lib/profile";
+import { shortPath, withSaved } from "@/lib/savedProfiles";
 import { btn, field, panel } from "@/lib/ui";
 import { FanMark } from "@/components/FanMark";
 import { I18nProvider, useI18n } from "@/components/I18nProvider";
@@ -272,6 +275,8 @@ function SignedIn({ email }: { email: string }) {
         </p>
       )}
 
+      <SavedProfiles />
+
       <section
         aria-labelledby="konto-passkeys"
         className={`${panel} space-y-3 p-5`}
@@ -358,5 +363,133 @@ function SignedIn({ email }: { email: string }) {
         </button>
       </section>
     </div>
+  );
+}
+
+interface LagretProfil {
+  id: string;
+  slug: string;
+  locale: Locale;
+  title: string;
+  updatedAt: number;
+}
+
+/** Profilene lagret i kontoen, med kort lenke, åpne og slett. */
+function SavedProfiles() {
+  const { locale, t } = useI18n();
+  const k = t.account;
+  const router = useRouter();
+  const [liste, setListe] = useState<LagretProfil[] | null>(null);
+  const [kopiert, setKopiert] = useState<string | null>(null);
+  const [feil, setFeil] = useState(false);
+
+  const hent = async () => {
+    try {
+      const r = await fetch("/api/profiler", { cache: "no-store" });
+      const d = (await r.json()) as { profiles?: LagretProfil[] };
+      setListe(r.ok ? (d.profiles ?? []) : []);
+    } catch {
+      setListe([]);
+    }
+  };
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    hent();
+  }, []);
+
+  const kort = (p: LagretProfil) =>
+    `${window.location.origin}${shortPath(p.slug, p.locale)}`;
+
+  const åpne = async (p: LagretProfil) => {
+    const r = await fetch(`/api/profiler/${p.id}`, { cache: "no-store" });
+    if (!r.ok) return setFeil(true);
+    const d = (await r.json()) as { hash: string };
+    router.push(`${profilePath(p.locale)}#${withSaved(d.hash, p.id)}`);
+  };
+
+  const kopier = async (p: LagretProfil) => {
+    try {
+      await navigator.clipboard.writeText(kort(p));
+      setKopiert(p.id);
+      setTimeout(() => setKopiert(null), 2000);
+    } catch {
+      setFeil(true);
+    }
+  };
+
+  const slett = async (p: LagretProfil) => {
+    if (!window.confirm(k.deleteProfileConfirm(p.title))) return;
+    const r = await fetch(`/api/profiler/${p.id}`, { method: "DELETE" });
+    if (!r.ok) setFeil(true);
+    hent();
+  };
+
+  const dato = (ms: number) =>
+    new Date(ms).toLocaleDateString(locale === "en" ? "en-GB" : "nb-NO");
+
+  return (
+    <section
+      aria-labelledby="konto-profiler"
+      className={`${panel} space-y-3 p-5`}
+    >
+      <h2 id="konto-profiler" className="font-display text-xl font-bold">
+        {k.profiles}
+      </h2>
+      <p className="text-sm text-subtle">{k.profilesHelp}</p>
+      {liste === null ? (
+        <p className="text-sm text-subtle">{k.loading}</p>
+      ) : liste.length === 0 ? (
+        <p className="text-sm">{k.noProfiles}</p>
+      ) : (
+        <ul className="divide-y divide-line text-sm">
+          {liste.map((p) => (
+            <li key={p.id} className="space-y-1 py-3">
+              <div className="flex flex-wrap items-baseline justify-between gap-2">
+                <span className="font-semibold">{p.title}</span>
+                <span className="text-xs text-subtle">
+                  {k.updated} {dato(p.updatedAt)}
+                </span>
+              </div>
+              <a
+                href={shortPath(p.slug, p.locale)}
+                target="_blank"
+                rel="noopener"
+                className="block truncate font-mono text-xs underline"
+              >
+                {shortPath(p.slug, p.locale)}
+              </a>
+              <div className="flex flex-wrap gap-3 text-xs">
+                <button
+                  type="button"
+                  onClick={() => åpne(p)}
+                  className="font-medium underline"
+                >
+                  {k.open}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => kopier(p)}
+                  className="underline"
+                >
+                  {kopiert === p.id ? k.copied : k.copyLink}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => slett(p)}
+                  className="text-bad underline"
+                >
+                  {k.deleteProfile}
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+      {feil && (
+        <p role="alert" className="text-sm font-medium text-bad">
+          {k.sendFailed}
+        </p>
+      )}
+    </section>
   );
 }
