@@ -32,8 +32,8 @@ import {
   withPantone,
   type PantoneMap,
 } from "@/lib/pantone";
-import { toFigmaTokens } from "@/lib/figmaExport";
-import { fileSlug } from "@/lib/export";
+import { ProfileExport } from "@/components/ProfileExport";
+import type { ProfileExportInput } from "@/lib/profileExport";
 import {
   filterMatrix,
   similarPairs,
@@ -280,38 +280,34 @@ function Profile() {
     (f, i) => tonefarger.findIndex((g) => g.hex === f.hex) === i,
   );
 
-  const lastNedFigma = () => {
-    const json = toFigmaTokens({
-      groups: profil.sections.map((s) => ({
-        heading: s.heading,
-        colors: s.colors.map((c) => ({
-          label: c.label,
-          hex: c.hex,
-          description: [
-            `CMYK ${c.cmyk}`,
-            cleanPantone(pantone[pantoneKey(c.hex)])
-              ? `Pantone ${cleanPantone(pantone[pantoneKey(c.hex)])}`
-              : "",
-          ]
-            .filter(Boolean)
-            .join(" · "),
-        })),
+  // Alt eksporten trenger. Lenken er uten logoen, så den holder seg kort.
+  const eksport: ProfileExportInput = {
+    title: profil.title,
+    credit: `${p.madeWith} (farger.borresendigital.no)`,
+    maker: navn || undefined,
+    colors: profil.sections.flatMap((s) =>
+      s.colors.map((c) => ({
+        group: s.heading,
+        label: c.label,
+        hex: c.hex,
+        cmyk: c.cmyk,
+        pantone: cleanPantone(pantone[pantoneKey(c.hex)]) || undefined,
       })),
-      tones: unikeTonefarger.map((f) => ({
-        label: f.label,
-        scale: toneScale(f.hex),
+    ),
+    tones: unikeTonefarger.map((f) => ({
+      label: f.label,
+      scale: toneScale(f.hex),
+    })),
+    typography: typo.map(cleanType),
+    rules: [
+      ...profil.sections.map((s) => ({
+        group: s.heading,
+        text: cleanRule(regler[s.kind]),
       })),
-      typography: typo.map(cleanType),
-      names: p.figmaNames,
-    });
-    const url = URL.createObjectURL(
-      new Blob([json], { type: "application/json" }),
-    );
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${fileSlug(profil.title)}.figma.tokens.json`;
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
+      { group: p.rules, text: cleanRule(regler.general) },
+    ],
+    link: `${window.location.origin}${window.location.pathname}#${withLogo(hash, null)}`,
+    figmaNames: p.figmaNames,
   };
 
   const endreMaker = (v: string) => {
@@ -562,28 +558,35 @@ function Profile() {
           )}
         />
 
-        <div className="grid gap-4 md:grid-cols-2 print:hidden">
-          <section className={`${panel} p-4`}>
-            <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-subtle">
-              {p.download}
-            </p>
-            <ColorCardPanel palette={palette} defaultMaker={navn} />
-          </section>
-          <section className={`${panel} space-y-3 p-4`}>
-            <p className="text-xs font-semibold uppercase tracking-widest text-subtle">
-              {p.figma}
-            </p>
-            <p className="text-sm">{p.figmaHelp}</p>
-            <button
-              type="button"
-              onClick={lastNedFigma}
-              className={btn("primary", "md")}
+        <section
+          id="profil-eksport"
+          aria-labelledby="profil-eksport-tittel"
+          className="space-y-4 print:hidden"
+        >
+          <div className="max-w-2xl space-y-1">
+            <h2
+              id="profil-eksport-tittel"
+              className="font-display text-2xl font-bold tracking-tight"
             >
-              {p.figmaDownload}
-            </button>
-            <p className="text-xs text-subtle">{p.figmaNote}</p>
-          </section>
-        </div>
+              {p.export}
+            </h2>
+            <p className="text-sm text-subtle">{p.exportHelp}</p>
+          </div>
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)]">
+            <div className={`${panel} p-4`}>
+              <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-subtle">
+                {p.download}
+              </p>
+              <ColorCardPanel palette={palette} defaultMaker={navn} />
+            </div>
+            <div className={`${panel} p-4`}>
+              <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-subtle">
+                {p.exportCode}
+              </p>
+              <ProfileExport input={eksport} />
+            </div>
+          </div>
+        </section>
 
         <footer className="space-y-2 border-t border-line pt-6 text-xs text-subtle">
           <p>
