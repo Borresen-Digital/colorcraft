@@ -1,6 +1,6 @@
-# Bidra til Theme-Advisor
+# Bidra til ColorCraft
 
-Takk for at du vurderer å bidra til Theme-Advisor! Jeg setter stor pris på alle bidrag som kan gjøre dette fargepalettverktøyet enda bedre.
+Takk for at du vurderer å bidra til ColorCraft! Jeg setter stor pris på alle bidrag som kan gjøre dette fargepalettverktøyet enda bedre.
 
 ## Hvordan bidra
 
@@ -77,4 +77,4 @@ Hvis du finner en bug:
 
 ## Lisens
 
-Ved å bidra til Theme-Advisor, godtar du at dine bidrag vil bli lisensiert under samme MIT-lisens som prosjektet.
+Ved å bidra til ColorCraft, godtar du at dine bidrag vil bli lisensiert under samme MIT-lisens som prosjektet.
