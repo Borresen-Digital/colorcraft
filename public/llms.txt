@@ -1,0 +1,80 @@
+# ColorCraft
+
+> ColorCraft (https://farger.borresendigital.no) is a free color tool for designers, made by Børresen Digital in Norway. It turns the colors from a brand guide (logo colors, surface colors, highlight colors) into a full screen palette with light and dark mode, checks contrast against WCAG 2.2, and makes a profile page the designer can send to a client. Everything runs in the browser: there is no account, no database and no API. Palettes and profiles live in the URL fragment (after #), which is never sent to the server.
+
+The interface is Norwegian by default (`/`), with English at `/en`.
+
+## Pages
+
+- [Tool](https://farger.borresendigital.no/): create and adjust palettes. English: https://farger.borresendigital.no/en
+- [Profile page](https://farger.borresendigital.no/profil): the color profile for a client, read from the URL fragment. English: https://farger.borresendigital.no/en/profil
+- [Profile file schema](https://farger.borresendigital.no/schema/colorcraft-profile-1.schema.json): JSON Schema for the profile file below.
+
+## Recommended way for an AI to create a profile
+
+Write a profile file (format `colorcraft-profile`, version 1) and let the designer import it in the tool: "Fra profilmanual" (From brand guide) → "Importer profil (JSON)". The designer reviews the colors before anything is created, and typography, usage rules, Pantone numbers and "made by" carry over to the profile page.
+
+Building a link by hand is possible (see below), but a custom palette link needs all 14 screen colors for light mode, which ColorCraft normally computes from the brand colors. Prefer the profile file.
+
+### Profile file (colorcraft-profile, version 1)
+
+```json
+{
+  "format": "colorcraft-profile",
+  "version": 1,
+  "title": "Erling Olsen",
+  "maker": "Honeybeedesign",
+  "direction": "neutral",
+  "colors": [
+    { "role": "logo", "name": "Dark blue", "hex": "#002245", "cmyk": "100 80 30 40", "cmykSource": "manual", "pantone": "2945 C" },
+    { "role": "support", "name": "Warm reed", "hex": "#C1B694" },
+    { "role": "highlight", "name": "Fresh water", "hex": "#59A8BD" }
+  ],
+  "typography": [
+    { "role": "Headings", "font": "Montserrat", "weight": 700, "size": "32–48 pt", "fallback": "Arial" }
+  ],
+  "rules": [
+    { "role": "logo", "text": "Always on white or dark blue" },
+    { "role": "general", "text": "Keep clear space around the logo" }
+  ]
+}
+```
+
+Rules for the file:
+
+- `format` must be `"colorcraft-profile"` and `version` must be `1`. At most 200 kB.
+- `colors[].role`: `logo` (1–3, the first is the main brand color), `support` (0–4, surface colors used as full backgrounds), `highlight` (0–2, small doses only: buttons, single words, never surfaces), `internal` (0–6, internal use only, for example presentations). Extra colors in a group are dropped. Duplicate and invalid colors are skipped. At least one color is required.
+- `hex`: `#RRGGBB`. `name`: up to 60 characters.
+- `cmyk`: four numbers 0–100 separated by spaces. Only kept when `cmykSource` is `"manual"` (numbers from the printed brand guide). Otherwise ColorCraft computes an approximate value itself.
+- `pantone`: the number from the brand guide as text, for example `"2945 C"`. ColorCraft never converts to or from Pantone; the Pantone library is licensed.
+- `direction`: `neutral`, `exclusive`, `sales`, `tonal` or `playful`. It only steers the generated colors around the brand; brand colors are never changed.
+- `typography` (up to 4): `font` is required (letters, digits, spaces and `._-`), `weight` is 100–900, `size`, `fallback` and `note` are free text. Fonts are not downloaded; the profile page shows a sample if the font is installed.
+- `rules[].role`: `logo`, `support`, `highlight`, `internal`, `main` or `general`. `text` up to 600 characters; one rule per line becomes a bulleted list.
+- Unknown fields are ignored. Fields exported by the profile page but not needed for import: `group`, `tones`, `link`, `generator`.
+
+## URL fragment format
+
+Everything is in the fragment, as URL-encoded query parameters (`#a=1&b=2`).
+
+Palette:
+
+- `p=<id>`: a built-in palette. Ids: `sande`, `verdens-ende`, `ramnes`, `slottsfjellet`, `kaldnes`, `bokeskogen`, `larvikitt`, `lardal`, `borre`, `molen`, `ula`, `svenner`, `havet`, `solnedgang`, `skogen`.
+- `m=dark`: show the dark variant.
+- Custom palette: `v=1&n=<name>&l=<light>&d=<dark>`. `l` and `d` are 84 hex characters: 14 colors of 6 hex digits each, without `#`, in this order: primary, secondary, accent, warm, cool, background, surface, foreground, muted, border, success, warning, error, info. `d` is optional.
+- Brand colors (with a custom palette): `bl`, `bs`, `bh`, `bi` (logo, support, highlight, internal; concatenated 6-digit hex), `br` (direction, if not neutral), `bn` (color names separated by `|`, in the order logo, support, highlight, internal), `bc` (manual CMYK as `c_m_y_k`, separated by `.`, same order).
+
+Profile page only:
+
+- `mk`: "made by", up to 60 characters.
+- `ul`, `us`, `uh`, `ui`, `um`: usage rules for logo, support, highlight, internal and main colors. `ug`: general usage rules. Up to 600 characters each; line breaks allowed.
+- `ty1` … `ty4`: typography as `role|font|weight|size|fallback|note`.
+- `pn`: Pantone numbers as `RRGGBB~number`, separated by `|`.
+- `lg`: the logo, compressed. Made by the profile page; do not create it.
+
+## Exports on the profile page
+
+CSS variables, SCSS, Tailwind 4 (`@theme`), Figma variables (DTCG as Figma imports it), design tokens (DTCG with hex strings), SwiftUI, Flutter, Android `colors.xml`, and the profile file. Every brand color also gets a tone scale 50–950 in OKLCH with fixed lightness per step; the brand color itself is placed unchanged at the step with the closest lightness.
+
+## Not available yet
+
+There is no API or MCP server. Accounts and an authenticated MCP server are planned; until then, use the profile file.
