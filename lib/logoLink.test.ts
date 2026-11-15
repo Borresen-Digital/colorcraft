@@ -28,6 +28,10 @@ describe("logoen i lenken", () => {
     );
   });
 
+  it("fjerner også kommentarer som dukker opp etter første runde", () => {
+    expect(minifySvg("<svg><!<!---->-- x --></svg>")).toBe("<svg></svg>");
+  });
+
   it("pakker og pakker ut en SVG", async () => {
     const verdi = await encodeLogo(enc(SVG), "image/svg+xml");
     expect(verdi).toMatch(/^s[A-Za-z0-9_-]+$/);

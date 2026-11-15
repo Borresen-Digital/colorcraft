@@ -8,6 +8,10 @@ on:
   pull_request:
   workflow_dispatch:
 
+# Jobben leser bare koden.
+permissions:
+  contents: read
+
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true

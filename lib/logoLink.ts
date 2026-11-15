@@ -85,13 +85,24 @@ async function strøm(
   return ut;
 }
 
-/** Fjerner det en nettleser ikke trenger for å vise en SVG. */
+/**
+ * Fjerner det en nettleser ikke trenger for å vise en SVG, så lenken blir
+ * kortere. Dette er ikke rensing: sikkerheten kommer av at logoen bare vises
+ * som <img>. Fjerningen gjentas til teksten står stille, så en kommentar som
+ * dukker opp når en annen fjernes («<!<!---->--»), også blir borte.
+ */
 export function minifySvg(svg: string): string {
-  return svg
-    .replace(/<\?xml[\s\S]*?\?>/g, "")
-    .replace(/<!DOCTYPE[\s\S]*?>/gi, "")
-    .replace(/<!--[\s\S]*?-->/g, "")
-    .replace(/<metadata[\s\S]*?<\/metadata>/gi, "")
+  let forrige: string;
+  let s = svg;
+  do {
+    forrige = s;
+    s = s
+      .replace(/<\?xml[\s\S]*?\?>/g, "")
+      .replace(/<!DOCTYPE[\s\S]*?>/gi, "")
+      .replace(/<!--[\s\S]*?-->/g, "")
+      .replace(/<metadata[\s\S]*?<\/metadata>/gi, "");
+  } while (s !== forrige);
+  return s
     .replace(/>\s+</g, "><")
     .replace(/\s{2,}/g, " ")
     .trim();

@@ -21,6 +21,10 @@ on:
         type: boolean
         default: false
 
+# Jobben leser bare koden. Deployen bruker Cloudflare-tokenet, ikke GITHUB_TOKEN.
+permissions:
+  contents: read
+
 # Aldri to deploys i parallell.
 concurrency:
   group: cf-deploy
