@@ -1,7 +1,8 @@
 import type { ExtendedColorPalette } from "@/data/palettes";
 import { parseCmyk, type Cmyk } from "./cmyk";
 import { formatRatio } from "./contrast";
-import { PAGE, wrap, type Fill, type Op } from "./colorCard";
+import { logoOp, PAGE, wrap, type Fill, type Op } from "./colorCard";
+import type { LogoSizes } from "./logo";
 import { localizeRatio, MESSAGES, type Locale } from "./i18n";
 import { inUseColors, type InUseColors } from "./inUse";
 
@@ -54,7 +55,11 @@ const MØRK = "#1F2937";
 const LINJE = "#D1D5DB";
 const BILDE = "#8A8F96";
 
-export function layoutInUse(model: InUsePageModel, locale: Locale): Op[] {
+export function layoutInUse(
+  model: InUsePageModel,
+  locale: Locale,
+  logos: LogoSizes = {},
+): Op[] {
   const k = MESSAGES[locale].inUse;
   const sur = MESSAGES[locale].surfaces;
   const c = model.colors;
@@ -100,7 +105,11 @@ export function layoutInUse(model: InUsePageModel, locale: Locale): Op[] {
       color,
       ...(align && { align }),
     });
-  /** Logomerket: en ring med en prikk, og navnet ved siden av. */
+  /**
+   * Logomerket: en ring med en prikk, og navnet ved siden av. Er logoen lastet
+   * opp, står den der i stedet: farge på papiret, sort eller hvit på
+   * hovedflaten.
+   */
   const logo = (
     x: number,
     y: number,
@@ -108,7 +117,16 @@ export function layoutInUse(model: InUsePageModel, locale: Locale): Op[] {
     farge: string,
     navn: string,
     size: number,
+    bg: string,
+    inColor: boolean,
+    maxW: number,
   ) => {
+    const h = r * 2.8;
+    const bilde = logoOp(logos, bg, inColor, x - r, y - h / 2, h, maxW);
+    if (bilde) {
+      ops.push(bilde);
+      return;
+    }
     ops.push({ kind: "circle", cx: x, cy: y, r, stroke: farge, width: r / 3 });
     ops.push({ kind: "circle", cx: x, cy: y, r: r / 3, fill: farge });
     if (navn) tekst(x + r + 4, y + size / 3, navn, size, farge, true);
@@ -139,7 +157,7 @@ export function layoutInUse(model: InUsePageModel, locale: Locale): Op[] {
     const x = margin;
     const w = 110;
     rect(x, topp, w, 264, c.hero);
-    logo(x + 14, topp + 18, 6, c.heroText, model.name, 7);
+    logo(x + 14, topp + 18, 6, c.heroText, model.name, 7, c.hero, false, 86);
     linjer(x + 10, topp + 50, k.headline, 18, 11, c.heroText, true);
     linjer(x + 10, topp + 84, k.body, 28, 6.5, c.heroText);
     rect(x, topp + 110, w, 104, BILDE);
@@ -186,7 +204,7 @@ export function layoutInUse(model: InUsePageModel, locale: Locale): Op[] {
     );
     rect(x + w / 2 - 34, topp + 162, 68, 18, c.button);
     tekst(x + w / 2, topp + 174, k.cta, 7.5, c.buttonText, true, "center");
-    logo(x + 22, topp + 202, 5, c.heroText, model.name, 6.5);
+    logo(x + 22, topp + 202, 5, c.heroText, model.name, 6.5, c.hero, false, 80);
     tekst(x + w / 2, topp + 220 + 14, k.ad, 8, GRÅ, false, "center");
   }
 
@@ -195,11 +213,11 @@ export function layoutInUse(model: InUsePageModel, locale: Locale): Op[] {
     const x = margin + 260;
     const w = 170;
     rect(x, topp, w, 110, c.hero);
-    logo(x + 40, topp + 55, 9, c.heroText, model.name, 10);
+    logo(x + 40, topp + 55, 9, c.heroText, model.name, 10, c.hero, false, 128);
     const bak = topp + 122;
     rect(x, bak, w, 110, c.paper, LINJE);
     rect(x + w - 6, bak, 6, 110, c.band);
-    logo(x + 16, bak + 16, 5, c.logo, model.name, 7);
+    logo(x + 16, bak + 16, 5, c.logo, model.name, 7, c.paper, true, 100);
     tekst(x + 12, bak + 78, k.person, 8, c.paperText, true);
     tekst(x + 12, bak + 89, k.role, 6.5, c.paperText);
     tekst(x + 12, bak + 101, k.url, 6.5, c.paperText);
@@ -212,7 +230,7 @@ export function layoutInUse(model: InUsePageModel, locale: Locale): Op[] {
     const x = margin;
     rect(x, rad2, 240, 135, c.paper, LINJE);
     rect(x, rad2, 80, 135, c.hero);
-    logo(x + 14, rad2 + 121, 5, c.heroText, "", 0);
+    logo(x + 14, rad2 + 121, 5, c.heroText, "", 0, c.hero, false, 60);
     linjer(x + 94, rad2 + 58, k.slideTitle, 22, 11, c.paperText, true);
     rect(x + 94, rad2 + 84, 30, 3, c.band);
     tekst(x + 94, rad2 + 98, k.slideSub, 7, c.paperText);
@@ -238,7 +256,7 @@ export function layoutInUse(model: InUsePageModel, locale: Locale): Op[] {
       const h = (høyder[i % 6] / 100) * 74;
       rect(x + 12 + i * (bredde + 6), rad2 + 108 - h, bredde, h, farge);
     });
-    logo(x + 17, rad2 + 122, 4, c.logo, model.name, 6.5);
+    logo(x + 17, rad2 + 122, 4, c.logo, model.name, 6.5, c.paper, true, 90);
     tekst(x + 120, rad2 + 135 + 14, k.internalSlide, 8, GRÅ, false, "center");
   }
 

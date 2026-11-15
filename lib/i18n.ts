@@ -312,7 +312,7 @@ const nb = {
   },
   logo: {
     button: "Din logo",
-    help: "Last opp logoen i farge, sort og hvit (SVG, PNG, JPG eller WebP). Den vises i forhåndsvisningen i stedet for plassholderen: fargeversjonen der logoen står i logofargen, og sort eller hvit der flaten krever det.",
+    help: "Last opp logoen i farge, sort og hvit (SVG, PNG, JPG eller WebP). Den vises i forhåndsvisningen og på fargekortet i stedet for plassholderen: fargeversjonen der logoen står i logofargen, og sort eller hvit der flaten krever det.",
     privacy:
       "Logoen blir i nettleseren og sendes ingen steder. Den lagres ikke og forsvinner når du lukker siden.",
     variants: { color: "Farge", black: "Sort", white: "Hvit" },
@@ -402,6 +402,7 @@ const nb = {
     maker: "Laget av (valgfritt)",
     makerPlaceholder: "Ditt navn eller firma",
     withInUse: "Ta med «I bruk» som side 2",
+    withLogo: "Ta med logoen du har lastet opp",
     downloadPdf: "Last ned PDF",
     downloadPng: "Last ned PNG",
     working: "Lager …",
@@ -742,7 +743,7 @@ const en: Messages = {
   },
   logo: {
     button: "Your logo",
-    help: "Upload the logo in colour, black and white (SVG, PNG, JPG or WebP). It replaces the placeholder in the preview: the colour version where the logo appears in the logo colour, and black or white where the surface calls for it.",
+    help: "Upload the logo in colour, black and white (SVG, PNG, JPG or WebP). It replaces the placeholder in the preview and on the color card: the colour version where the logo appears in the logo colour, and black or white where the surface calls for it.",
     privacy:
       "The logo stays in your browser and is sent nowhere. It is not saved and disappears when you close the page.",
     variants: { color: "Colour", black: "Black", white: "White" },
@@ -829,6 +830,7 @@ const en: Messages = {
     maker: "Made by (optional)",
     makerPlaceholder: "Your name or company",
     withInUse: "Include “In use” as page 2",
+    withLogo: "Include the logo you uploaded",
     downloadPdf: "Download PDF",
     downloadPng: "Download PNG",
     working: "Working …",

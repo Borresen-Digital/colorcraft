@@ -1,5 +1,56 @@
 import { parseHex } from "./contrast";
 import { PAGE, type Op } from "./colorCard";
+import {
+  LOGO_VARIANTS,
+  type LogoSizes,
+  type LogoVariant,
+  type UploadedLogos,
+} from "./logo";
+
+/** De opplastede logoene klare til kortet: PNG til PDF-en, lerret til PNG-en. */
+export interface CardLogos {
+  sizes: LogoSizes;
+  png: Partial<Record<LogoVariant, Uint8Array>>;
+  canvas: Partial<Record<LogoVariant, HTMLCanvasElement>>;
+}
+
+/**
+ * Gjør logoene om til PNG. pdf-lib tar bare PNG og JPG, og SVG og WebP er
+ * vanlige logoformater. Logoen tegnes inntil 400 px høy (over 700 dpi i
+ * størrelsen den har på kortet), og gjennomsiktighet beholdes.
+ */
+export async function prepareLogos(logos: UploadedLogos): Promise<CardLogos> {
+  const ut: CardLogos = { sizes: {}, png: {}, canvas: {} };
+  for (const v of LOGO_VARIANTS) {
+    const src = logos[v];
+    if (!src) continue;
+    try {
+      const bilde = new Image();
+      bilde.src = src;
+      await bilde.decode();
+      // En SVG uten width og height kan mangle størrelse.
+      const nw = bilde.naturalWidth || 300;
+      const nh = bilde.naturalHeight || 100;
+      const skala = Math.min(400 / nh, 2400 / nw);
+      const lerret = document.createElement("canvas");
+      lerret.width = Math.max(1, Math.round(nw * skala));
+      lerret.height = Math.max(1, Math.round(nh * skala));
+      lerret
+        .getContext("2d")!
+        .drawImage(bilde, 0, 0, lerret.width, lerret.height);
+      const blob = await new Promise<Blob | null>((r) =>
+        lerret.toBlob(r, "image/png"),
+      );
+      if (!blob) continue;
+      ut.png[v] = new Uint8Array(await blob.arrayBuffer());
+      ut.canvas[v] = lerret;
+      ut.sizes[v] = { aspect: lerret.width / lerret.height };
+    } catch {
+      // Et bilde som ikke kan leses, hoppes over. Kortet får plassholderen.
+    }
+  }
+  return ut;
+}
 
 /**
  * Tegner fargekortet. Begge tegnerne får de samme operasjonene fra
@@ -18,6 +69,7 @@ import { PAGE, type Op } from "./colorCard";
 export async function renderPdf(
   pages: Op[][],
   title: string,
+  logos: CardLogos["png"] = {},
 ): Promise<Uint8Array> {
   const { PDFDocument, StandardFonts, rgb, cmyk } = await import("pdf-lib");
   const doc = await PDFDocument.create();
@@ -38,6 +90,14 @@ export async function renderPdf(
       })
       .join("");
 
+  const bilder: Partial<
+    Record<LogoVariant, Awaited<ReturnType<typeof doc.embedPng>>>
+  > = {};
+  for (const v of LOGO_VARIANTS) {
+    const png = logos[v];
+    if (png) bilder[v] = await doc.embedPng(png);
+  }
+
   const rgbAv = (hex: string) => {
     const { r, g, b } = parseHex(hex)!;
     return rgb(r / 255, g / 255, b / 255);
@@ -46,7 +106,16 @@ export async function renderPdf(
   for (const ops of pages) {
     const side = doc.addPage([PAGE.width, PAGE.height]);
     for (const op of ops) {
-      if (op.kind === "circle") {
+      if (op.kind === "image") {
+        const bilde = bilder[op.variant];
+        if (bilde)
+          side.drawImage(bilde, {
+            x: op.x,
+            y: PAGE.height - op.y - op.h,
+            width: op.w,
+            height: op.h,
+          });
+      } else if (op.kind === "circle") {
         side.drawCircle({
           x: op.cx,
           y: PAGE.height - op.cy,
@@ -104,7 +173,10 @@ export async function renderPdf(
  */
 const MELLOM = 24;
 
-export async function renderPng(pages: Op[][]): Promise<Blob> {
+export async function renderPng(
+  pages: Op[][],
+  logos: CardLogos["canvas"] = {},
+): Promise<Blob> {
   const skala = 2;
   const lerret = document.createElement("canvas");
   lerret.width = Math.round(PAGE.width * skala);
@@ -124,7 +196,10 @@ export async function renderPng(pages: Op[][]): Promise<Blob> {
     ctx.fillStyle = "#FFFFFF";
     ctx.fillRect(0, 0, PAGE.width, PAGE.height);
     for (const op of ops) {
-      if (op.kind === "circle") {
+      if (op.kind === "image") {
+        const bilde = logos[op.variant];
+        if (bilde) ctx.drawImage(bilde, op.x, op.y, op.w, op.h);
+      } else if (op.kind === "circle") {
         ctx.beginPath();
         ctx.arc(op.cx, op.cy, op.r, 0, Math.PI * 2);
         if (op.fill) {

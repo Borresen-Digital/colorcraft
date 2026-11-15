@@ -5,6 +5,7 @@ import type { ExtendedColorPalette } from "@/data/palettes";
 import { buildCardModel, cardFilename, layoutCard } from "@/lib/colorCard";
 import { buildInUseModel, layoutInUse } from "@/lib/cardInUse";
 import { useI18n } from "@/components/I18nProvider";
+import { useLogos } from "@/components/BrandLogo";
 
 /**
  * «Fargekort til kunden»: PDF eller PNG med fargene, lages i nettleseren.
@@ -15,6 +16,9 @@ export function ColorCardPanel({ palette }: { palette: ExtendedColorPalette }) {
   const k = t.card;
   const [maker, setMaker] = useState("");
   const [medIBruk, setMedIBruk] = useState(true);
+  const { logos } = useLogos();
+  const harLogo = Object.keys(logos).length > 0;
+  const [medLogo, setMedLogo] = useState(true);
   const [status, setStatus] = useState<"" | "working" | "failed">("");
 
   const lastNed = (blob: Blob, navn: string) => {
@@ -30,19 +34,26 @@ export function ColorCardPanel({ palette }: { palette: ExtendedColorPalette }) {
   const lag = async (format: "pdf" | "png") => {
     setStatus("working");
     try {
+      const { renderPdf, renderPng, prepareLogos } =
+        await import("@/lib/cardRender");
+      const logo = await prepareLogos(harLogo && medLogo ? logos : {});
       const sider = [
-        layoutCard(buildCardModel(palette, locale, maker, new Date()), locale),
+        layoutCard(
+          buildCardModel(palette, locale, maker, new Date()),
+          locale,
+          logo.sizes,
+        ),
         ...(medIBruk
-          ? [layoutInUse(buildInUseModel(palette, locale), locale)]
+          ? [layoutInUse(buildInUseModel(palette, locale), locale, logo.sizes)]
           : []),
       ];
-      const { renderPdf, renderPng } = await import("@/lib/cardRender");
       const blob =
         format === "pdf"
-          ? new Blob([(await renderPdf(sider, palette.name)) as BlobPart], {
-              type: "application/pdf",
-            })
-          : await renderPng(sider);
+          ? new Blob(
+              [(await renderPdf(sider, palette.name, logo.png)) as BlobPart],
+              { type: "application/pdf" },
+            )
+          : await renderPng(sider, logo.canvas);
       lastNed(blob, cardFilename(palette.name, locale, format));
       setStatus("");
     } catch {
@@ -80,6 +91,17 @@ export function ColorCardPanel({ palette }: { palette: ExtendedColorPalette }) {
         />
         {k.withInUse}
       </label>
+      {harLogo && (
+        <label className="flex items-center gap-2 text-xs text-ink">
+          <input
+            type="checkbox"
+            checked={medLogo}
+            onChange={(e) => setMedLogo(e.target.checked)}
+            className="h-4 w-4 accent-[var(--cc-accent)]"
+          />
+          {k.withLogo}
+        </label>
+      )}
       <div className="flex gap-2">
         <button
           type="button"
