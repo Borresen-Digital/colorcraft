@@ -376,6 +376,22 @@ const nb = {
       `Én regel per linje blir en punktliste. Lagres i lenken, opptil ${maks} tegn.`,
     rulesGeneralHelp:
       "For eksempel hvor logoen kan stå, minste størrelse, eller farger som ikke skal brukes sammen.",
+    figma: "Til Figma",
+    figmaHelp:
+      "Fargene, tonetrappen og typografien som variabler. I Figma: åpne Variables, lag en ny samling og dra filen inn.",
+    figmaDownload: "Last ned for Figma (.json)",
+    figmaNote:
+      "Filen følger DTCG-formatet Figma importerer. Hver fil blir en modus i samlingen.",
+    figmaNames: {
+      colors: "Farger",
+      tones: "Tonetrapp",
+      typography: "Typografi",
+      font: "Font",
+      fallback: "Reservefont",
+      weight: "Vekt",
+      size: "Størrelse",
+      note: "Merknad",
+    },
     tones: "Tonetrapp",
     tonesHelp:
       "Hver farge i elleve trinn fra 50 (lysest) til 950 (mørkest), som i Tailwind og de fleste designsystemer. Trinnene har lik lyshet på tvers av fargene. Fargen selv står uendret på trinnet som passer best, merket med en prikk. Teksten på hvert trinn er hvit eller svart, den som står best.",
@@ -963,6 +979,22 @@ const en: Messages = {
       `One rule per line becomes a bulleted list. Saved in the link, up to ${max} characters.`,
     rulesGeneralHelp:
       "For example where the logo may be placed, minimum size, or colors that must not be used together.",
+    figma: "For Figma",
+    figmaHelp:
+      "The colors, tone scale and typography as variables. In Figma: open Variables, create a new collection and drag the file in.",
+    figmaDownload: "Download for Figma (.json)",
+    figmaNote:
+      "The file follows the DTCG format Figma imports. Each file becomes a mode in the collection.",
+    figmaNames: {
+      colors: "Colors",
+      tones: "Tone scale",
+      typography: "Typography",
+      font: "Font",
+      fallback: "Fallback font",
+      weight: "Weight",
+      size: "Size",
+      note: "Note",
+    },
     tones: "Tone scale",
     tonesHelp:
       "Each color in eleven steps from 50 (lightest) to 950 (darkest), as in Tailwind and most design systems. The steps have the same lightness across colors. The color itself stays unchanged at the step that fits best, marked with a dot. The text on each step is white or black, whichever works best.",
