@@ -24,6 +24,16 @@ import {
 } from "@/lib/profile";
 import { decodeShare } from "@/lib/share";
 import {
+  cleanFont,
+  fontStack,
+  MAX_TYPES,
+  readTypography,
+  WEIGHTS,
+  withoutTypography,
+  withTypography,
+  type TypeSpec,
+} from "@/lib/typography";
+import {
   decodeLogo,
   encodeLogo,
   readLogoParam,
@@ -174,6 +184,7 @@ function Profile() {
   const [hash, setHash] = useState<string | null>(null);
   const [maker, setMaker] = useState("");
   const [regler, setRegler] = useState<Rules>({});
+  const [typo, setTypo] = useState<TypeSpec[]>([]);
   const [lenke, setLenke] = useState<"" | "copied" | "failed">("");
   const [medLogo, setMedLogo] = useState(true);
   const logoLenke = useLogoILenke(hash);
@@ -184,6 +195,7 @@ function Profile() {
       setHash(h);
       setMaker(readMaker(h));
       setRegler(readRules(h));
+      setTypo(readTypography(h));
     };
     les();
     window.addEventListener("hashchange", les);
@@ -230,12 +242,19 @@ function Profile() {
   const profil = buildProfile(palette, locale);
   const navn = maker.trim();
   // Verktøyet leser ikke logoen fra lenken. Den følger med i nettleseren.
-  const tilVerktøy = `${localePath(locale)}#${withLogo(withoutRules(withoutMaker(hash)), null)}`;
+  const tilVerktøy = `${localePath(locale)}#${withLogo(withoutTypography(withoutRules(withoutMaker(hash))), null)}`;
   const farger = profil.sections.flatMap((s) => s.colors.map((c) => c.hex));
 
   const endreMaker = (v: string) => {
     setMaker(v);
     const ny = withMaker(hash, v);
+    setHash(ny);
+    window.history.replaceState(null, "", `#${ny}`);
+  };
+
+  const endreTypo = (liste: TypeSpec[]) => {
+    setTypo(liste);
+    const ny = withTypography(hash, liste);
     setHash(ny);
     window.history.replaceState(null, "", `#${ny}`);
   };
@@ -370,6 +389,8 @@ function Profile() {
             onRegel={(v) => endreRegel(s.kind, v)}
           />
         ))}
+
+        <Typography liste={typo} onListe={endreTypo} />
 
         <GeneralRules
           regel={regler.general ?? ""}
@@ -581,6 +602,262 @@ function Section({
         ))}
       </ul>
     </section>
+  );
+}
+
+/**
+ * Om en font er installert: tekst i fonten måles mot to ulike
+ * reservefonter. Blir bredden den samme som reservefonten for begge, finnes
+ * ikke fonten.
+ */
+function fontFinnes(font: string): boolean {
+  const ctx = document.createElement("canvas").getContext("2d");
+  if (!ctx) return true;
+  const prøve = "mmmmmmmmmmlli WQ@#0123";
+  return (["monospace", "serif"] as const).some((reserve) => {
+    ctx.font = `72px ${reserve}`;
+    const uten = ctx.measureText(prøve).width;
+    ctx.font = `72px "${cleanFont(font)}", ${reserve}`;
+    return ctx.measureText(prøve).width !== uten;
+  });
+}
+
+/** Typografien. Uten fonter vises bare knappen, og ikke på trykk. */
+function Typography({
+  liste,
+  onListe,
+}: {
+  liste: TypeSpec[];
+  onListe: (l: TypeSpec[]) => void;
+}) {
+  const { t } = useI18n();
+  const p = t.profile;
+  const [åpen, setÅpen] = useState(false);
+  const fonter = liste.filter((x) => cleanFont(x.font));
+
+  const ny = (role: string, weight: number): TypeSpec => ({
+    role,
+    font: "",
+    weight,
+    size: "",
+    fallback: "",
+    note: "",
+  });
+  const endre = (i: number, felt: Partial<TypeSpec>) =>
+    onListe(liste.map((x, j) => (j === i ? { ...x, ...felt } : x)));
+
+  if (fonter.length === 0 && !åpen) {
+    return (
+      <div className="print:hidden">
+        <button
+          type="button"
+          onClick={() => {
+            if (liste.length === 0) {
+              onListe([ny(p.typeDefaults[0], 700), ny(p.typeDefaults[1], 400)]);
+            }
+            setÅpen(true);
+          }}
+          className={btn("outline", "sm")}
+        >
+          {p.typeAdd}
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <section aria-labelledby="profil-typografi" className="space-y-4">
+      <div className="max-w-2xl space-y-1">
+        <h2
+          id="profil-typografi"
+          className="font-display text-2xl font-bold tracking-tight"
+        >
+          {p.type}
+        </h2>
+        <p className="text-xs text-subtle print:hidden">{p.typeHelp}</p>
+      </div>
+
+      {åpen ? (
+        <div className="space-y-3 print:hidden">
+          {liste.map((x, i) => (
+            <fieldset
+              key={i}
+              className={`${panel} grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-3`}
+            >
+              <legend className="sr-only">
+                {x.role || `${p.typeFont} ${i + 1}`}
+              </legend>
+              <TypeField
+                label={p.typeRole}
+                value={x.role}
+                onChange={(v) => endre(i, { role: v })}
+              />
+              <TypeField
+                label={p.typeFont}
+                value={x.font}
+                placeholder="Montserrat"
+                onChange={(v) => endre(i, { font: v })}
+                autoFocus={i === 0 && !x.font}
+              />
+              <label className="flex flex-col gap-1 text-xs font-medium">
+                {p.typeWeight}
+                <select
+                  value={x.weight}
+                  onChange={(e) => endre(i, { weight: Number(e.target.value) })}
+                  className={field}
+                >
+                  {WEIGHTS.map((w) => (
+                    <option key={w} value={w}>
+                      {w} {p.weights[w]}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <TypeField
+                label={p.typeSize}
+                value={x.size}
+                placeholder={p.typeSizePlaceholder}
+                onChange={(v) => endre(i, { size: v })}
+              />
+              <TypeField
+                label={p.typeFallback}
+                value={x.fallback}
+                placeholder={p.typeFallbackPlaceholder}
+                onChange={(v) => endre(i, { fallback: v })}
+              />
+              <TypeField
+                label={p.typeNote}
+                value={x.note}
+                max={160}
+                onChange={(v) => endre(i, { note: v })}
+              />
+              <div className="sm:col-span-2 lg:col-span-3">
+                <button
+                  type="button"
+                  onClick={() => onListe(liste.filter((_, j) => j !== i))}
+                  className={btn("ghost", "sm")}
+                >
+                  {p.typeRemoveFont}
+                </button>
+              </div>
+            </fieldset>
+          ))}
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setÅpen(false)}
+              className={btn("primary", "sm")}
+            >
+              {p.rulesDone}
+            </button>
+            {liste.length < MAX_TYPES && (
+              <button
+                type="button"
+                onClick={() => onListe([...liste, ny("", 400)])}
+                className={btn("outline", "sm")}
+              >
+                {p.typeAddFont}
+              </button>
+            )}
+          </div>
+        </div>
+      ) : (
+        <>
+          <ul className="grid gap-4 sm:grid-cols-2">
+            {fonter.map((x, i) => (
+              <TypeCard key={i} x={x} />
+            ))}
+          </ul>
+          <button
+            type="button"
+            onClick={() => setÅpen(true)}
+            className="text-xs font-medium text-subtle underline hover:text-ink print:hidden"
+          >
+            {p.typeChange}
+          </button>
+        </>
+      )}
+    </section>
+  );
+}
+
+function TypeField({
+  label,
+  value,
+  onChange,
+  placeholder,
+  max = 60,
+  autoFocus,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  max?: number;
+  autoFocus?: boolean;
+}) {
+  return (
+    <label className="flex flex-col gap-1 text-xs font-medium">
+      {label}
+      <input
+        type="text"
+        value={value}
+        maxLength={max}
+        placeholder={placeholder}
+        autoFocus={autoFocus}
+        onChange={(e) => onChange(e.target.value)}
+        className={field}
+      />
+    </label>
+  );
+}
+
+function TypeCard({ x }: { x: TypeSpec }) {
+  const { t } = useI18n();
+  const p = t.profile;
+  const font = cleanFont(x.font);
+  const reserve = cleanFont(x.fallback);
+  const [finnes, setFinnes] = useState(true);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setFinnes(fontFinnes(font));
+  }, [font]);
+  const stil = { fontFamily: fontStack(x), fontWeight: x.weight };
+  return (
+    <li className={`${panel} space-y-3 p-5 break-inside-avoid`}>
+      <p className="text-xs font-semibold uppercase tracking-widest text-subtle">
+        {x.role}
+      </p>
+      <div className="flex items-end gap-4">
+        <span style={stil} className="text-6xl leading-none">
+          Aa
+        </span>
+        <div className="min-w-0">
+          <p style={stil} className="truncate text-2xl">
+            {font}
+          </p>
+          <p className="text-xs text-subtle">
+            {x.weight} {p.weights[x.weight]}
+            {x.size && <> · {x.size}</>}
+          </p>
+        </div>
+      </div>
+      <p style={stil} className="text-lg">
+        {p.typeSample}
+      </p>
+      {(reserve || x.note) && (
+        <p className="text-sm text-subtle">
+          {reserve && p.typeFallbackLabel(reserve)}
+          {reserve && x.note && " · "}
+          {x.note}
+        </p>
+      )}
+      {!finnes && (
+        <p className="text-xs text-subtle print:hidden">
+          {p.typeMissing(font, reserve)}
+        </p>
+      )}
+    </li>
   );
 }
 
