@@ -86,22 +86,43 @@ async function strøm(
 }
 
 /**
- * Fjerner det en nettleser ikke trenger for å vise en SVG, så lenken blir
- * kortere. Dette er ikke rensing: sikkerheten kommer av at logoen bare vises
- * som <img>. Fjerningen gjentas til teksten står stille, så en kommentar som
- * dukker opp når en annen fjernes («<!<!---->--»), også blir borte.
+ * Kutter alt mellom `start` og `slutt`, og gjentar til teksten står stille,
+ * så en bit som dukker opp når en annen fjernes («<!<!---->--»), også blir
+ * borte. En start uten slutt kuttes ut sammen med resten av teksten.
  */
-export function minifySvg(svg: string): string {
+function kutt(s: string, start: string, slutt: string): string {
   let forrige: string;
-  let s = svg;
   do {
     forrige = s;
-    s = s
-      .replace(/<\?xml[\s\S]*?\?>/g, "")
-      .replace(/<!DOCTYPE[\s\S]*?>/gi, "")
-      .replace(/<!--[\s\S]*?-->/g, "")
-      .replace(/<metadata[\s\S]*?<\/metadata>/gi, "");
+    let ut = "";
+    let i = 0;
+    for (;;) {
+      const a = s.indexOf(start, i);
+      if (a < 0) {
+        ut += s.slice(i);
+        break;
+      }
+      ut += s.slice(i, a);
+      const b = s.indexOf(slutt, a + start.length);
+      if (b < 0) break;
+      i = b + slutt.length;
+    }
+    s = ut;
   } while (s !== forrige);
+  return s;
+}
+
+/**
+ * Fjerner det en nettleser ikke trenger for å vise en SVG, så lenken blir
+ * kortere: XML-deklarasjon, DOCTYPE, kommentarer, metadata og mellomrom
+ * mellom taggene. Dette er ikke rensing: sikkerheten kommer av at logoen bare
+ * vises som <img>, der skript ikke kjører.
+ */
+export function minifySvg(svg: string): string {
+  let s = kutt(svg, "<?xml", "?>");
+  s = kutt(s, "<!DOCTYPE", ">");
+  s = kutt(s, "<!--", "-->");
+  s = kutt(s, "<metadata", "</metadata>");
   return s
     .replace(/>\s+</g, "><")
     .replace(/\s{2,}/g, " ")
