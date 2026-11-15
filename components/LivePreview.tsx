@@ -12,12 +12,7 @@ import { SurfacesPreview } from "@/components/SurfacesPreview";
 import { TonesPreview } from "@/components/TonesPreview";
 import { InUsePreview } from "@/components/InUsePreview";
 import { useI18n } from "@/components/I18nProvider";
-import {
-  BrandLogo,
-  LogoProvider,
-  LogoUpload,
-  useLogos,
-} from "@/components/BrandLogo";
+import { BrandLogo, LogoUpload, useLogos } from "@/components/BrandLogo";
 import { ColorPalette } from "@/types/palette";
 
 interface LivePreviewProps {
@@ -36,15 +31,7 @@ type Tab = "components" | "surfaces" | "tones" | "inUse";
  * (skalaer og varianter av merkefargene), og i bruk (trykksaker og
  * presentasjon).
  */
-export function LivePreview(props: LivePreviewProps) {
-  return (
-    <LogoProvider>
-      <Preview {...props} />
-    </LogoProvider>
-  );
-}
-
-function Preview({ palette, brand, onApply }: LivePreviewProps) {
+export function LivePreview({ palette, brand, onApply }: LivePreviewProps) {
   const { t } = useI18n();
   const { logos } = useLogos();
   const harLogo = Object.keys(logos).length > 0;

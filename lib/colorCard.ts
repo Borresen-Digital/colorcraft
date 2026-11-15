@@ -1,4 +1,5 @@
 import type { ExtendedColorPalette } from "@/data/palettes";
+import { pickVariant, type LogoSizes, type LogoVariant } from "./logo";
 import { formatCmyk, hexToCmyk, parseCmyk, type Cmyk } from "./cmyk";
 import { contrastRatio, formatRatio, parseHex } from "./contrast";
 import { checkPalette } from "./contrastPairs";
@@ -238,7 +239,42 @@ export type Op =
       /** Ring i denne fargen, med bredden `width`. */
       stroke?: string;
       width?: number;
+    }
+  | {
+      /** Den opplastede logoen. Tegneren legger inn bildet for versjonen. */
+      kind: "image";
+      variant: LogoVariant;
+      x: number;
+      y: number;
+      w: number;
+      h: number;
     };
+
+/**
+ * Logoen i en boks med høyde `h` og bredde inntil `maxW`, med versjonen som
+ * passer flaten (se pickVariant). Uten opplastet logo: null.
+ */
+export function logoOp(
+  logos: LogoSizes,
+  bg: string,
+  inColor: boolean,
+  x: number,
+  top: number,
+  h: number,
+  maxW: number,
+): Op | null {
+  const v = pickVariant(logos, bg, inColor);
+  if (!v) return null;
+  const aspect = logos[v]!.aspect;
+  let w = h * aspect;
+  let hh = h;
+  if (w > maxW) {
+    w = maxW;
+    hh = w / aspect;
+  }
+  // Midtstilt i høyden, så en bred logo står på samme linje.
+  return { kind: "image", variant: v, x, y: top + (h - hh) / 2, w, h: hh };
+}
 
 const MØRK = "#1F2937";
 const GRÅ = "#4B5563";
@@ -248,7 +284,11 @@ const SWATCH = 92;
 const STRIPE = 10;
 const BLOKK = 108;
 
-export function layoutCard(model: CardModel, locale: Locale): Op[] {
+export function layoutCard(
+  model: CardModel,
+  locale: Locale,
+  logos: LogoSizes = {},
+): Op[] {
   const k = MESSAGES[locale].card;
   const ops: Op[] = [];
   const { margin, width, height } = PAGE;
@@ -261,6 +301,12 @@ export function layoutCard(model: CardModel, locale: Locale): Op[] {
     bold = false,
     color = MØRK,
   ) => ops.push({ kind: "text", x, y, text, size, bold, color });
+
+  // Kundens logo øverst til høyre, på det hvite kortet.
+  const toppLogo = logoOp(logos, "#FFFFFF", true, 0, margin, 40, 150);
+  if (toppLogo?.kind === "image") {
+    ops.push({ ...toppLogo, x: width - margin - toppLogo.w });
+  }
 
   let y = margin + 22;
   tekst(margin, y, model.title, 22, true);

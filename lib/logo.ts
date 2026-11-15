@@ -48,19 +48,31 @@ export function monoFor(bg: string): "black" | "white" {
  * valgt: fargeversjonen der logoen står i logofargen, ellers sort eller hvit
  * etter hva flaten tåler. Mangler versjonen, brukes den nest beste.
  */
-export function pickLogo(
-  logos: UploadedLogos,
+export function pickVariant(
+  available: Partial<Record<LogoVariant, unknown>>,
   bg: string,
   wantColor: boolean,
-): { src: string; variant: LogoVariant } | null {
+): LogoVariant | null {
   const mono = monoFor(bg);
   const annen = mono === "white" ? "black" : "white";
   const rekkefølge: LogoVariant[] = wantColor
     ? ["color", mono, annen]
     : [mono, "color", annen];
-  for (const v of rekkefølge) {
-    const src = logos[v];
-    if (src) return { src, variant: v };
-  }
-  return null;
+  return rekkefølge.find((v) => available[v]) ?? null;
 }
+
+export function pickLogo(
+  logos: UploadedLogos,
+  bg: string,
+  wantColor: boolean,
+): { src: string; variant: LogoVariant } | null {
+  const v = pickVariant(logos, bg, wantColor);
+  return v ? { src: logos[v]!, variant: v } : null;
+}
+
+/**
+ * Forholdet mellom bredde og høyde for hver opplastet versjon. Fargekortet
+ * trenger bare dette for å plassere logoen. Selve bildet legges inn når
+ * kortet tegnes.
+ */
+export type LogoSizes = Partial<Record<LogoVariant, { aspect: number }>>;
