@@ -21,6 +21,7 @@ import { useI18n } from "@/components/I18nProvider";
 import { ManualCheck } from "@/components/ManualCheck";
 import { Glossary } from "@/components/Glossary";
 import { LogoColors, type LogoColorTarget } from "@/components/LogoColors";
+import { useSimple } from "@/components/SimpleMode";
 import { MAX_INTERNAL, suggestInternal } from "@/lib/internal";
 import type { ColorPalette } from "@/types/palette";
 
@@ -198,6 +199,7 @@ export function BrandBuilder({
   initial,
 }: BrandBuilderProps) {
   const { locale, t } = useI18n();
+  const { simple } = useSimple();
   const b = t.brand;
   const fra = initial?.brand;
   const [name, setName] = useState<string>(initial?.name ?? b.defaultName);
@@ -246,8 +248,9 @@ export function BrandBuilder({
     }
   }, [logo, support, highlight, retning, alleGyldige]);
 
+  // Enkel visning har bare lys modus, så bare den telles og vises.
   const stryker = result
-    ? [result.light, result.dark]
+    ? (simple ? [result.light] : [result.light, result.dark])
         .map(
           (colors) =>
             checkPalette(
@@ -257,6 +260,12 @@ export function BrandBuilder({
         )
         .reduce((a, n) => a + n, 0)
     : 0;
+
+  // Merknadene om mørk modus hører ikke hjemme i enkel visning.
+  const synligeNotater = (result?.notes ?? []).filter(
+    (n) =>
+      !simple || (n.kind !== "adjusted-dark" && n.kind !== "logo-background"),
+  );
 
   const noteText = (n: BrandNote) => {
     switch (n.kind) {
@@ -452,12 +461,14 @@ export function BrandBuilder({
             />
           </div>
 
-          <LogoColors
-            onUseAsLogo={brukSomLogo}
-            onAdd={leggTil}
-            has={(hex, l) => iListe(l, hex)}
-            full={(l) => lister[l][0].length >= maks[l]}
-          />
+          {!simple && (
+            <LogoColors
+              onUseAsLogo={brukSomLogo}
+              onAdd={leggTil}
+              has={(hex, l) => iListe(l, hex)}
+              full={(l) => lister[l][0].length >= maks[l]}
+            />
+          )}
 
           <div className="grid gap-5 sm:grid-cols-2">
             {seksjon("logo", b.logo, b.logoHelp, MAX_LOGO, 1)}
@@ -472,66 +483,68 @@ export function BrandBuilder({
           </div>
           <p className="text-xs text-subtle">{t.values.cmykHelp}</p>
 
-          <details
-            // Står åpen når noe der allerede er valgt, så ingenting skjules.
-            open={internal.length > 0 || retning !== "neutral" || undefined}
-            className="rounded-lg border border-line"
-          >
-            <summary className="cursor-pointer select-none px-3 py-2">
-              <span className="text-sm font-semibold text-ink">{b.more}</span>
-              <span className="block text-xs text-subtle">{b.moreHelp}</span>
-            </summary>
-            <div className="space-y-5 border-t border-line p-3">
-              {seksjon(
-                "internal",
-                b.internal,
-                b.internalHelp,
-                MAX_INTERNAL,
-                0,
-                normalizeHex(logo[0] ?? "") && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setInternal(suggestInternal(normalizeHex(logo[0])!));
-                      setNames((n) => ({ ...n, internal: [] }));
-                    }}
-                    className="ml-4 text-sm font-medium text-accent underline-offset-4 hover:underline"
-                  >
-                    {b.suggest}
-                  </button>
-                ),
-              )}
-
-              <fieldset className="min-w-0 space-y-2">
-                <legend className="text-sm font-semibold text-ink">
-                  {b.direction}
-                </legend>
-                <p className="text-xs text-subtle">{b.directionHelp}</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {DIRECTIONS.map((d) => (
-                    <label
-                      key={d}
-                      className="cursor-pointer rounded-full border border-field px-3 py-1 text-sm text-ink has-[:checked]:border-ink has-[:checked]:bg-ink has-[:checked]:text-paper has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-accent"
+          {!simple && (
+            <details
+              // Står åpen når noe der allerede er valgt, så ingenting skjules.
+              open={internal.length > 0 || retning !== "neutral" || undefined}
+              className="rounded-lg border border-line"
+            >
+              <summary className="cursor-pointer select-none px-3 py-2">
+                <span className="text-sm font-semibold text-ink">{b.more}</span>
+                <span className="block text-xs text-subtle">{b.moreHelp}</span>
+              </summary>
+              <div className="space-y-5 border-t border-line p-3">
+                {seksjon(
+                  "internal",
+                  b.internal,
+                  b.internalHelp,
+                  MAX_INTERNAL,
+                  0,
+                  normalizeHex(logo[0] ?? "") && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setInternal(suggestInternal(normalizeHex(logo[0])!));
+                        setNames((n) => ({ ...n, internal: [] }));
+                      }}
+                      className="ml-4 text-sm font-medium text-accent underline-offset-4 hover:underline"
                     >
-                      <input
-                        type="radio"
-                        name="brand-direction"
-                        value={d}
-                        checked={retning === d}
-                        onChange={() => setRetning(d)}
-                        className="sr-only"
-                      />
-                      {b.directions[d]}
-                    </label>
-                  ))}
-                </div>
-                <p className="text-xs text-subtle" aria-live="polite">
-                  {b.directionInfo[retning]}
-                </p>
-              </fieldset>
-              <ManualCheck />
-            </div>
-          </details>
+                      {b.suggest}
+                    </button>
+                  ),
+                )}
+
+                <fieldset className="min-w-0 space-y-2">
+                  <legend className="text-sm font-semibold text-ink">
+                    {b.direction}
+                  </legend>
+                  <p className="text-xs text-subtle">{b.directionHelp}</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {DIRECTIONS.map((d) => (
+                      <label
+                        key={d}
+                        className="cursor-pointer rounded-full border border-field px-3 py-1 text-sm text-ink has-[:checked]:border-ink has-[:checked]:bg-ink has-[:checked]:text-paper has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-accent"
+                      >
+                        <input
+                          type="radio"
+                          name="brand-direction"
+                          value={d}
+                          checked={retning === d}
+                          onChange={() => setRetning(d)}
+                          className="sr-only"
+                        />
+                        {b.directions[d]}
+                      </label>
+                    ))}
+                  </div>
+                  <p className="text-xs text-subtle" aria-live="polite">
+                    {b.directionInfo[retning]}
+                  </p>
+                </fieldset>
+                <ManualCheck />
+              </div>
+            </details>
+          )}
 
           <section
             aria-labelledby="brand-preview"
@@ -544,18 +557,22 @@ export function BrandBuilder({
               <>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <Swatches colors={result.light} label={b.light} />
-                  <Swatches colors={result.dark} label={b.dark} />
+                  {!simple && <Swatches colors={result.dark} label={b.dark} />}
                 </div>
                 <p
                   className={
                     stryker === 0 ? "text-sm text-ok" : "text-sm text-warn"
                   }
                 >
-                  {stryker === 0 ? b.allPass : b.failing(stryker)}
+                  {stryker === 0
+                    ? simple
+                      ? b.allPassLight
+                      : b.allPass
+                    : b.failing(stryker)}
                 </p>
-                {result.notes.length > 0 && (
+                {synligeNotater.length > 0 && (
                   <ul className="list-disc space-y-1 pl-5 text-xs text-subtle">
-                    {result.notes.map((n, i) => (
+                    {synligeNotater.map((n, i) => (
                       <li key={i}>{noteText(n)}</li>
                     ))}
                   </ul>

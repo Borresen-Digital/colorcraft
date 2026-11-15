@@ -10,6 +10,7 @@ import { ColorValues } from "./ColorValues";
 import { ColorCardPanel } from "./ColorCardPanel";
 import { Glossary } from "./Glossary";
 import type { ExtendedColorPalette } from "@/data/palettes";
+import { useSimple } from "./SimpleMode";
 
 interface ColorDetailsProps {
   /** Varianten som vises nå (lys eller mørk). */
@@ -35,6 +36,7 @@ export function ColorDetails({
   onApplySuggestion,
 }: ColorDetailsProps) {
   const { t } = useI18n();
+  const { simple } = useSimple();
   const brand = exportPalette.brand;
   const c = palette.colors;
 
@@ -112,31 +114,35 @@ export function ColorDetails({
 
       <Glossary />
 
+      {/* I enkel visning er kontrasten bare informasjon. Forslagene kan
+          kopieres, men endrer ikke fargene. */}
       <ContrastPanel
         palette={palette}
         brand={!!brand}
-        onApply={onApplySuggestion}
+        onApply={simple ? undefined : onApplySuggestion}
       />
 
       <ColorCardPanel palette={exportPalette} />
 
-      <details
-        // Paletter fra en manual er for designere, så utviklerdelen står
-        // sammenfoldet. Andre paletter viser den åpen, som før.
-        key={brand ? "manual" : "rolle"}
-        open={!brand}
-        className="space-y-4 rounded-xl border border-line p-3"
-      >
-        <summary className="cursor-pointer select-none font-display text-lg font-bold text-ink">
-          {t.details.developer}
-        </summary>
-        <div className="mt-3 space-y-4">
-          <p className="text-xs text-subtle">{t.details.developerHelp}</p>
-          {brand && <div className="space-y-3">{roller}</div>}
-          <ColorValues palette={palette} />
-          <ExportPanel palette={exportPalette} />
-        </div>
-      </details>
+      {!simple && (
+        <details
+          // Paletter fra en manual er for designere, så utviklerdelen står
+          // sammenfoldet. Andre paletter viser den åpen, som før.
+          key={brand ? "manual" : "rolle"}
+          open={!brand}
+          className="space-y-4 rounded-xl border border-line p-3"
+        >
+          <summary className="cursor-pointer select-none font-display text-lg font-bold text-ink">
+            {t.details.developer}
+          </summary>
+          <div className="mt-3 space-y-4">
+            <p className="text-xs text-subtle">{t.details.developerHelp}</p>
+            {brand && <div className="space-y-3">{roller}</div>}
+            <ColorValues palette={palette} />
+            <ExportPanel palette={exportPalette} />
+          </div>
+        </details>
+      )}
     </div>
   );
 }
