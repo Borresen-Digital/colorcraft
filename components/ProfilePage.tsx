@@ -24,6 +24,8 @@ import {
 } from "@/lib/profile";
 import { decodeShare } from "@/lib/share";
 import { toneCss, toneScale } from "@/lib/toneScale";
+import { toFigmaTokens } from "@/lib/figmaExport";
+import { fileSlug } from "@/lib/export";
 import {
   filterMatrix,
   similarPairs,
@@ -33,6 +35,7 @@ import {
 } from "@/lib/colorblind";
 import {
   cleanFont,
+  cleanType,
   fontStack,
   MAX_TYPES,
   readTypography,
@@ -253,6 +256,46 @@ function Profile() {
   // Verktøyet leser ikke logoen fra lenken. Den følger med i nettleseren.
   const tilVerktøy = `${localePath(locale)}#${withLogo(withoutTypography(withoutRules(withoutMaker(hash))), null)}`;
   const farger = profil.sections.flatMap((s) => s.colors.map((c) => c.hex));
+  // Tonetrappen og Figma-filen: merkefargene uten intern profil, og for en
+  // palett uten profil bare hovedfarge, uthevingsfarge og flatefarge.
+  const tonefarger = profil.sections.flatMap((s) =>
+    s.kind === "internal"
+      ? []
+      : (s.kind === "main" ? s.colors.slice(0, 3) : s.colors).map((c) => ({
+          label: c.label,
+          hex: c.hex,
+        })),
+  );
+  const unikeTonefarger = tonefarger.filter(
+    (f, i) => tonefarger.findIndex((g) => g.hex === f.hex) === i,
+  );
+
+  const lastNedFigma = () => {
+    const json = toFigmaTokens({
+      groups: profil.sections.map((s) => ({
+        heading: s.heading,
+        colors: s.colors.map((c) => ({
+          label: c.label,
+          hex: c.hex,
+          description: `CMYK ${c.cmyk}`,
+        })),
+      })),
+      tones: unikeTonefarger.map((f) => ({
+        label: f.label,
+        scale: toneScale(f.hex),
+      })),
+      typography: typo.map(cleanType),
+      names: p.figmaNames,
+    });
+    const url = URL.createObjectURL(
+      new Blob([json], { type: "application/json" }),
+    );
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${fileSlug(profil.title)}.figma.tokens.json`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
 
   const endreMaker = (v: string) => {
     setMaker(v);
@@ -432,15 +475,7 @@ function Profile() {
           />
         ))}
 
-        <ToneScales
-          farger={profil.sections.flatMap((s) =>
-            s.kind === "internal"
-              ? []
-              : (s.kind === "main" ? s.colors.slice(0, 3) : s.colors).map(
-                  (c) => ({ label: c.label, hex: c.hex }),
-                ),
-          )}
-        />
+        <ToneScales farger={tonefarger} />
 
         <Typography liste={typo} onListe={endreTypo} />
 
@@ -499,12 +534,28 @@ function Profile() {
           )}
         />
 
-        <section className={`${panel} max-w-md p-4 print:hidden`}>
-          <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-subtle">
-            {p.download}
-          </p>
-          <ColorCardPanel palette={palette} defaultMaker={navn} />
-        </section>
+        <div className="grid gap-4 md:grid-cols-2 print:hidden">
+          <section className={`${panel} p-4`}>
+            <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-subtle">
+              {p.download}
+            </p>
+            <ColorCardPanel palette={palette} defaultMaker={navn} />
+          </section>
+          <section className={`${panel} space-y-3 p-4`}>
+            <p className="text-xs font-semibold uppercase tracking-widest text-subtle">
+              {p.figma}
+            </p>
+            <p className="text-sm">{p.figmaHelp}</p>
+            <button
+              type="button"
+              onClick={lastNedFigma}
+              className={btn("primary", "md")}
+            >
+              {p.figmaDownload}
+            </button>
+            <p className="text-xs text-subtle">{p.figmaNote}</p>
+          </section>
+        </div>
 
         <footer className="space-y-2 border-t border-line pt-6 text-xs text-subtle">
           <p>
