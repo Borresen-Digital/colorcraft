@@ -383,12 +383,33 @@ const nb = {
     pantoneHelp:
       "Skriv nummeret fra manualen. ColorCraft regner ikke om til Pantone.",
     pantoneSource: "Pantone fra manualen",
-    figma: "Til Figma",
-    figmaHelp:
-      "Fargene, tonetrappen og typografien som variabler. I Figma: åpne Variables, lag en ny samling og dra filen inn.",
-    figmaDownload: "Last ned for Figma (.json)",
-    figmaNote:
-      "Filen følger DTCG-formatet Figma importerer. Hver fil blir en modus i samlingen.",
+    export: "Eksport",
+    exportHelp:
+      "Fargene, tonetrappen og typografien i formatet du trenger. Filene lages i nettleseren.",
+    exportCode: "Til kode og design",
+    exportFormats: "Format",
+    exportGroups: {
+      web: "Nett",
+      design: "Design",
+      apps: "Apper",
+      data: "Data",
+    },
+    exportHints: {
+      css: "CSS-variabler i :root. Lim inn i stilarket og bruk var(--color-navn).",
+      scss: "Sass-variabler, og et kart per tonetrapp: map.get($color-navn-tones, 500).",
+      tailwind:
+        "Tailwind 4: @theme gir klasser som bg-navn-500 og font-overskrifter.",
+      tokens:
+        "Design tokens (DTCG) med HEX. Leses av Style Dictionary og Tokens Studio.",
+      figma:
+        "Figma: åpne Variables, lag en ny samling og dra filen inn. Hver fil blir en modus.",
+      swift:
+        "SwiftUI: Color.navn og Color.navn500, og fontnavnene i BrandFont.",
+      flutter: "Flutter: BrandColors.navn og BrandFonts med vekt.",
+      android: "Android: colors.xml i res/values. Bruk @color/navn.",
+      profile:
+        "Hele profilen som data: farger, tonetrapp, typografi, bruksregler og Pantone. Tenkt for andre verktøy, og for AI som skal lese eller lage en profil.",
+    },
     figmaNames: {
       colors: "Farger",
       tones: "Tonetrapp",
@@ -993,12 +1014,33 @@ const en: Messages = {
     pantoneHelp:
       "Enter the number from the brand guide. ColorCraft does not convert to Pantone.",
     pantoneSource: "Pantone from the brand guide",
-    figma: "For Figma",
-    figmaHelp:
-      "The colors, tone scale and typography as variables. In Figma: open Variables, create a new collection and drag the file in.",
-    figmaDownload: "Download for Figma (.json)",
-    figmaNote:
-      "The file follows the DTCG format Figma imports. Each file becomes a mode in the collection.",
+    export: "Export",
+    exportHelp:
+      "The colors, tone scale and typography in the format you need. The files are made in the browser.",
+    exportCode: "For code and design",
+    exportFormats: "Format",
+    exportGroups: {
+      web: "Web",
+      design: "Design",
+      apps: "Apps",
+      data: "Data",
+    },
+    exportHints: {
+      css: "CSS variables in :root. Paste into the stylesheet and use var(--color-name).",
+      scss: "Sass variables, and a map per tone scale: map.get($color-name-tones, 500).",
+      tailwind:
+        "Tailwind 4: @theme gives classes like bg-name-500 and font-headings.",
+      tokens:
+        "Design tokens (DTCG) with HEX. Read by Style Dictionary and Tokens Studio.",
+      figma:
+        "Figma: open Variables, create a new collection and drag the file in. Each file becomes a mode.",
+      swift:
+        "SwiftUI: Color.name and Color.name500, and the font names in BrandFont.",
+      flutter: "Flutter: BrandColors.name and BrandFonts with weight.",
+      android: "Android: colors.xml in res/values. Use @color/name.",
+      profile:
+        "The whole profile as data: colors, tone scale, typography, usage rules and Pantone. Meant for other tools, and for AI that reads or builds a profile.",
+    },
     figmaNames: {
       colors: "Colors",
       tones: "Tone scale",
