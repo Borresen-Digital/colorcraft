@@ -37,12 +37,21 @@ export const PROFILE_FORMATS = [
 ] as const;
 export type ProfileFormat = (typeof PROFILE_FORMATS)[number];
 
+/** Gruppen fargen står i på profilsiden. */
+export type ExportRole = "logo" | "support" | "highlight" | "internal" | "main";
+
 export interface ExportColor {
   group: string;
+  /** Rollen, så profilen kan leses inn igjen uansett språk. */
+  role?: ExportRole;
   label: string;
   hex: string;
   /** CMYK-teksten slik profilsiden viser den. */
   cmyk?: string;
+  /** Bare tallene, for eksempel «100 80 30 40». */
+  cmykNumbers?: string;
+  /** Tallene er fra manualen, ikke regnet om fra HEX. */
+  cmykFromManual?: boolean;
   pantone?: string;
 }
 
@@ -54,7 +63,9 @@ export interface ProfileExportInput {
   colors: ExportColor[];
   tones: { label: string; scale: ToneStep[] }[];
   typography: TypeSpec[];
-  rules: { group: string; text: string }[];
+  rules: { group: string; role?: ExportRole | "general"; text: string }[];
+  /** Retningen fra «Fra profilmanual» (neutral, exclusive …). */
+  direction?: string;
   /** Lenken til profilsiden, til profile-formatet. */
   link?: string;
   figmaNames: FigmaInput["names"];
@@ -351,11 +362,20 @@ function toProfile(input: ProfileExportInput): string {
     title: input.title,
     ...(input.maker ? { maker: input.maker } : {}),
     ...(input.link ? { link: input.link } : {}),
+    ...(input.direction ? { direction: input.direction } : {}),
     colors: input.colors.map((c) => ({
+      ...(c.role ? { role: c.role } : {}),
       group: c.group,
       name: c.label,
       hex: c.hex.toUpperCase(),
-      ...(c.cmyk ? { cmyk: c.cmyk } : {}),
+      ...(c.cmykNumbers
+        ? {
+            cmyk: c.cmykNumbers,
+            cmykSource: c.cmykFromManual ? "manual" : "approx",
+          }
+        : c.cmyk
+          ? { cmyk: c.cmyk }
+          : {}),
       ...(c.pantone ? { pantone: c.pantone } : {}),
     })),
     tones: input.tones.map((t) => ({
