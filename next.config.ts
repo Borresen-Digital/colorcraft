@@ -72,10 +72,16 @@ const nextConfig: NextConfig = {
    * `/`, så det bare finnes én adresse for den norske siden.
    */
   async rewrites() {
-    return [{ source: "/", destination: "/nb" }];
+    return [
+      { source: "/", destination: "/nb" },
+      { source: "/profil", destination: "/nb/profil" },
+    ];
   },
   async redirects() {
-    return [{ source: "/nb", destination: "/", permanent: true }];
+    return [
+      { source: "/nb", destination: "/", permanent: true },
+      { source: "/nb/profil", destination: "/profil", permanent: true },
+    ];
   },
 };
 

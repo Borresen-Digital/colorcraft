@@ -7,6 +7,7 @@ import {
 import { notFound } from "next/navigation";
 import { isLocale, LOCALES, localePath, MESSAGES } from "@/lib/i18n";
 import { THEME_SCRIPT } from "@/lib/theme";
+import { LogoProvider } from "@/components/BrandLogo";
 import "../globals.css";
 
 // Visningsfont til navnet og overskrifter: litt leken, men lesbar.
@@ -110,7 +111,9 @@ export default async function RootLayout({
         suppressHydrationWarning={true}
       >
         <div id="root" className="min-h-screen">
-          {children}
+          {/* Logoen holdes her, over sidene, så den følger med når du går
+              fra verktøyet til profilsiden. Den blir i nettleseren. */}
+          <LogoProvider>{children}</LogoProvider>
         </div>
       </body>
     </html>

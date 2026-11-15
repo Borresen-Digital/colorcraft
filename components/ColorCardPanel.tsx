@@ -11,10 +11,17 @@ import { useLogos } from "@/components/BrandLogo";
  * «Fargekort til kunden»: PDF eller PNG med fargene, lages i nettleseren.
  * pdf-lib lastes først når noen ber om en PDF, så siden ikke blir tyngre.
  */
-export function ColorCardPanel({ palette }: { palette: ExtendedColorPalette }) {
+export function ColorCardPanel({
+  palette,
+  defaultMaker = "",
+}: {
+  palette: ExtendedColorPalette;
+  /** Navnet som står i «Laget av» fra start, for eksempel fra profilsiden. */
+  defaultMaker?: string;
+}) {
   const { locale, t } = useI18n();
   const k = t.card;
-  const [maker, setMaker] = useState("");
+  const [maker, setMaker] = useState(defaultMaker);
   const [medIBruk, setMedIBruk] = useState(true);
   const { logos } = useLogos();
   const harLogo = Object.keys(logos).length > 0;

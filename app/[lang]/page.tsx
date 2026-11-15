@@ -1,18 +1,15 @@
 import { notFound } from "next/navigation";
 import { ColorCraftApp } from "@/components/ColorCraftApp";
-import { LogoProvider } from "@/components/BrandLogo";
 import { SimpleModeProvider } from "@/components/SimpleMode";
 import { isLocale } from "@/lib/i18n";
 
 export default async function Page({ params }: PageProps<"/[lang]">) {
   const { lang } = await params;
   if (!isLocale(lang)) notFound();
-  // Logoen deles av forhåndsvisningen og fargekortet, og blir i nettleseren.
+  // Logoen ligger i LogoProvider i layouten, så profilsiden får den også.
   return (
     <SimpleModeProvider>
-      <LogoProvider>
-        <ColorCraftApp locale={lang} />
-      </LogoProvider>
+      <ColorCraftApp locale={lang} />
     </SimpleModeProvider>
   );
 }

@@ -51,7 +51,8 @@ export interface CardModel {
   footer: string[];
 }
 
-function color(
+/** Én farge med verdier og kontrast, slik kortet og profilsiden viser den. */
+export function cardColor(
   label: string,
   hex: string,
   manual: string | undefined,
@@ -118,14 +119,20 @@ export function buildCardModel(
     sections.push({
       heading: k.logoColors,
       colors: palette.brand.logo.map((c, i) =>
-        color(names[c] || m.tones.logo(i + 1), c, manual[c], locale, true),
+        cardColor(names[c] || m.tones.logo(i + 1), c, manual[c], locale, true),
       ),
     });
     if (palette.brand.support.length > 0) {
       sections.push({
         heading: k.supportColors,
         colors: palette.brand.support.map((c, i) =>
-          color(names[c] || m.tones.support(i + 1), c, manual[c], locale, true),
+          cardColor(
+            names[c] || m.tones.support(i + 1),
+            c,
+            manual[c],
+            locale,
+            true,
+          ),
         ),
       });
     }
@@ -135,7 +142,7 @@ export function buildCardModel(
       sections.push({
         heading: k.highlightColors,
         colors: highlight.map((c, i) =>
-          color(
+          cardColor(
             names[c] || m.tones.highlight(i + 1),
             c,
             manual[c],
@@ -149,7 +156,7 @@ export function buildCardModel(
       sections.push({
         heading: k.internalColors,
         colors: internal.map((c, i) =>
-          color(names[c] || m.tones.internal(i + 1), c, manual[c], locale),
+          cardColor(names[c] || m.tones.internal(i + 1), c, manual[c], locale),
         ),
       });
     }
@@ -165,7 +172,7 @@ export function buildCardModel(
     sections.push({
       heading: k.mainColors,
       colors: roller.map((r) =>
-        color(m.roles[r], palette.colors[r], undefined, locale),
+        cardColor(m.roles[r], palette.colors[r], undefined, locale),
       ),
     });
   }
