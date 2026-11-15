@@ -13,7 +13,9 @@ import { tints, type Tint } from "./tint";
  * kontrast), så kortet og siden aldri sier noe forskjellig.
  *
  * I tillegg har hver gruppe en kort tekst om hva fargene brukes til, med de
- * ordene designere bruker i en profilmanual.
+ * ordene designere bruker i en profilmanual. Designeren kan bytte teksten ut
+ * med egne bruksregler, og legge til generelle regler. De ligger også i
+ * lenken.
  */
 
 /** Tintene som vises under hver merkefarge på siden. */
@@ -43,6 +45,84 @@ export interface ProfileModel {
   title: string;
   sections: ProfileSection[];
   contrast: { label: string; ratio: string; level: string }[];
+}
+
+/** En gruppe med egne bruksregler, eller de generelle reglene. */
+export type RuleKey = ProfileKind | "general";
+
+/**
+ * Bruksreglene ligger i lenken som `u` + en bokstav. De starter ikke med
+ * «b», så de ikke blir en del av palettens id.
+ */
+export const RULE_PARAMS: Record<RuleKey, string> = {
+  logo: "ul",
+  support: "us",
+  highlight: "uh",
+  internal: "ui",
+  main: "um",
+  general: "ug",
+};
+
+/** Lengste tekst per gruppe, i tegn. */
+export const MAX_RULE = 600;
+
+export type Rules = Partial<Record<RuleKey, string>>;
+
+/**
+ * En bruksregel renset for kontrolltegn (linjeskift beholdes), uten tomme
+ * linjer i slutten og kortet ned.
+ */
+export function cleanRule(s: string | null | undefined): string {
+  return (s ?? "")
+    .replace(/\r\n?/g, "\n")
+    .replace(/[\u0000-\u0009\u000b-\u001f\u007f]/g, " ")
+    .split("\n")
+    .map((l) => l.replace(/\s+/g, " ").trim())
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim()
+    .slice(0, MAX_RULE);
+}
+
+/** Bruksreglene i fragmentet. Tomme regler er ikke med. */
+export function readRules(hash: string): Rules {
+  const q = new URLSearchParams(hash.replace(/^#/, ""));
+  const ut: Rules = {};
+  for (const [key, param] of Object.entries(RULE_PARAMS) as [
+    RuleKey,
+    string,
+  ][]) {
+    const tekst = cleanRule(q.get(param));
+    if (tekst) ut[key] = tekst;
+  }
+  return ut;
+}
+
+/** Fragmentet med en bruksregel satt, eller fjernet når teksten er tom. */
+export function withRule(hash: string, key: RuleKey, tekst: string): string {
+  const q = new URLSearchParams(hash.replace(/^#/, ""));
+  const ren = cleanRule(tekst);
+  if (ren) q.set(RULE_PARAMS[key], ren);
+  else q.delete(RULE_PARAMS[key]);
+  return q.toString().replace(/\+/g, "%20");
+}
+
+/** Fragmentet uten bruksregler, til lenken tilbake til verktøyet. */
+export function withoutRules(hash: string): string {
+  const q = new URLSearchParams(hash.replace(/^#/, ""));
+  for (const param of Object.values(RULE_PARAMS)) q.delete(param);
+  return q.toString().replace(/\+/g, "%20");
+}
+
+/**
+ * Linjene i en bruksregel, uten tomme linjer og uten et punkttegn først
+ * («- », «* », «• »), så de kan vises som en liste.
+ */
+export function ruleLines(tekst: string): string[] {
+  return tekst
+    .split("\n")
+    .map((l) => l.replace(/^[-*•–]\s+/, "").trim())
+    .filter(Boolean);
 }
 
 /** Stien til profilsiden på et språk. Norsk har ikke prefiks. */
