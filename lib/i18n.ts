@@ -376,6 +376,15 @@ const nb = {
       `Én regel per linje blir en punktliste. Lagres i lenken, opptil ${maks} tegn.`,
     rulesGeneralHelp:
       "For eksempel hvor logoen kan stå, minste størrelse, eller farger som ikke skal brukes sammen.",
+    tones: "Tonetrapp",
+    tonesHelp:
+      "Hver farge i elleve trinn fra 50 (lysest) til 950 (mørkest), som i Tailwind og de fleste designsystemer. Trinnene har lik lyshet på tvers av fargene. Fargen selv står uendret på trinnet som passer best, merket med en prikk. Teksten på hvert trinn er hvit eller svart, den som står best.",
+    tonesBase: "fargen selv",
+    tonesCopy: "Kopier som CSS",
+    tonesCopyAll: "Kopier alle som CSS",
+    tonesCopied: "Kopiert",
+    tonesCssNote:
+      "Variablene (--color-navn-500) virker i vanlig CSS og i @theme i Tailwind 4.",
     vision: "Se siden som",
     visionNormal: "Vanlig fargesyn",
     visions: {
@@ -954,6 +963,15 @@ const en: Messages = {
       `One rule per line becomes a bulleted list. Saved in the link, up to ${max} characters.`,
     rulesGeneralHelp:
       "For example where the logo may be placed, minimum size, or colors that must not be used together.",
+    tones: "Tone scale",
+    tonesHelp:
+      "Each color in eleven steps from 50 (lightest) to 950 (darkest), as in Tailwind and most design systems. The steps have the same lightness across colors. The color itself stays unchanged at the step that fits best, marked with a dot. The text on each step is white or black, whichever works best.",
+    tonesBase: "the color itself",
+    tonesCopy: "Copy as CSS",
+    tonesCopyAll: "Copy all as CSS",
+    tonesCopied: "Copied",
+    tonesCssNote:
+      "The variables (--color-name-500) work in plain CSS and in @theme in Tailwind 4.",
     vision: "View the page as",
     visionNormal: "Normal color vision",
     visions: {

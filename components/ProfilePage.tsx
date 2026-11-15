@@ -23,6 +23,7 @@ import {
   type Rules,
 } from "@/lib/profile";
 import { decodeShare } from "@/lib/share";
+import { toneCss, toneScale } from "@/lib/toneScale";
 import {
   filterMatrix,
   similarPairs,
@@ -430,6 +431,16 @@ function Profile() {
             onRegel={(v) => endreRegel(s.kind, v)}
           />
         ))}
+
+        <ToneScales
+          farger={profil.sections.flatMap((s) =>
+            s.kind === "internal"
+              ? []
+              : (s.kind === "main" ? s.colors.slice(0, 3) : s.colors).map(
+                  (c) => ({ label: c.label, hex: c.hex }),
+                ),
+          )}
+        />
 
         <Typography liste={typo} onListe={endreTypo} />
 
@@ -905,6 +916,92 @@ function TypeCard({ x }: { x: TypeSpec }) {
         </p>
       )}
     </li>
+  );
+}
+
+/**
+ * Tonetrapp 50–950 for merkefargene, med CSS-variabler til utvikleren.
+ * Intern profil er ikke med, og for en palett uten profil bare hovedfarge,
+ * uthevingsfarge og flatefarge.
+ */
+function ToneScales({ farger }: { farger: { label: string; hex: string }[] }) {
+  const { t } = useI18n();
+  const p = t.profile;
+  const { kopiert, kopier } = useCopy();
+  const unike = farger.filter(
+    (f, i) => farger.findIndex((g) => g.hex === f.hex) === i,
+  );
+  if (unike.length === 0) return null;
+  const trapper = unike.map((f) => ({
+    ...f,
+    skala: toneScale(f.hex),
+  }));
+  const alt = trapper.map((x) => toneCss(x.label, x.skala)).join("\n\n");
+
+  return (
+    <section aria-labelledby="profil-toner" className="space-y-4">
+      <div className="max-w-2xl space-y-1">
+        <h2
+          id="profil-toner"
+          className="font-display text-2xl font-bold tracking-tight"
+        >
+          {p.tones}
+        </h2>
+        <p className="text-sm text-subtle">{p.tonesHelp}</p>
+      </div>
+      <ul className="space-y-5">
+        {trapper.map((x) => {
+          const css = toneCss(x.label, x.skala);
+          return (
+            <li key={x.hex} className="space-y-2 break-inside-avoid">
+              <div className="flex flex-wrap items-baseline justify-between gap-2">
+                <p className="text-sm font-semibold">{x.label}</p>
+                <button
+                  type="button"
+                  onClick={() => kopier(css)}
+                  className="text-xs font-medium text-subtle underline hover:text-ink print:hidden"
+                >
+                  {kopiert === css ? p.tonesCopied : p.tonesCopy}
+                </button>
+              </div>
+              <ol className="grid grid-cols-6 gap-1 sm:grid-cols-11">
+                {x.skala.map((s) => (
+                  <li
+                    key={s.step}
+                    className="flex h-16 flex-col justify-between rounded-md p-1.5 text-[10px] leading-tight"
+                    style={{ background: s.hex, color: s.text }}
+                    title={s.base ? `${s.hex}, ${p.tonesBase}` : s.hex}
+                  >
+                    <span className="flex items-center justify-between font-semibold">
+                      {s.step}
+                      {s.base && (
+                        <span
+                          className="h-2 w-2 rounded-full"
+                          style={{ background: s.text }}
+                        >
+                          <span className="sr-only">{p.tonesBase}</span>
+                        </span>
+                      )}
+                    </span>
+                    <span className="font-mono">{s.hex.slice(1)}</span>
+                  </li>
+                ))}
+              </ol>
+            </li>
+          );
+        })}
+      </ul>
+      <div className="flex flex-wrap items-center gap-3 print:hidden">
+        <button
+          type="button"
+          onClick={() => kopier(alt)}
+          className={btn("outline", "sm")}
+        >
+          {kopiert === alt ? p.tonesCopied : p.tonesCopyAll}
+        </button>
+        <p className="text-xs text-subtle">{p.tonesCssNote}</p>
+      </div>
+    </section>
   );
 }
 
