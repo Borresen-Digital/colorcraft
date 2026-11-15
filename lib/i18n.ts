@@ -349,7 +349,7 @@ const nb = {
     openTool: "Åpne ColorCraft",
     toolbar: "For deg som designer",
     toolbarHelp:
-      "Denne linjen vises ikke for utskrift. Lenken til kunden inneholder fargene og navnet ditt.",
+      "Denne linjen vises ikke for utskrift. Lenken til kunden inneholder fargene, navnet ditt og logoen.",
     maker: "Laget av",
     makerPlaceholder: "Ditt navn eller firma",
     copyLink: "Kopier lenke til kunden",
@@ -357,9 +357,13 @@ const nb = {
     copyFailed: "Kunne ikke kopiere",
     print: "Skriv ut",
     edit: "Rediger i ColorCraft",
-    logo: "Logo",
-    logoNote:
-      "Logoen ligger ikke i lenken. Den vises bare i nettleseren der den er lastet opp.",
+    logo: "Last opp logo",
+    logoInLink: "Ta med logoen i lenken",
+    logoWorking: "Gjør logoen klar …",
+    logoSize: (tegn: number) =>
+      `Logoen gjør lenken ${tegn.toLocaleString("nb-NO")} tegn lengre.`,
+    logoTooBig:
+      "Logoen er for stor til å ligge i lenken. Prøv en SVG eller et mindre bilde.",
   },
   simple: {
     label: "Visning",
@@ -857,7 +861,7 @@ const en: Messages = {
     openTool: "Open ColorCraft",
     toolbar: "For you as the designer",
     toolbarHelp:
-      "This bar is hidden when printing. The link for your client contains the colors and your name.",
+      "This bar is hidden when printing. The link for your client contains the colors, your name and the logo.",
     maker: "Made by",
     makerPlaceholder: "Your name or company",
     copyLink: "Copy link for the client",
@@ -865,9 +869,13 @@ const en: Messages = {
     copyFailed: "Could not copy",
     print: "Print",
     edit: "Edit in ColorCraft",
-    logo: "Logo",
-    logoNote:
-      "The logo is not in the link. It only shows in the browser where it was uploaded.",
+    logo: "Upload logo",
+    logoInLink: "Include the logo in the link",
+    logoWorking: "Preparing the logo …",
+    logoSize: (chars: number) =>
+      `The logo makes the link ${chars.toLocaleString("en-GB")} characters longer.`,
+    logoTooBig:
+      "The logo is too large to fit in the link. Try an SVG or a smaller image.",
   },
   simple: {
     label: "View",

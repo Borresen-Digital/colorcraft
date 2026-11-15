@@ -22,12 +22,15 @@ import { useI18n } from "@/components/I18nProvider";
 
 interface LogoState {
   logos: UploadedLogos;
+  /** Filene bak bildene. Profilsiden trenger dem for å legge logoen i lenken. */
+  files: Partial<Record<LogoVariant, Blob>>;
   set: (v: LogoVariant, file: File) => LogoFileError | null;
   remove: (v: LogoVariant) => void;
 }
 
 const LogoContext = createContext<LogoState>({
   logos: {},
+  files: {},
   set: () => null,
   remove: () => {},
 });
@@ -40,6 +43,7 @@ export const useLogos = () => useContext(LogoContext);
  */
 export function LogoProvider({ children }: { children: ReactNode }) {
   const [logos, setLogos] = useState<UploadedLogos>({});
+  const [files, setFiles] = useState<Partial<Record<LogoVariant, Blob>>>({});
   const aktive = useRef<UploadedLogos>({});
   useEffect(() => {
     aktive.current = logos;
@@ -63,6 +67,7 @@ export function LogoProvider({ children }: { children: ReactNode }) {
       if (l[v]) URL.revokeObjectURL(l[v]);
       return { ...l, [v]: url };
     });
+    setFiles((f) => ({ ...f, [v]: file }));
     return null;
   }, []);
 
@@ -73,10 +78,15 @@ export function LogoProvider({ children }: { children: ReactNode }) {
       delete rest[v];
       return rest;
     });
+    setFiles((f) => {
+      const rest = { ...f };
+      delete rest[v];
+      return rest;
+    });
   }, []);
 
   return (
-    <LogoContext.Provider value={{ logos, set, remove }}>
+    <LogoContext.Provider value={{ logos, files, set, remove }}>
       {children}
     </LogoContext.Provider>
   );
