@@ -24,6 +24,13 @@ import {
 } from "@/lib/profile";
 import { decodeShare } from "@/lib/share";
 import {
+  filterMatrix,
+  similarPairs,
+  simulate,
+  VISIONS,
+  type Vision,
+} from "@/lib/colorblind";
+import {
   cleanFont,
   fontStack,
   MAX_TYPES,
@@ -185,6 +192,7 @@ function Profile() {
   const [maker, setMaker] = useState("");
   const [regler, setRegler] = useState<Rules>({});
   const [typo, setTypo] = useState<TypeSpec[]>([]);
+  const [syn, setSyn] = useState<Vision | "normal">("normal");
   const [lenke, setLenke] = useState<"" | "copied" | "failed">("");
   const [medLogo, setMedLogo] = useState(true);
   const logoLenke = useLogoILenke(hash);
@@ -322,6 +330,21 @@ function Profile() {
                   ? p.copyFailed
                   : p.copyLink}
             </button>
+            <label className="flex flex-col gap-1 text-xs font-medium">
+              {p.vision}
+              <select
+                value={syn}
+                onChange={(e) => setSyn(e.target.value as Vision | "normal")}
+                className={field}
+              >
+                <option value="normal">{p.visionNormal}</option>
+                {VISIONS.map((v) => (
+                  <option key={v} value={v}>
+                    {p.visions[v]}
+                  </option>
+                ))}
+              </select>
+            </label>
             <button
               type="button"
               onClick={() => window.print()}
@@ -365,7 +388,25 @@ function Profile() {
         </div>
       </aside>
 
-      <main className="mx-auto max-w-5xl space-y-12 px-4 py-10 sm:px-6 print:py-0">
+      {/* Filtrene for «Se siden som». feColorMatrix regner i lineær RGB. */}
+      <svg aria-hidden="true" focusable="false" className="absolute h-0 w-0">
+        <defs>
+          {VISIONS.map((v) => (
+            <filter
+              key={v}
+              id={`cc-${v}`}
+              colorInterpolationFilters="linearRGB"
+            >
+              <feColorMatrix type="matrix" values={filterMatrix(v)} />
+            </filter>
+          ))}
+        </defs>
+      </svg>
+
+      <main
+        className="mx-auto max-w-5xl space-y-12 px-4 py-10 sm:px-6 print:py-0 print:filter-none!"
+        style={syn === "normal" ? undefined : { filter: `url(#cc-${syn})` }}
+      >
         <header className="space-y-4">
           <BrandLogo bg={palette.colors.background} inColor size="lg">
             {null}
@@ -440,6 +481,12 @@ function Profile() {
             ))}
           </ul>
         </section>
+
+        <ColorBlindness
+          farger={profil.sections.flatMap((s) =>
+            s.colors.map((c) => ({ label: c.label, hex: c.hex })),
+          )}
+        />
 
         <section className={`${panel} max-w-md p-4 print:hidden`}>
           <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-subtle">
@@ -858,6 +905,97 @@ function TypeCard({ x }: { x: TypeSpec }) {
         </p>
       )}
     </li>
+  );
+}
+
+/**
+ * Fargene med hvert fargesyn, og hvilke farger som blir for like. Regnes
+ * fra HEX, så tabellen er riktig også på trykk.
+ */
+function ColorBlindness({
+  farger,
+}: {
+  farger: { label: string; hex: string }[];
+}) {
+  const { t } = useI18n();
+  const p = t.profile;
+  const unike = farger.filter(
+    (f, i) => farger.findIndex((g) => g.hex === f.hex) === i,
+  );
+  if (unike.length === 0) return null;
+  const funn = VISIONS.map((v) => ({ v, par: similarPairs(unike, v) }));
+  return (
+    <section aria-labelledby="profil-fargeblind" className="space-y-4">
+      <div className="max-w-2xl space-y-1">
+        <h2
+          id="profil-fargeblind"
+          className="font-display text-2xl font-bold tracking-tight"
+        >
+          {p.colorblind}
+        </h2>
+        <p className="text-sm text-subtle">{p.colorblindHelp}</p>
+      </div>
+      <div className={`${panel} overflow-x-auto break-inside-avoid`}>
+        <table className="w-full min-w-[34rem] border-collapse text-left text-xs">
+          <thead>
+            <tr className="border-b border-line">
+              <th scope="col" className="px-3 py-2 font-semibold">
+                {p.colorblindColor}
+              </th>
+              <th scope="col" className="px-3 py-2 font-semibold">
+                {p.visionNormal}
+              </th>
+              {VISIONS.map((v) => (
+                <th key={v} scope="col" className="px-3 py-2 font-semibold">
+                  {p.visionsShort[v]}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {unike.map((f) => (
+              <tr key={f.hex} className="border-b border-line last:border-0">
+                <th scope="row" className="px-3 py-2 font-medium">
+                  {f.label}
+                </th>
+                {[f.hex, ...VISIONS.map((v) => simulate(f.hex, v))].map(
+                  (hex, i) => (
+                    <td key={i} className="px-3 py-2">
+                      <span
+                        className="block h-8 w-full min-w-12 rounded-md border border-line"
+                        style={{ background: hex }}
+                        title={hex}
+                      />
+                    </td>
+                  ),
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <ul className="grid gap-3 text-sm sm:grid-cols-2">
+        {funn.map(({ v, par }) => (
+          <li key={v} className="space-y-1 break-inside-avoid">
+            <p className="font-semibold">{p.visions[v]}</p>
+            {par.length === 0 ? (
+              <p className="text-subtle">{p.colorblindNone}</p>
+            ) : (
+              <ul className="list-disc space-y-0.5 pl-5">
+                {par.map((x) => (
+                  <li key={`${x.a.hex}-${x.b.hex}`}>
+                    {p.colorblindSimilar(x.a.label, x.b.label)}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </li>
+        ))}
+      </ul>
+      {funn.some((f) => f.par.length > 0) && (
+        <p className="max-w-2xl text-sm text-subtle">{p.colorblindTip}</p>
+      )}
+    </section>
   );
 }
 

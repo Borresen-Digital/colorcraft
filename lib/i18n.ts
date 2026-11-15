@@ -376,6 +376,29 @@ const nb = {
       `Én regel per linje blir en punktliste. Lagres i lenken, opptil ${maks} tegn.`,
     rulesGeneralHelp:
       "For eksempel hvor logoen kan stå, minste størrelse, eller farger som ikke skal brukes sammen.",
+    vision: "Se siden som",
+    visionNormal: "Vanlig fargesyn",
+    visions: {
+      protanopia: "Protanopi (rødblind)",
+      deuteranopia: "Deuteranopi (grønnblind)",
+      tritanopia: "Tritanopi (blå-gul)",
+      achromatopsia: "Akromatopsi (uten farger)",
+    },
+    visionsShort: {
+      protanopia: "Protanopi",
+      deuteranopia: "Deuteranopi",
+      tritanopia: "Tritanopi",
+      achromatopsia: "Akromatopsi",
+    },
+    colorblind: "Fargeblindhet",
+    colorblindHelp:
+      "Slik ser fargene ut med de vanligste formene for nedsatt fargesyn. Rød-grønn fargeblindhet (protanopi og deuteranopi) er vanligst, særlig hos menn. Simuleringen er en modell (Machado 2009) og viser full fargeblindhet. De fleste har en mildere form.",
+    colorblindColor: "Farge",
+    colorblindSimilar: (a: string, b: string) =>
+      `${a} og ${b} blir vanskelige å skille.`,
+    colorblindNone: "Ingen av fargene blir for like.",
+    colorblindTip:
+      "Farger som blir like, bør ikke være det eneste som skiller ting fra hverandre. Bruk også tekst, ikoner, mønster eller ulik lyshet.",
     type: "Typografi",
     typeAdd: "Legg til typografi",
     typeChange: "Endre typografien",
@@ -931,6 +954,29 @@ const en: Messages = {
       `One rule per line becomes a bulleted list. Saved in the link, up to ${max} characters.`,
     rulesGeneralHelp:
       "For example where the logo may be placed, minimum size, or colors that must not be used together.",
+    vision: "View the page as",
+    visionNormal: "Normal color vision",
+    visions: {
+      protanopia: "Protanopia (red-blind)",
+      deuteranopia: "Deuteranopia (green-blind)",
+      tritanopia: "Tritanopia (blue-yellow)",
+      achromatopsia: "Achromatopsia (no color)",
+    },
+    visionsShort: {
+      protanopia: "Protanopia",
+      deuteranopia: "Deuteranopia",
+      tritanopia: "Tritanopia",
+      achromatopsia: "Achromatopsia",
+    },
+    colorblind: "Color blindness",
+    colorblindHelp:
+      "How the colors look with the most common forms of color vision deficiency. Red-green color blindness (protanopia and deuteranopia) is the most common, especially in men. The simulation is a model (Machado 2009) and shows full color blindness. Most people have a milder form.",
+    colorblindColor: "Color",
+    colorblindSimilar: (a: string, b: string) =>
+      `${a} and ${b} become hard to tell apart.`,
+    colorblindNone: "None of the colors become too similar.",
+    colorblindTip:
+      "Colors that become similar should not be the only thing that sets things apart. Also use text, icons, patterns or different lightness.",
     type: "Typography",
     typeAdd: "Add typography",
     typeChange: "Edit the typography",
