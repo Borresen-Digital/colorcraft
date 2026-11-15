@@ -46,6 +46,16 @@ const CSP = [
   "upgrade-insecure-requests",
 ].join("; ");
 
+/**
+ * Kontosiden laster Cloudflare Turnstile (sjekken før en innloggingslenke
+ * sendes). Bare der åpnes skript og ramme fra challenges.cloudflare.com.
+ */
+const TURNSTILE = "https://challenges.cloudflare.com";
+const CSP_KONTO = CSP.replace(
+  "script-src 'self'",
+  `script-src 'self' ${TURNSTILE}`,
+).replace("frame-src 'none'", `frame-src ${TURNSTILE}`);
+
 const SIKKERHETSHODER = [
   { key: "Content-Security-Policy", value: CSP },
   { key: "Strict-Transport-Security", value: "max-age=31536000" },
@@ -64,7 +74,14 @@ const nextConfig: NextConfig = {
   // eneste bildet, og den er liten nok til å serveres som den er.
   images: { unoptimized: true },
   async headers() {
-    return [{ source: "/(.*)", headers: SIKKERHETSHODER }];
+    return [
+      { source: "/(.*)", headers: SIKKERHETSHODER },
+      // Senere regler vinner for samme header.
+      ...["/konto", "/:lang/konto"].map((source) => ({
+        source,
+        headers: [{ key: "Content-Security-Policy", value: CSP_KONTO }],
+      })),
+    ];
   },
   /**
    * Norsk er standard og skal ligge på `/`, ikke `/nb`. Siden bygges som
@@ -75,12 +92,16 @@ const nextConfig: NextConfig = {
     return [
       { source: "/", destination: "/nb" },
       { source: "/profil", destination: "/nb/profil" },
+      { source: "/konto", destination: "/nb/konto" },
+      { source: "/personvern", destination: "/nb/personvern" },
     ];
   },
   async redirects() {
     return [
       { source: "/nb", destination: "/", permanent: true },
       { source: "/nb/profil", destination: "/profil", permanent: true },
+      { source: "/nb/konto", destination: "/konto", permanent: true },
+      { source: "/nb/personvern", destination: "/personvern", permanent: true },
     ];
   },
 };

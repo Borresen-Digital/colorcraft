@@ -31,6 +31,92 @@ const nb = {
       "Gratis verktøy for fargepaletter. Se fargene på ekte komponenter, sjekk kontrasten etter WCAG 2.2, og eksporter som CSS, Tailwind eller design tokens.",
     ogLocale: "nb_NO",
   },
+  account: {
+    metaTitle: "Konto · ColorCraft",
+    title: "Logg inn",
+    titleSignedIn: "Kontoen din",
+    loading: "Henter …",
+    notEnabled:
+      "Kontoer er på vei, men ikke slått på ennå. Verktøyet virker som før uten konto.",
+    intro:
+      "Ingen passord. Du får en innloggingslenke på e-post, og kan legge til en passkey (Face ID, fingeravtrykk eller Windows Hello) for neste gang.",
+    email: "E-postadresse",
+    sendLink: "Send innloggingslenke",
+    sending: "Sender …",
+    sentTitle: "Sjekk e-posten din",
+    sent: (epost: string) =>
+      `Vi har sendt en innloggingslenke til ${epost}. Den virker i ti minutter.`,
+    tryAgain: "Bruk en annen adresse eller send på nytt",
+    sendFailed: "Kunne ikke sende lenken. Prøv igjen om litt.",
+    rateLimited: "For mange forsøk. Vent noen minutter og prøv igjen.",
+    passkeyIntro: "Har du lagt til en passkey, kan du logge inn med den.",
+    passkeySignIn: "Logg inn med passkey",
+    passkeyFailed: "Innloggingen med passkey ble avbrutt eller virket ikke.",
+    signedInAs: "Logget inn som",
+    signOut: "Logg ut",
+    passkeys: "Passkeys",
+    passkeysHelp:
+      "En passkey lar deg logge inn uten e-postlenke. Den private nøkkelen blir på enheten din.",
+    noPasskeys: "Ingen passkeys ennå.",
+    addPasskey: "Legg til passkey",
+    passkeyDefaultName: "Passkey",
+    passkeyAdded: "Passkeyen er lagt til.",
+    passkeyAddFailed: "Passkeyen ble ikke lagt til.",
+    passkeyRemoveFailed: "Kunne ikke fjerne passkeyen.",
+    remove: "Fjern",
+    yourData: "Dine data",
+    exportHelp: "Last ned alt vi har lagret om kontoen din, som en JSON-fil.",
+    export: "Last ned mine data",
+    deleteTitle: "Slett kontoen",
+    deleteHelp:
+      "Kontoen, innloggingene og passkeyene slettes for godt. Paletter i nettleseren og lenker du har delt, påvirkes ikke.",
+    deleteConfirm: (epost: string) => `Skriv ${epost} for å bekrefte`,
+    deleteButton: "Slett kontoen for godt",
+    deleteNeedsFresh:
+      "Av sikkerhetshensyn må du ha logget inn de siste ti minuttene. Logg ut, logg inn på nytt og prøv igjen.",
+    privacyNote:
+      "Vi lagrer e-postadressen din og det som trengs for innloggingen.",
+    privacyLink: "Les om personvern",
+    signIn: "Logg inn",
+    account: "Konto",
+  },
+  privacy: {
+    metaTitle: "Personvern · ColorCraft",
+    title: "Personvern i ColorCraft",
+    intro:
+      "ColorCraft kan brukes uten konto. Da ligger alt i nettleseren din og i lenken, og ingenting sendes til oss. Denne siden gjelder deg som lager en konto.",
+    sections: [
+      {
+        heading: "Behandlingsansvarlig",
+        body: "Børresen Digital (org.nr. 938 537 720), et enkeltpersonforetak drevet av Marcus Børresen. Spørsmål om personvern sendes via kontaktskjemaet på borresendigital.no.",
+      },
+      {
+        heading: "Hva vi lagrer",
+        body: "E-postadressen din. For hver innlogging: når den startet og utløper, og IP-adressen og nettleseren du brukte, for sikkerhet og mot misbruk. For passkeys: navnet, når den ble laget og den offentlige nøkkelen. Den private nøkkelen forlater aldri enheten din. Innloggingslenken har en engangskode som virker i ti minutter.",
+      },
+      {
+        heading: "Hvorfor",
+        body: "For å gi deg kontoen du har bedt om (avtale, personvernforordningen artikkel 6 nr. 1 b), og for å beskytte tjenesten mot misbruk (berettiget interesse, artikkel 6 nr. 1 f).",
+      },
+      {
+        heading: "Hvor",
+        body: "I ColorCraft sin database hos Cloudflare (D1), lagret i EU. Innloggingslenker sendes med e-postleverandøren Resend. Cloudflare Turnstile sjekker at det er et menneske som ber om en lenke.",
+      },
+      {
+        heading: "Informasjonskapsler",
+        body: "Bare den som holder deg innlogget, som er nødvendig for at kontoen skal virke. Ingen sporing og ingen reklame.",
+      },
+      {
+        heading: "Hvor lenge",
+        body: "Til du sletter kontoen. En innlogging utløper etter 30 dager uten bruk.",
+      },
+      {
+        heading: "Rettighetene dine",
+        body: "På kontosiden kan du laste ned alle opplysningene og slette kontoen selv. Du har også rett til innsyn, retting, begrensning, protest og dataportabilitet. Mener du at opplysningene behandles i strid med regelverket, kan du klage til Datatilsynet.",
+      },
+    ],
+    back: "Tilbake til ColorCraft",
+  },
   views: {
     label: "Sider",
     tool: "Verktøy",
@@ -686,6 +772,93 @@ const en: Messages = {
     description:
       "A free color palette tool. See your colors on real components, check contrast against WCAG 2.2, and export as CSS, Tailwind or design tokens.",
     ogLocale: "en_US",
+  },
+  account: {
+    metaTitle: "Account · ColorCraft",
+    title: "Sign in",
+    titleSignedIn: "Your account",
+    loading: "Loading …",
+    notEnabled:
+      "Accounts are on the way but not switched on yet. The tool works as before without an account.",
+    intro:
+      "No passwords. You get a sign-in link by email, and can add a passkey (Face ID, fingerprint or Windows Hello) for next time.",
+    email: "Email address",
+    sendLink: "Send sign-in link",
+    sending: "Sending …",
+    sentTitle: "Check your email",
+    sent: (email: string) =>
+      `We have sent a sign-in link to ${email}. It works for ten minutes.`,
+    tryAgain: "Use another address or send again",
+    sendFailed: "Could not send the link. Try again in a moment.",
+    rateLimited: "Too many attempts. Wait a few minutes and try again.",
+    passkeyIntro: "If you have added a passkey, you can sign in with it.",
+    passkeySignIn: "Sign in with passkey",
+    passkeyFailed: "Signing in with a passkey was cancelled or did not work.",
+    signedInAs: "Signed in as",
+    signOut: "Sign out",
+    passkeys: "Passkeys",
+    passkeysHelp:
+      "A passkey lets you sign in without an email link. The private key stays on your device.",
+    noPasskeys: "No passkeys yet.",
+    addPasskey: "Add passkey",
+    passkeyDefaultName: "Passkey",
+    passkeyAdded: "The passkey was added.",
+    passkeyAddFailed: "The passkey was not added.",
+    passkeyRemoveFailed: "Could not remove the passkey.",
+    remove: "Remove",
+    yourData: "Your data",
+    exportHelp:
+      "Download everything we store about your account, as a JSON file.",
+    export: "Download my data",
+    deleteTitle: "Delete the account",
+    deleteHelp:
+      "The account, sign-ins and passkeys are deleted for good. Palettes in your browser and links you have shared are not affected.",
+    deleteConfirm: (email: string) => `Type ${email} to confirm`,
+    deleteButton: "Delete the account for good",
+    deleteNeedsFresh:
+      "For security, you must have signed in within the last ten minutes. Sign out, sign in again and try again.",
+    privacyNote:
+      "We store your email address and what is needed for signing in.",
+    privacyLink: "Read about privacy",
+    signIn: "Sign in",
+    account: "Account",
+  },
+  privacy: {
+    metaTitle: "Privacy · ColorCraft",
+    title: "Privacy in ColorCraft",
+    intro:
+      "ColorCraft can be used without an account. Then everything stays in your browser and in the link, and nothing is sent to us. This page applies to you if you create an account.",
+    sections: [
+      {
+        heading: "Controller",
+        body: "Børresen Digital (org. no. 938 537 720), a sole proprietorship run by Marcus Børresen. Questions about privacy go through the contact form on borresendigital.no.",
+      },
+      {
+        heading: "What we store",
+        body: "Your email address. For each sign-in: when it started and expires, and the IP address and browser you used, for security and against abuse. For passkeys: the name, when it was created and the public key. The private key never leaves your device. The sign-in link has a one-time code that works for ten minutes.",
+      },
+      {
+        heading: "Why",
+        body: "To provide the account you asked for (contract, GDPR Article 6(1)(b)), and to protect the service against abuse (legitimate interest, Article 6(1)(f)).",
+      },
+      {
+        heading: "Where",
+        body: "In ColorCraft's database at Cloudflare (D1), stored in the EU. Sign-in links are sent with the email provider Resend. Cloudflare Turnstile checks that a human asks for a link.",
+      },
+      {
+        heading: "Cookies",
+        body: "Only the one that keeps you signed in, which is needed for the account to work. No tracking and no ads.",
+      },
+      {
+        heading: "How long",
+        body: "Until you delete the account. A sign-in expires after 30 days without use.",
+      },
+      {
+        heading: "Your rights",
+        body: "On the account page you can download all the data and delete the account yourself. You also have the right to access, rectification, restriction, objection and data portability. If you believe your data is processed unlawfully, you can complain to the Norwegian Data Protection Authority (Datatilsynet).",
+      },
+    ],
+    back: "Back to ColorCraft",
   },
   views: {
     label: "Pages",
