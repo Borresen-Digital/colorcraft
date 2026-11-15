@@ -290,9 +290,14 @@ function Profile() {
     colors: profil.sections.flatMap((s) =>
       s.colors.map((c) => ({
         group: s.heading,
+        role: s.kind,
         label: c.label,
         hex: c.hex,
         cmyk: c.cmyk,
+        cmykNumbers: c.cmykValue
+          ? formatCmyk(c.cmykValue)
+          : c.cmyk.slice(t.card.approx.length + 1),
+        cmykFromManual: c.cmykFromManual,
         pantone: cleanPantone(pantone[pantoneKey(c.hex)]) || undefined,
       })),
     ),
@@ -304,10 +309,16 @@ function Profile() {
     rules: [
       ...profil.sections.map((s) => ({
         group: s.heading,
+        role: s.kind,
         text: cleanRule(regler[s.kind]),
       })),
-      { group: p.rules, text: cleanRule(regler.general) },
+      {
+        group: p.rules,
+        role: "general" as const,
+        text: cleanRule(regler.general),
+      },
     ],
+    direction: palette.brand?.direction,
     link: `${window.location.origin}${window.location.pathname}#${withLogo(hash, null)}`,
     figmaNames: p.figmaNames,
   };

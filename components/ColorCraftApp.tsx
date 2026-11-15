@@ -2,6 +2,8 @@
 
 import { ViewSwitch } from "@/components/ViewSwitch";
 import { useState, useEffect, useRef } from "react";
+import type { ImportedProfile, ProfileExtras } from "@/lib/profileImport";
+import { loadExtras, saveExtras, withProfileExtras } from "@/lib/profileExtras";
 import { colorPalettes, ExtendedColorPalette } from "@/data/palettes";
 import { decodeShare, encodeShare } from "@/lib/share";
 import { profilePath } from "@/lib/profile";
@@ -272,9 +274,49 @@ function ColorCraft() {
   const [brandEditing, setBrandEditing] = useState<ExtendedColorPalette | null>(
     null,
   );
+  // En importert profil: skjemaet starter med fargene fra filen, og
+  // tilleggene (typografi, regler, Pantone) lagres når paletten lages.
+  const [brandStart, setBrandStart] = useState<ExtendedColorPalette | null>(
+    null,
+  );
+  const [importExtras, setImportExtras] = useState<ProfileExtras | null>(null);
+  const [importNote, setImportNote] = useState<string[]>([]);
+  const [importNr, setImportNr] = useState(0);
   const lukkBrand = () => {
     setBrandOpen(false);
     setBrandEditing(null);
+    setBrandStart(null);
+    setImportExtras(null);
+    setImportNote([]);
+  };
+  const handleImportProfile = (p: ImportedProfile) => {
+    const b = t.brand;
+    const farger = [
+      ...p.brand.logo,
+      ...p.brand.support,
+      ...(p.brand.highlight ?? []),
+      ...(p.brand.internal ?? []),
+    ].length;
+    const e = p.extras;
+    const harTillegg =
+      !!e.maker ||
+      e.typography.length > 0 ||
+      Object.keys(e.rules).length > 0 ||
+      Object.keys(e.pantone).length > 0;
+    setBrandStart({
+      ...currentExtended,
+      id: "import",
+      name: p.name || b.defaultName,
+      brand: p.brand,
+    });
+    setImportExtras(harTillegg ? e : null);
+    setImportNote([
+      b.imported(p.name || b.defaultName, farger),
+      ...(harTillegg ? [b.importedExtras] : []),
+      ...(p.dropped > 0 ? [b.importedDropped(p.dropped)] : []),
+    ]);
+    // Ny nøkkel, så skjemaet starter på nytt med fargene fra filen.
+    setImportNr((n) => n + 1);
   };
   const handleCreateFromBrand = (p: Omit<ExtendedColorPalette, "id">) => {
     if (brandEditing) {
@@ -306,8 +348,19 @@ function ColorCraft() {
     };
     setPalettes((prev) => [...prev, ny]);
     setSelectedPaletteId(isDarkMode && ny.darkVariant ? ny.darkVariant.id : id);
+    if (importExtras) saveExtras(id, importExtras);
     lukkBrand();
   };
+
+  // Tilleggene fra en importert profil følger med i lenken til profilsiden.
+  // Leses etter hydrering, som de andre verdiene fra localStorage.
+  const [extras, setExtras] = useState<ProfileExtras | null>(null);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setExtras(loadExtras(currentExtended.id));
+  }, [currentExtended.id, palettes]);
+  const delt = encodeShare(currentExtended, false);
+  const profilHash = extras ? withProfileExtras(delt, extras) : delt;
 
   // Handle editing existing palette
   const handleEditPalette = () => {
@@ -378,6 +431,7 @@ function ColorCraft() {
       ) {
         storageUtils.removeCustomPalette(paletteToDelete.id);
       }
+      saveExtras(paletteToDelete.id, null);
 
       setPalettes((prev) => prev.filter((p) => p.id !== paletteToDelete.id));
 
@@ -475,7 +529,7 @@ function ColorCraft() {
           <ViewSwitch
             active="tool"
             toolHref={`${localePath(locale)}#${encodeShare(currentExtended, false)}`}
-            profileHref={`${profilePath(locale)}#${encodeShare(currentExtended, false)}`}
+            profileHref={`${profilePath(locale)}#${profilHash}`}
           />
           <p className="order-last hidden w-full text-sm text-subtle lg:order-none lg:block lg:w-auto lg:max-w-md">
             {t.app.tagline}
@@ -686,8 +740,11 @@ function ColorCraft() {
 
       {brandOpen && (
         <BrandBuilder
-          key={brandEditing?.id ?? "ny"}
+          key={brandEditing?.id ?? `ny-${importNr}`}
           initial={brandEditing ?? undefined}
+          start={brandStart ?? undefined}
+          onImport={handleImportProfile}
+          importNote={importNote}
           onClose={lukkBrand}
           onCreate={handleCreateFromBrand}
         />

@@ -1,6 +1,13 @@
 "use client";
 
-import { useId, useMemo, useState, type ReactNode } from "react";
+import {
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type ReactNode,
+} from "react";
 import type { ExtendedColorPalette } from "@/data/palettes";
 import {
   generateFromBrand,
@@ -24,6 +31,13 @@ import { LogoColors, type LogoColorTarget } from "@/components/LogoColors";
 import { useSimple } from "@/components/SimpleMode";
 import { MAX_INTERNAL, suggestInternal } from "@/lib/internal";
 import type { ColorPalette } from "@/types/palette";
+import {
+  MAX_PROFILE_BYTES,
+  parseProfileJson,
+  type ImportError,
+  type ImportedProfile,
+} from "@/lib/profileImport";
+import { btn } from "@/lib/ui";
 
 type Liste = "logo" | "support" | "highlight" | "internal";
 
@@ -33,6 +47,12 @@ interface BrandBuilderProps {
   initial?: ExtendedColorPalette;
   /** Får paletten uten id. Forelderen gir den en custom-id og lagrer den. */
   onCreate: (palette: Omit<ExtendedColorPalette, "id">) => void;
+  /** Startverdier for en ny palett, for eksempel fra en importert profil. */
+  start?: ExtendedColorPalette;
+  /** Når den finnes, kan en profilfil importeres i skjemaet. */
+  onImport?: (profile: ImportedProfile) => void;
+  /** Hva importen ga, vist øverst i skjemaet. */
+  importNote?: string[];
 }
 
 /**
@@ -50,6 +70,7 @@ function ColorRow({
   invalidText,
   name,
   onName,
+  manual,
 }: {
   value: string;
   onChange: (v: string) => void;
@@ -61,6 +82,8 @@ function ColorRow({
   /** Eget navn på fargen, for eksempel «Varm rørfarge». */
   name: string;
   onName: (v: string) => void;
+  /** CMYK fra manualen for denne HEX-en, hvis den finnes. */
+  manual?: string;
 }) {
   const { t } = useI18n();
   const id = useId();
@@ -71,7 +94,10 @@ function ColorRow({
   const avledet = gyldig ? formatCmyk(hexToCmyk(gyldig)!.cmyk) : "";
   // Det som er skrevet, vises så lenge HEX er den det hørte til. Endres HEX
   // et annet sted (fargevelger eller HEX-feltet), følger CMYK etter.
-  const cmykTekst = skrevet && skrevet.hex === gyldig ? skrevet.text : avledet;
+  // Manualens tall går foran omregningen, også når skjemaet åpnes med en
+  // lagret eller importert palett.
+  const cmykTekst =
+    skrevet && skrevet.hex === gyldig ? skrevet.text : (manual ?? avledet);
   const cmykGyldig = cmykTekst === "" || !!parseCmyk(cmykTekst);
   const handleCmyk = (text: string) => {
     const cmyk = parseCmyk(text);
@@ -197,12 +223,34 @@ export function BrandBuilder({
   onClose,
   onCreate,
   initial,
+  start,
+  onImport,
+  importNote,
 }: BrandBuilderProps) {
   const { locale, t } = useI18n();
   const { simple } = useSimple();
   const b = t.brand;
-  const fra = initial?.brand;
-  const [name, setName] = useState<string>(initial?.name ?? b.defaultName);
+  const fra = (initial ?? start)?.brand;
+  const [name, setName] = useState<string>(
+    (initial ?? start)?.name || b.defaultName,
+  );
+  const filRef = useRef<HTMLInputElement>(null);
+  const [importFeil, setImportFeil] = useState<ImportError | null>(null);
+  // Filen leses i nettleseren. Ingenting lastes opp.
+  const lesProfil = async (e: ChangeEvent<HTMLInputElement>) => {
+    const fil = e.target.files?.[0];
+    e.target.value = "";
+    if (!fil || !onImport) return;
+    if (fil.size > MAX_PROFILE_BYTES) {
+      setImportFeil("size");
+      return;
+    }
+    const r = parseProfileJson(await fil.text());
+    if (r.ok) {
+      setImportFeil(null);
+      onImport(r.profile);
+    } else setImportFeil(r.error);
+  };
   // Én lys flatefarge som start. En mørk nummer to ble ofte stående og
   // gjorde mørk modus grå.
   const [logo, setLogo] = useState<string[]>(fra?.logo ?? ["#F2B705"]);
@@ -397,6 +445,7 @@ export function BrandBuilder({
             invalidText={b.invalid}
             name={names[l][i] ?? ""}
             onName={(v) => settNavn(l, i, v)}
+            manual={manualCmyk[normalizeHex(c) ?? ""]}
           />
         ))}
         {liste.length < maks && (
@@ -443,6 +492,40 @@ export function BrandBuilder({
 
         <div className="space-y-5 p-4 sm:p-6">
           <p className="text-sm text-subtle">{b.intro}</p>
+          {onImport && !initial && (
+            <div className="space-y-2 rounded-xl border border-dashed border-line p-3 text-sm">
+              {importNote && importNote.length > 0 ? (
+                <div role="status" className="space-y-1">
+                  {importNote.map((l) => (
+                    <p key={l}>{l}</p>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-subtle">{b.importHelp}</p>
+              )}
+              <button
+                type="button"
+                onClick={() => filRef.current?.click()}
+                className={btn("outline", "sm")}
+              >
+                {b.importButton}
+              </button>
+              <input
+                ref={filRef}
+                type="file"
+                accept=".json,application/json"
+                className="sr-only"
+                tabIndex={-1}
+                aria-hidden="true"
+                onChange={lesProfil}
+              />
+              {importFeil && (
+                <p role="alert" className="text-xs font-medium text-bad">
+                  {b.importErrors[importFeil]}
+                </p>
+              )}
+            </div>
+          )}
           <Glossary />
 
           <div>

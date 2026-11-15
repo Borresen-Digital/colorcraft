@@ -215,6 +215,23 @@ const nb = {
     openTitle:
       "Lag en palett fra logofargene og flatefargene i en profilmanual",
     title: "Palett fra profilmanual",
+    importButton: "Importer profil (JSON)",
+    importHelp:
+      "Har du en profilfil fra profilsiden? Importer den, så fylles skjemaet ut. Du ser over fargene før paletten lages.",
+    imported: (navn: string, farger: number) =>
+      `Importert «${navn}» med ${farger} ${farger === 1 ? "farge" : "farger"}. Se over fargene og trykk «Lag palett».`,
+    importedExtras:
+      "Typografi, bruksregler, Pantone og «Laget av» fra filen følger med til profilsiden.",
+    importedDropped: (n: number) =>
+      `${n} ${n === 1 ? "farge" : "farger"} fikk ikke plass i gruppen sin og er utelatt.`,
+    importErrors: {
+      size: "Filen er for stor til å være en profil.",
+      json: "Filen er ikke gyldig JSON.",
+      format:
+        "Dette er ikke en profilfil fra ColorCraft. Bruk «Profil (JSON)» under Eksport på profilsiden.",
+      version: "Profilfilen er fra en nyere versjon av ColorCraft.",
+      colors: "Profilfilen har ingen gyldige farger.",
+    },
     intro:
       "Legg inn fargene fra profilmanualen. Merkefargene endres ikke. Tekst, bakgrunn og varslingsfarger tilpasses, så kontrasten blir god nok.",
     name: "Navn på paletten",
@@ -854,6 +871,23 @@ const en: Messages = {
     openTitle:
       "Create a palette from the logo and area colors in a brand guide",
     title: "Palette from brand guide",
+    importButton: "Import profile (JSON)",
+    importHelp:
+      "Do you have a profile file from the profile page? Import it to fill in the form. You review the colors before the palette is created.",
+    imported: (name: string, colors: number) =>
+      `Imported “${name}” with ${colors} ${colors === 1 ? "color" : "colors"}. Review the colors and press “Create palette”.`,
+    importedExtras:
+      "Typography, usage rules, Pantone and “Made by” from the file carry over to the profile page.",
+    importedDropped: (n: number) =>
+      `${n} ${n === 1 ? "color" : "colors"} did not fit in their group and were left out.`,
+    importErrors: {
+      size: "The file is too large to be a profile.",
+      json: "The file is not valid JSON.",
+      format:
+        "This is not a ColorCraft profile file. Use “Profile (JSON)” under Export on the profile page.",
+      version: "The profile file is from a newer version of ColorCraft.",
+      colors: "The profile file has no valid colors.",
+    },
     intro:
       "Enter the colors from the brand guide. The brand colors are not changed. Text, background and alert colors are adjusted so the contrast is good enough.",
     name: "Palette name",
