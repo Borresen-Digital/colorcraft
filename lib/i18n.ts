@@ -31,6 +31,11 @@ const nb = {
       "Gratis verktøy for fargepaletter. Se fargene på ekte komponenter, sjekk kontrasten etter WCAG 2.2, og eksporter som CSS, Tailwind eller design tokens.",
     ogLocale: "nb_NO",
   },
+  views: {
+    label: "Sider",
+    tool: "Verktøy",
+    profile: "Profilside",
+  },
   app: {
     tagline:
       "Test fargepaletter på ekte komponenter, sjekk kontrasten og eksporter som tokens",
@@ -383,6 +388,10 @@ const nb = {
     pantoneHelp:
       "Skriv nummeret fra manualen. ColorCraft regner ikke om til Pantone.",
     pantoneSource: "Pantone fra manualen",
+    onThisPage: "På denne siden",
+    navColors: "Farger",
+    navInUse: "I bruk",
+    navContrast: "Kontrast",
     export: "Eksport",
     exportHelp:
       "Fargene, tonetrappen og typografien i formatet du trenger. Filene lages i nettleseren.",
@@ -660,6 +669,11 @@ const en: Messages = {
     description:
       "A free color palette tool. See your colors on real components, check contrast against WCAG 2.2, and export as CSS, Tailwind or design tokens.",
     ogLocale: "en_US",
+  },
+  views: {
+    label: "Pages",
+    tool: "Tool",
+    profile: "Profile page",
   },
   app: {
     tagline:
@@ -1014,6 +1028,10 @@ const en: Messages = {
     pantoneHelp:
       "Enter the number from the brand guide. ColorCraft does not convert to Pantone.",
     pantoneSource: "Pantone from the brand guide",
+    onThisPage: "On this page",
+    navColors: "Colors",
+    navInUse: "In use",
+    navContrast: "Contrast",
     export: "Export",
     exportHelp:
       "The colors, tone scale and typography in the format you need. The files are made in the browser.",

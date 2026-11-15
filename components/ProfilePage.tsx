@@ -33,6 +33,8 @@ import {
   type PantoneMap,
 } from "@/lib/pantone";
 import { ProfileExport } from "@/components/ProfileExport";
+import { SectionNav, type NavItem } from "@/components/SectionNav";
+import { ViewSwitch } from "@/components/ViewSwitch";
 import type { ProfileExportInput } from "@/lib/profileExport";
 import {
   filterMatrix,
@@ -310,6 +312,25 @@ function Profile() {
     figmaNames: p.figmaNames,
   };
 
+  // Menyen følger rekkefølgen på siden. Typografi og bruksregler er bare
+  // med når de har innhold.
+  const navItems: NavItem[] = [
+    { id: "profil-farger", label: p.navColors },
+    ...(unikeTonefarger.length > 0
+      ? [{ id: "profil-toner", label: p.tones }]
+      : []),
+    ...(typo.some((x) => cleanFont(x.font))
+      ? [{ id: "profil-typografi", label: p.type }]
+      : []),
+    ...(cleanRule(regler.general)
+      ? [{ id: "profil-regler", label: p.rules }]
+      : []),
+    { id: "profil-ibruk", label: p.navInUse },
+    { id: "profil-kontrast", label: p.navContrast },
+    { id: "profil-fargeblind", label: p.colorblind },
+    { id: "profil-eksport", label: p.export },
+  ];
+
   const endreMaker = (v: string) => {
     setMaker(v);
     const ny = withMaker(hash, v);
@@ -366,7 +387,7 @@ function Profile() {
           <div className="flex flex-wrap items-end gap-2">
             <Link
               href={tilVerktøy}
-              className="mr-auto flex items-center gap-2 rounded-lg"
+              className="flex items-center gap-2 rounded-lg"
               title={p.edit}
             >
               <FanMark colors={farger} size={28} />
@@ -374,6 +395,12 @@ function Profile() {
                 Color<span className="font-semibold text-subtle">Craft</span>
               </span>
             </Link>
+            <ViewSwitch
+              active="profile"
+              toolHref={tilVerktøy}
+              profileHref={`#${hash}`}
+              className="mr-auto"
+            />
             <label className="flex min-w-48 flex-col gap-1 text-xs font-medium">
               {p.maker}
               <input
@@ -418,9 +445,6 @@ function Profile() {
             >
               {p.print}
             </button>
-            <Link href={tilVerktøy} className={btn("ghost", "md")}>
-              {p.edit}
-            </Link>
           </div>
           <details className="text-xs">
             <summary className="cursor-pointer text-subtle hover:text-ink">
@@ -453,6 +477,8 @@ function Profile() {
           <p className="text-[11px] text-subtle">{p.toolbarHelp}</p>
         </div>
       </aside>
+
+      <SectionNav label={p.onThisPage} items={navItems} />
 
       {/* Filtrene for «Se siden som». feColorMatrix regner i lineær RGB. */}
       <svg aria-hidden="true" focusable="false" className="absolute h-0 w-0">
@@ -488,16 +514,18 @@ function Profile() {
           </div>
         </header>
 
-        {profil.sections.map((s) => (
-          <Section
-            key={s.kind}
-            s={s}
-            regel={regler[s.kind] ?? ""}
-            onRegel={(v) => endreRegel(s.kind, v)}
-            pantone={pantone}
-            onPantone={endrePantone}
-          />
-        ))}
+        <div id="profil-farger" className="space-y-12">
+          {profil.sections.map((s) => (
+            <Section
+              key={s.kind}
+              s={s}
+              regel={regler[s.kind] ?? ""}
+              onRegel={(v) => endreRegel(s.kind, v)}
+              pantone={pantone}
+              onPantone={endrePantone}
+            />
+          ))}
+        </div>
 
         <ToneScales farger={tonefarger} />
 

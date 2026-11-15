@@ -1,10 +1,10 @@
 "use client";
 
+import { ViewSwitch } from "@/components/ViewSwitch";
 import { useState, useEffect, useRef } from "react";
 import { colorPalettes, ExtendedColorPalette } from "@/data/palettes";
 import { decodeShare, encodeShare } from "@/lib/share";
 import { profilePath } from "@/lib/profile";
-import Link from "next/link";
 import {
   applyOverrides,
   builtinOriginal,
@@ -472,6 +472,11 @@ function ColorCraft() {
               Color<span className="font-semibold text-subtle">Craft</span>
             </h1>
           </a>
+          <ViewSwitch
+            active="tool"
+            toolHref={`${localePath(locale)}#${encodeShare(currentExtended, false)}`}
+            profileHref={`${profilePath(locale)}#${encodeShare(currentExtended, false)}`}
+          />
           <p className="order-last hidden w-full text-sm text-subtle lg:order-none lg:block lg:w-auto lg:max-w-md">
             {t.app.tagline}
           </p>
@@ -501,13 +506,6 @@ function ColorCraft() {
                   ? t.app.copyFailed
                   : t.app.share}
             </button>
-            <Link
-              href={`${profilePath(locale)}#${encodeShare(currentExtended, false)}`}
-              className={btn("outline", "sm")}
-              title={t.app.profileTitle}
-            >
-              {t.app.profile}
-            </Link>
             {!simple && (
               <button
                 type="button"

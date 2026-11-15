@@ -112,6 +112,11 @@ body {
   outline-offset: 2px;
 }
 
+/* Seksjonene på profilsiden havner under menyen som står fast øverst. */
+[id^="profil-"] {
+  scroll-margin-top: 4rem;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
