@@ -19,4 +19,22 @@
   "observability": {
     "enabled": true,
   },
+  // Kontoer (Better Auth). Databasen ligger i EU (jurisdiksjon eu).
+  // Migreringene i migrations/ kjøres før hver deploy.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "colorcraft-eu",
+      "database_id": "d719405b-fbc4-468c-9c71-d25bc14fb773",
+      "migrations_dir": "migrations",
+    },
+  ],
+  // Ikke hemmelige. BETTER_AUTH_SECRET, RESEND_API_KEY og
+  // TURNSTILE_SECRET_KEY settes med `wrangler secret put`, og
+  // TURNSTILE_SITE_KEY legges her når widgeten finnes. Mangler noe, er
+  // kontoene av (lib/auth.ts).
+  "vars": {
+    "BETTER_AUTH_URL": "https://farger.borresendigital.no",
+    "AUTH_FROM_EMAIL": "ColorCraft <farger@borresendigital.no>",
+  },
 }

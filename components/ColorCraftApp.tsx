@@ -1,6 +1,7 @@
 "use client";
 
 import { ViewSwitch } from "@/components/ViewSwitch";
+import { AccountLink } from "@/components/AccountLink";
 import { useState, useEffect, useRef } from "react";
 import type { ImportedProfile, ProfileExtras } from "@/lib/profileImport";
 import { loadExtras, saveExtras, withProfileExtras } from "@/lib/profileExtras";
@@ -548,6 +549,7 @@ function ColorCraft() {
             </a>
             <SimpleToggle />
             <ThemeToggle />
+            <AccountLink />
             <button
               type="button"
               onClick={copyShareLink}

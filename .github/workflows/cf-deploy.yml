@@ -164,6 +164,21 @@ jobs:
                 exit 1
               fi
               echo "ok: /llms.txt og skjemaet"
+              # Kontoer: sidene svarer, og statusen er gyldig JSON. Uten
+              # hemmeligheter i røyktesten skal kontoene være av, ikke åpne.
+              for side in /konto /en/konto /personvern; do
+                kode=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "http://localhost:8787$side" || true)
+                if [ "$kode" != "200" ]; then
+                  echo "::error::$side svarte $kode."
+                  exit 1
+                fi
+              done
+              status=$(curl -s --max-time 20 "http://localhost:8787/api/konto/status" || true)
+              if ! echo "$status" | grep -q '"enabled":false'; then
+                echo "::error::Kontostatus uten hemmeligheter skal være av: $status"
+                exit 1
+              fi
+              echo "ok: /konto, /personvern og kontostatus"
               # Favikonet ligger under [lang] og får en uvanlig adresse
               # (/-/icon.svg). Lenken i siden må gå til noe som svarer.
               ikon=$(grep -o '<link rel="icon" href="[^"]*' forside.html | head -1 | sed 's/.*href="//')
@@ -192,6 +207,12 @@ jobs:
         run: |
           npx opennextjs-cloudflare populateCache local
           npx wrangler deploy --dry-run --outdir .wrangler-dry-run
+
+      # Databasen må ha tabellene før koden som bruker dem går live.
+      # Idempotent: migreringer som er kjørt, hoppes over.
+      - name: Migrer D1
+        if: steps.secrets.outputs.ready == 'true' && env.DRY_RUN != 'true'
+        run: npx wrangler d1 migrations apply colorcraft-eu --remote
 
       - name: Deploy
         if: steps.secrets.outputs.ready == 'true' && env.DRY_RUN != 'true'

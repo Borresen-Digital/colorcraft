@@ -1,0 +1,362 @@
+"use client";
+
+import Link from "next/link";
+import { useEffect, useState, type FormEvent } from "react";
+import {
+  authClient,
+  hentKontoStatus,
+  type KontoStatus,
+} from "@/lib/authClient";
+import { localePath, type Locale } from "@/lib/i18n";
+import { kontoPath, personvernPath } from "@/lib/accountPaths";
+import { btn, field, panel } from "@/lib/ui";
+import { FanMark } from "@/components/FanMark";
+import { I18nProvider, useI18n } from "@/components/I18nProvider";
+import { Turnstile } from "@/components/Turnstile";
+
+/**
+ * Kontosiden: logg inn med e-postlenke eller passkey, og styr kontoen
+ * (passkeys, last ned data, slett, logg ut). Ingen passord.
+ */
+export function AccountPage({ locale }: { locale: Locale }) {
+  return (
+    <I18nProvider locale={locale}>
+      <Account />
+    </I18nProvider>
+  );
+}
+
+function Account() {
+  const { locale, t } = useI18n();
+  const k = t.account;
+  const [status, setStatus] = useState<KontoStatus | null>(null);
+  const { data: økt, isPending } = authClient.useSession();
+
+  useEffect(() => {
+    hentKontoStatus().then(setStatus);
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-paper text-ink">
+      <header className="border-b border-line bg-panel">
+        <div className="mx-auto flex max-w-2xl items-center gap-2 px-4 py-3 sm:px-6">
+          <Link
+            href={localePath(locale)}
+            className="flex items-center gap-2 rounded-lg"
+          >
+            <FanMark size={28} />
+            <span className="font-display text-lg font-extrabold tracking-tight">
+              Color<span className="font-semibold text-subtle">Craft</span>
+            </span>
+          </Link>
+        </div>
+      </header>
+      <main className="mx-auto max-w-2xl space-y-6 px-4 py-10 sm:px-6">
+        <h1 className="font-display text-3xl font-extrabold tracking-tight">
+          {økt ? k.titleSignedIn : k.title}
+        </h1>
+        {status === null || isPending ? (
+          <p className="text-subtle" role="status">
+            {k.loading}
+          </p>
+        ) : !status.enabled ? (
+          <p className={`${panel} p-4`}>{k.notEnabled}</p>
+        ) : økt ? (
+          <SignedIn email={økt.user.email} />
+        ) : (
+          <SignIn siteKey={status.turnstileSiteKey} />
+        )}
+        <p className="text-xs text-subtle">
+          {k.privacyNote}{" "}
+          <Link href={personvernPath(locale)} className="underline">
+            {k.privacyLink}
+          </Link>
+        </p>
+      </main>
+    </div>
+  );
+}
+
+function SignIn({ siteKey }: { siteKey: string | null }) {
+  const { locale, t } = useI18n();
+  const k = t.account;
+  const [epost, setEpost] = useState("");
+  const [token, setToken] = useState<string | null>(null);
+  const [nonce, setNonce] = useState(0);
+  const [tilstand, setTilstand] = useState<
+    "" | "sending" | "sent" | "error" | "rate" | "passkey-error"
+  >("");
+
+  const send = async (e: FormEvent) => {
+    e.preventDefault();
+    if (siteKey && !token) return;
+    setTilstand("sending");
+    const { error } = await authClient.signIn.magicLink({
+      email: epost.trim(),
+      callbackURL: kontoPath(locale),
+      metadata: { locale },
+      fetchOptions: token
+        ? { headers: { "x-captcha-response": token } }
+        : undefined,
+    });
+    setNonce((n) => n + 1);
+    if (!error) setTilstand("sent");
+    else setTilstand(error.status === 429 ? "rate" : "error");
+  };
+
+  const medPasskey = async () => {
+    setTilstand("");
+    const r = await authClient.signIn.passkey();
+    if (r?.error) setTilstand("passkey-error");
+  };
+
+  if (tilstand === "sent") {
+    return (
+      <div className={`${panel} space-y-2 p-5`} role="status">
+        <p className="font-semibold">{k.sentTitle}</p>
+        <p className="text-sm">{k.sent(epost.trim())}</p>
+        <button
+          type="button"
+          onClick={() => setTilstand("")}
+          className="text-sm text-subtle underline hover:text-ink"
+        >
+          {k.tryAgain}
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <p className="text-subtle">{k.intro}</p>
+      <form onSubmit={send} className={`${panel} space-y-3 p-5`}>
+        <label className="flex flex-col gap-1 text-sm font-medium">
+          {k.email}
+          <input
+            type="email"
+            required
+            autoComplete="email"
+            inputMode="email"
+            value={epost}
+            onChange={(e) => setEpost(e.target.value)}
+            className={field}
+          />
+        </label>
+        {siteKey && (
+          <Turnstile
+            siteKey={siteKey}
+            locale={locale}
+            onToken={setToken}
+            nonce={nonce}
+          />
+        )}
+        <button
+          type="submit"
+          disabled={tilstand === "sending" || (!!siteKey && !token)}
+          className={btn("primary", "md")}
+        >
+          {tilstand === "sending" ? k.sending : k.sendLink}
+        </button>
+        {(tilstand === "error" || tilstand === "rate") && (
+          <p role="alert" className="text-sm font-medium text-bad">
+            {tilstand === "rate" ? k.rateLimited : k.sendFailed}
+          </p>
+        )}
+      </form>
+      <div className={`${panel} space-y-2 p-5`}>
+        <p className="text-sm">{k.passkeyIntro}</p>
+        <button
+          type="button"
+          onClick={medPasskey}
+          className={btn("outline", "md")}
+        >
+          {k.passkeySignIn}
+        </button>
+        {tilstand === "passkey-error" && (
+          <p role="alert" className="text-sm font-medium text-bad">
+            {k.passkeyFailed}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+interface PasskeyRad {
+  id: string;
+  name?: string | null;
+  createdAt?: string | Date | null;
+}
+
+function SignedIn({ email }: { email: string }) {
+  const { locale, t } = useI18n();
+  const k = t.account;
+  const [passkeys, setPasskeys] = useState<PasskeyRad[] | null>(null);
+  const [melding, setMelding] = useState<{ ok: boolean; tekst: string } | null>(
+    null,
+  );
+  const [bekreft, setBekreft] = useState("");
+  const [sletter, setSletter] = useState(false);
+
+  const hent = async () => {
+    const { data } = await authClient.passkey.listUserPasskeys();
+    setPasskeys((data as PasskeyRad[] | null) ?? []);
+  };
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    hent();
+  }, []);
+
+  const leggTil = async () => {
+    setMelding(null);
+    const navn = `${k.passkeyDefaultName} ${new Date().toLocaleDateString(
+      locale === "en" ? "en-GB" : "nb-NO",
+    )}`;
+    const r = await authClient.passkey.addPasskey({ name: navn });
+    if (r?.error) setMelding({ ok: false, tekst: k.passkeyAddFailed });
+    else {
+      setMelding({ ok: true, tekst: k.passkeyAdded });
+      hent();
+    }
+  };
+
+  const fjern = async (id: string) => {
+    const { error } = await authClient.passkey.deletePasskey({ id });
+    if (error) setMelding({ ok: false, tekst: k.passkeyRemoveFailed });
+    else hent();
+  };
+
+  const slett = async () => {
+    setSletter(true);
+    const { error } = await authClient.deleteUser();
+    setSletter(false);
+    if (error) {
+      setMelding({ ok: false, tekst: k.deleteNeedsFresh });
+      return;
+    }
+    window.location.href = localePath(locale);
+  };
+
+  const loggUt = async () => {
+    await authClient.signOut();
+    window.location.reload();
+  };
+
+  const dato = (d?: string | Date | null) =>
+    d
+      ? new Date(d).toLocaleDateString(locale === "en" ? "en-GB" : "nb-NO")
+      : "";
+
+  return (
+    <div className="space-y-6">
+      <div
+        className={`${panel} flex flex-wrap items-center justify-between gap-3 p-5`}
+      >
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-widest text-subtle">
+            {k.signedInAs}
+          </p>
+          <p className="font-medium">{email}</p>
+        </div>
+        <button type="button" onClick={loggUt} className={btn("outline", "sm")}>
+          {k.signOut}
+        </button>
+      </div>
+
+      {melding && (
+        <p
+          role={melding.ok ? "status" : "alert"}
+          className={`text-sm font-medium ${melding.ok ? "text-ok" : "text-bad"}`}
+        >
+          {melding.tekst}
+        </p>
+      )}
+
+      <section
+        aria-labelledby="konto-passkeys"
+        className={`${panel} space-y-3 p-5`}
+      >
+        <h2 id="konto-passkeys" className="font-display text-xl font-bold">
+          {k.passkeys}
+        </h2>
+        <p className="text-sm text-subtle">{k.passkeysHelp}</p>
+        {passkeys === null ? (
+          <p className="text-sm text-subtle">{k.loading}</p>
+        ) : passkeys.length === 0 ? (
+          <p className="text-sm">{k.noPasskeys}</p>
+        ) : (
+          <ul className="divide-y divide-line text-sm">
+            {passkeys.map((p) => (
+              <li
+                key={p.id}
+                className="flex items-center justify-between gap-3 py-2"
+              >
+                <span>
+                  {p.name || k.passkeyDefaultName}
+                  <span className="text-subtle"> · {dato(p.createdAt)}</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => fjern(p.id)}
+                  className="text-xs text-subtle underline hover:text-ink"
+                >
+                  {k.remove}
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+        <button
+          type="button"
+          onClick={leggTil}
+          className={btn("primary", "sm")}
+        >
+          {k.addPasskey}
+        </button>
+      </section>
+
+      <section
+        aria-labelledby="konto-data"
+        className={`${panel} space-y-3 p-5`}
+      >
+        <h2 id="konto-data" className="font-display text-xl font-bold">
+          {k.yourData}
+        </h2>
+        <p className="text-sm text-subtle">{k.exportHelp}</p>
+        <a href="/api/konto/eksport" className={btn("outline", "sm")} download>
+          {k.export}
+        </a>
+      </section>
+
+      <section
+        aria-labelledby="konto-slett"
+        className="space-y-3 rounded-2xl border border-bad/40 p-5"
+      >
+        <h2 id="konto-slett" className="font-display text-xl font-bold">
+          {k.deleteTitle}
+        </h2>
+        <p className="text-sm">{k.deleteHelp}</p>
+        <label className="flex flex-col gap-1 text-sm font-medium">
+          {k.deleteConfirm(email)}
+          <input
+            type="email"
+            value={bekreft}
+            onChange={(e) => setBekreft(e.target.value)}
+            autoComplete="off"
+            className={field}
+          />
+        </label>
+        <button
+          type="button"
+          onClick={slett}
+          disabled={
+            sletter || bekreft.trim().toLowerCase() !== email.toLowerCase()
+          }
+          className="rounded-lg bg-bad px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+        >
+          {k.deleteButton}
+        </button>
+      </section>
+    </div>
+  );
+}
