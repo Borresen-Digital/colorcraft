@@ -3,11 +3,18 @@ import { colorPalettes } from "@/data/palettes";
 import { buildCardModel } from "./colorCard";
 import {
   buildProfile,
+  cleanRule,
   MAKER_PARAM,
+  MAX_RULE,
   profilePath,
   readMaker,
+  readRules,
+  RULE_PARAMS,
+  ruleLines,
   withMaker,
   withoutMaker,
+  withoutRules,
+  withRule,
 } from "./profile";
 import { decodeShare, encodeShare } from "./share";
 import { generateFromBrand } from "./brand";
@@ -108,5 +115,43 @@ describe("«Laget av» i lenken", () => {
     expect(readMaker(`#mk=${encodeURIComponent("a\u0007b")}`)).toBe("a b");
     expect(readMaker(`mk=${"x".repeat(100)}`)).toHaveLength(60);
     expect(readMaker("p=havet")).toBe("");
+  });
+});
+
+describe("bruksregler", () => {
+  it("legges i lenken uten å endre paletten", () => {
+    const hash = withMaker("p=havet", "Testdesign");
+    const med = withRule(
+      withRule(hash, "logo", "Alltid på hvit\n- Aldri på bilder"),
+      "general",
+      "Minst 20 mm bred",
+    );
+    expect(readRules(med)).toEqual({
+      logo: "Alltid på hvit\n- Aldri på bilder",
+      general: "Minst 20 mm bred",
+    });
+    expect(decodeShare(med)).toEqual(decodeShare(hash));
+    expect(readMaker(med)).toBe("Testdesign");
+    expect(withoutRules(med)).toBe(hash);
+    expect(withRule(med, "logo", "  ")).not.toContain(RULE_PARAMS.logo + "=");
+  });
+
+  it("ingen parameter starter med b, så palettens id står fast", () => {
+    for (const p of Object.values(RULE_PARAMS)) expect(p[0]).not.toBe("b");
+  });
+
+  it("renser teksten og beholder linjeskift", () => {
+    expect(cleanRule("  a\u0007b \r\n\r\n\r\n\r\n c  ")).toBe("a b\n\nc");
+    expect(cleanRule("x".repeat(MAX_RULE + 50))).toHaveLength(MAX_RULE);
+    expect(cleanRule(null)).toBe("");
+  });
+
+  it("deler regler i linjer uten punkttegn", () => {
+    expect(ruleLines("- en\n\n• to\n* tre\nfire")).toEqual([
+      "en",
+      "to",
+      "tre",
+      "fire",
+    ]);
   });
 });

@@ -8,11 +8,19 @@ import { contrastLevel, contrastRatio, formatRatio } from "@/lib/contrast";
 import { localePath, localizePalette, localizeRatio } from "@/lib/i18n";
 import {
   buildProfile,
+  cleanRule,
+  MAX_RULE,
   readMaker,
+  readRules,
+  ruleLines,
   withMaker,
   withoutMaker,
+  withoutRules,
+  withRule,
   type ProfileColor,
   type ProfileSection,
+  type RuleKey,
+  type Rules,
 } from "@/lib/profile";
 import { decodeShare } from "@/lib/share";
 import {
@@ -165,6 +173,7 @@ function Profile() {
   // null til fragmentet er lest. Det finnes bare i nettleseren.
   const [hash, setHash] = useState<string | null>(null);
   const [maker, setMaker] = useState("");
+  const [regler, setRegler] = useState<Rules>({});
   const [lenke, setLenke] = useState<"" | "copied" | "failed">("");
   const [medLogo, setMedLogo] = useState(true);
   const logoLenke = useLogoILenke(hash);
@@ -174,6 +183,7 @@ function Profile() {
       const h = window.location.hash.replace(/^#/, "");
       setHash(h);
       setMaker(readMaker(h));
+      setRegler(readRules(h));
     };
     les();
     window.addEventListener("hashchange", les);
@@ -220,12 +230,21 @@ function Profile() {
   const profil = buildProfile(palette, locale);
   const navn = maker.trim();
   // Verktøyet leser ikke logoen fra lenken. Den følger med i nettleseren.
-  const tilVerktøy = `${localePath(locale)}#${withLogo(withoutMaker(hash), null)}`;
+  const tilVerktøy = `${localePath(locale)}#${withLogo(withoutRules(withoutMaker(hash)), null)}`;
   const farger = profil.sections.flatMap((s) => s.colors.map((c) => c.hex));
 
   const endreMaker = (v: string) => {
     setMaker(v);
     const ny = withMaker(hash, v);
+    setHash(ny);
+    window.history.replaceState(null, "", `#${ny}`);
+  };
+
+  // Teksten i feltet står som den er skrevet. Lenken får den rensede.
+  const endreRegel = (key: RuleKey, v: string) => {
+    setRegler((r) => ({ ...r, [key]: v }));
+    const ny = withRule(hash, key, v);
+    setHash(ny);
     window.history.replaceState(null, "", `#${ny}`);
   };
 
@@ -344,8 +363,18 @@ function Profile() {
         </header>
 
         {profil.sections.map((s) => (
-          <Section key={s.kind} s={s} />
+          <Section
+            key={s.kind}
+            s={s}
+            regel={regler[s.kind] ?? ""}
+            onRegel={(v) => endreRegel(s.kind, v)}
+          />
         ))}
+
+        <GeneralRules
+          regel={regler.general ?? ""}
+          onRegel={(v) => endreRegel("general", v)}
+        />
 
         <section aria-labelledby="profil-ibruk" className="space-y-4">
           <h2
@@ -432,21 +461,191 @@ function Level({ level }: { level: string }) {
   );
 }
 
-function Section({ s }: { s: ProfileSection }) {
+/** En bruksregel som avsnitt, eller som punktliste når den har flere linjer. */
+function RuleText({ tekst, className }: { tekst: string; className: string }) {
+  const linjer = ruleLines(tekst);
+  if (linjer.length === 1) return <p className={className}>{linjer[0]}</p>;
+  return (
+    <ul className={`${className} list-disc space-y-0.5 pl-5`}>
+      {linjer.map((l, i) => (
+        <li key={i}>{l}</li>
+      ))}
+    </ul>
+  );
+}
+
+/**
+ * Feltet der designeren skriver egne bruksregler. Vises ikke for utskrift.
+ */
+function RuleEditor({
+  label,
+  regel,
+  standard,
+  onRegel,
+  onDone,
+}: {
+  label: string;
+  regel: string;
+  standard?: string;
+  onRegel: (v: string) => void;
+  onDone: () => void;
+}) {
+  const { t } = useI18n();
+  const p = t.profile;
+  // Uendret standardtekst lagres ikke i lenken.
+  const ferdig = () => {
+    if (standard && cleanRule(regel) === cleanRule(standard)) onRegel("");
+    onDone();
+  };
+  return (
+    <div className="space-y-2 print:hidden">
+      <textarea
+        aria-label={label}
+        value={regel}
+        maxLength={MAX_RULE}
+        rows={4}
+        autoFocus
+        onChange={(e) => onRegel(e.target.value)}
+        className={`${field} block w-full resize-y`}
+      />
+      <p className="text-[11px] text-subtle">{p.rulesHelp(MAX_RULE)}</p>
+      <div className="flex flex-wrap gap-2">
+        <button type="button" onClick={ferdig} className={btn("primary", "sm")}>
+          {p.rulesDone}
+        </button>
+        {regel && (
+          <button
+            type="button"
+            onClick={() => {
+              onRegel("");
+              onDone();
+            }}
+            className={btn("ghost", "sm")}
+          >
+            {standard ? p.rulesReset : p.rulesRemove}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function Section({
+  s,
+  regel,
+  onRegel,
+}: {
+  s: ProfileSection;
+  regel: string;
+  onRegel: (v: string) => void;
+}) {
+  const { t } = useI18n();
+  const p = t.profile;
+  const [åpen, setÅpen] = useState(false);
   const id = `profil-${s.kind}`;
+  const egen = cleanRule(regel);
   return (
     <section aria-labelledby={id} className="space-y-4">
-      <div className="max-w-2xl space-y-1">
+      <div className="max-w-2xl space-y-2">
         <h2 id={id} className="font-display text-2xl font-bold tracking-tight">
           {s.heading}
         </h2>
-        <p className="text-sm text-subtle">{s.usage}</p>
+        {åpen ? (
+          <RuleEditor
+            label={p.rulesLabel(s.heading)}
+            regel={regel}
+            standard={s.usage}
+            onRegel={onRegel}
+            onDone={() => setÅpen(false)}
+          />
+        ) : (
+          <>
+            <RuleText tekst={egen || s.usage} className="text-sm text-subtle" />
+            <button
+              type="button"
+              onClick={() => {
+                // Standardteksten er et godt sted å starte.
+                if (!egen) onRegel(s.usage);
+                setÅpen(true);
+              }}
+              className="text-xs font-medium text-subtle underline hover:text-ink print:hidden"
+            >
+              {egen ? p.rulesChange : p.rulesWrite}
+            </button>
+          </>
+        )}
       </div>
       <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {s.colors.map((c) => (
           <ColorCard key={c.hex + c.label} c={c} />
         ))}
       </ul>
+    </section>
+  );
+}
+
+/** Generelle bruksregler. Uten tekst vises bare knappen, og ikke på trykk. */
+function GeneralRules({
+  regel,
+  onRegel,
+}: {
+  regel: string;
+  onRegel: (v: string) => void;
+}) {
+  const { t } = useI18n();
+  const p = t.profile;
+  const [åpen, setÅpen] = useState(false);
+  const egen = cleanRule(regel);
+
+  if (!egen && !åpen) {
+    return (
+      <div className="print:hidden">
+        <button
+          type="button"
+          onClick={() => setÅpen(true)}
+          className={btn("outline", "sm")}
+        >
+          {p.rulesAdd}
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <section
+      aria-labelledby="profil-regler"
+      className="max-w-2xl space-y-2 break-inside-avoid"
+    >
+      <h2
+        id="profil-regler"
+        className="font-display text-2xl font-bold tracking-tight"
+      >
+        {p.rules}
+      </h2>
+      {åpen ? (
+        <>
+          <p className="text-xs text-subtle print:hidden">
+            {p.rulesGeneralHelp}
+          </p>
+          <RuleEditor
+            label={p.rules}
+            regel={regel}
+            onRegel={onRegel}
+            onDone={() => setÅpen(false)}
+          />
+        </>
+      ) : (
+        <>
+          <RuleText tekst={egen} className="text-sm" />
+          <button
+            type="button"
+            onClick={() => setÅpen(true)}
+            className="text-xs font-medium text-subtle underline hover:text-ink print:hidden"
+          >
+            {p.rulesChange}
+          </button>
+        </>
+      )}
     </section>
   );
 }

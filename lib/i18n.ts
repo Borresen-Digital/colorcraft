@@ -349,7 +349,7 @@ const nb = {
     openTool: "Åpne ColorCraft",
     toolbar: "For deg som designer",
     toolbarHelp:
-      "Denne linjen vises ikke for utskrift. Lenken til kunden inneholder fargene, navnet ditt og logoen.",
+      "Denne linjen og knappene for bruksregler vises ikke for utskrift. Lenken til kunden inneholder fargene, navnet ditt, bruksreglene og logoen.",
     maker: "Laget av",
     makerPlaceholder: "Ditt navn eller firma",
     copyLink: "Kopier lenke til kunden",
@@ -364,6 +364,18 @@ const nb = {
       `Logoen gjør lenken ${tegn.toLocaleString("nb-NO")} tegn lengre.`,
     logoTooBig:
       "Logoen er for stor til å ligge i lenken. Prøv en SVG eller et mindre bilde.",
+    rules: "Bruksregler",
+    rulesWrite: "Skriv egne bruksregler",
+    rulesChange: "Endre bruksreglene",
+    rulesAdd: "Legg til generelle bruksregler",
+    rulesDone: "Ferdig",
+    rulesReset: "Bruk standardteksten",
+    rulesRemove: "Fjern reglene",
+    rulesLabel: (gruppe: string) => `Bruksregler for ${gruppe.toLowerCase()}`,
+    rulesHelp: (maks: number) =>
+      `Én regel per linje blir en punktliste. Lagres i lenken, opptil ${maks} tegn.`,
+    rulesGeneralHelp:
+      "For eksempel hvor logoen kan stå, minste størrelse, eller farger som ikke skal brukes sammen.",
   },
   simple: {
     label: "Visning",
@@ -861,7 +873,7 @@ const en: Messages = {
     openTool: "Open ColorCraft",
     toolbar: "For you as the designer",
     toolbarHelp:
-      "This bar is hidden when printing. The link for your client contains the colors, your name and the logo.",
+      "This bar and the usage rule buttons are hidden when printing. The link for your client contains the colors, your name, the usage rules and the logo.",
     maker: "Made by",
     makerPlaceholder: "Your name or company",
     copyLink: "Copy link for the client",
@@ -876,6 +888,18 @@ const en: Messages = {
       `The logo makes the link ${chars.toLocaleString("en-GB")} characters longer.`,
     logoTooBig:
       "The logo is too large to fit in the link. Try an SVG or a smaller image.",
+    rules: "Usage rules",
+    rulesWrite: "Write your own usage rules",
+    rulesChange: "Edit the usage rules",
+    rulesAdd: "Add general usage rules",
+    rulesDone: "Done",
+    rulesReset: "Use the default text",
+    rulesRemove: "Remove the rules",
+    rulesLabel: (group: string) => `Usage rules for ${group.toLowerCase()}`,
+    rulesHelp: (max: number) =>
+      `One rule per line becomes a bulleted list. Saved in the link, up to ${max} characters.`,
+    rulesGeneralHelp:
+      "For example where the logo may be placed, minimum size, or colors that must not be used together.",
   },
   simple: {
     label: "View",
