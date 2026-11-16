@@ -94,15 +94,17 @@ export function ColorDetails({
           {grupper.map(([tittel, farger, standard]) => (
             <div key={tittel}>
               <h3 className="mb-2 text-sm font-semibold text-ink">{tittel}</h3>
-              <div className="grid grid-cols-3 gap-3">
+              <ul className="space-y-1">
                 {farger.map((hex, i) => (
-                  <ColorSwatch
-                    key={`${hex}-${i}`}
-                    label={navn(hex, standard(i + 1))}
-                    color={hex}
-                  />
+                  <li key={`${hex}-${i}`}>
+                    <ColorSwatch
+                      layout="row"
+                      label={navn(hex, standard(i + 1))}
+                      color={hex}
+                    />
+                  </li>
                 ))}
-              </div>
+              </ul>
             </div>
           ))}
         </section>

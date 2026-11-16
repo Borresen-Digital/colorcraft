@@ -611,6 +611,7 @@ function ColorCraft() {
               palettes={shown}
               selectedId={selectedPaletteId}
               onSelect={handlePaletteSelect}
+              onNew={() => setBrandOpen(true)}
             />
           </nav>
 
