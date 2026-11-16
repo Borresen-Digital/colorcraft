@@ -2,6 +2,7 @@ import type { ExtendedColorPalette } from "@/data/palettes";
 import type { ColorPalette } from "@/types/palette";
 import { generateFromBrand, normalizeHex } from "./brand";
 import { DEFAULT_LOCALE, type Locale } from "./i18n";
+import { cleanFont, type TypeSpec } from "./typography";
 
 /**
  * Nettsidevisningen: paletten på en hel nettside, med fargene i en linje
@@ -111,4 +112,24 @@ export function withPalette(hash: string, paletteHash: string): string {
   const ut = new URLSearchParams(paletteHash.replace(/^#/, ""));
   for (const [k, v] of q) ut.append(k, v);
   return ut.toString().replace(/\+/g, "%20");
+}
+
+/**
+ * Fontene eksempelsiden bruker, fra typografien i profilen. Rollen er fri
+ * tekst, så den tolkes: «Overskrifter» og lignende blir overskriftene,
+ * «Brødtekst» og lignende blir teksten. Uten treff blir første font
+ * overskriftene og andre font teksten. Tomme fonter tas ikke med.
+ */
+export function siteFonts(liste: TypeSpec[]): {
+  heading?: TypeSpec;
+  body?: TypeSpec;
+} {
+  const med = liste.filter((t) => cleanFont(t.font));
+  const OVERSKRIFT = /overskrift|tittel|heading|headline|title|display/i;
+  const TEKST = /brød|tekst|body|text|paragraph|løpende/i;
+  const heading = med.find((t) => OVERSKRIFT.test(t.role)) ?? med[0];
+  const body =
+    med.find((t) => t !== heading && TEKST.test(t.role)) ??
+    med.find((t) => t !== heading);
+  return { heading, body };
 }

@@ -13,6 +13,8 @@ interface PaginatedPaletteSelectorProps {
   onSelect: (id: string) => void;
   /** «Ny fra profilmanual» øverst i listen. */
   onNew?: () => void;
+  /** «Ny tom palett», bare for utviklere. */
+  onNewEmpty?: () => void;
 }
 
 /** Fargene som vises i stripen på hver palett, lys og eventuelt mørk. */
@@ -36,6 +38,7 @@ export function PaginatedPaletteSelector({
   selectedId,
   onSelect,
   onNew,
+  onNewEmpty,
 }: PaginatedPaletteSelectorProps) {
   const { t } = useI18n();
   const { simple } = useSimple();
@@ -128,6 +131,18 @@ export function PaginatedPaletteSelector({
           className={cn(btn("primary", "sm"), "mb-3 w-full justify-center")}
         >
           {s.newFromManual}
+        </button>
+      )}
+      {onNewEmpty && !simple && (
+        <button
+          type="button"
+          onClick={onNewEmpty}
+          className={cn(
+            btn("outline", "sm"),
+            "-mt-1 mb-3 w-full justify-center",
+          )}
+        >
+          {t.app.newPalette}
         </button>
       )}
 
