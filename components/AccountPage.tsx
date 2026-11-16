@@ -277,6 +277,8 @@ function SignedIn({ email }: { email: string }) {
 
       <SavedProfiles />
 
+      <McpTokens />
+
       <section
         aria-labelledby="konto-passkeys"
         className={`${panel} space-y-3 p-5`}
@@ -488,6 +490,174 @@ function SavedProfiles() {
       {feil && (
         <p role="alert" className="text-sm font-medium text-bad">
           {k.sendFailed}
+        </p>
+      )}
+    </section>
+  );
+}
+
+interface TokenRad {
+  id: string;
+  name: string;
+  label: string;
+  createdAt: number;
+  lastUsedAt: number | null;
+}
+
+/** MCP-tokens: lag, se og trekk tilbake. Tokenet vises bare én gang. */
+function McpTokens() {
+  const { locale, t } = useI18n();
+  const k = t.account;
+  const [liste, setListe] = useState<TokenRad[] | null>(null);
+  const [navn, setNavn] = useState("");
+  const [nytt, setNytt] = useState<string | null>(null);
+  const [kopiert, setKopiert] = useState<"" | "token" | "cmd">("");
+  const [feil, setFeil] = useState<string | null>(null);
+
+  const hent = async () => {
+    try {
+      const r = await fetch("/api/konto/tokens", { cache: "no-store" });
+      const d = (await r.json()) as { tokens?: TokenRad[] };
+      setListe(r.ok ? (d.tokens ?? []) : []);
+    } catch {
+      setListe([]);
+    }
+  };
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    hent();
+  }, []);
+
+  const kommando = (token: string) =>
+    `claude mcp add --transport http colorcraft ${window.location.origin}/mcp --header "Authorization: Bearer ${token}"`;
+
+  const lag = async (e: FormEvent) => {
+    e.preventDefault();
+    setFeil(null);
+    const r = await fetch("/api/konto/tokens", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: navn }),
+    });
+    const d = (await r.json()) as { token?: string; error?: string };
+    if (!r.ok || !d.token) {
+      setFeil(d.error === "limit" ? k.mcpLimit : k.sendFailed);
+      return;
+    }
+    setNytt(d.token);
+    setNavn("");
+    hent();
+  };
+
+  const kopier = async (hva: "token" | "cmd") => {
+    if (!nytt) return;
+    try {
+      await navigator.clipboard.writeText(
+        hva === "token" ? nytt : kommando(nytt),
+      );
+      setKopiert(hva);
+      setTimeout(() => setKopiert(""), 2000);
+    } catch {
+      setFeil(k.sendFailed);
+    }
+  };
+
+  const trekk = async (rad: TokenRad) => {
+    if (!window.confirm(k.mcpRevokeConfirm(rad.name))) return;
+    const r = await fetch(`/api/konto/tokens/${rad.id}`, { method: "DELETE" });
+    if (!r.ok) setFeil(k.sendFailed);
+    hent();
+  };
+
+  const dato = (ms: number) =>
+    new Date(ms).toLocaleDateString(locale === "en" ? "en-GB" : "nb-NO");
+
+  return (
+    <section aria-labelledby="konto-mcp" className={`${panel} space-y-3 p-5`}>
+      <h2 id="konto-mcp" className="font-display text-xl font-bold">
+        {k.mcp}
+      </h2>
+      <p className="text-sm text-subtle">{k.mcpHelp}</p>
+      {nytt && (
+        <div
+          role="status"
+          className="space-y-2 rounded-xl border border-line bg-sunken p-3 text-sm"
+        >
+          <p className="font-medium">{k.mcpCreated}</p>
+          <code className="block break-all font-mono text-xs">{nytt}</code>
+          <code className="block break-all font-mono text-[11px] text-subtle">
+            {kommando(nytt)}
+          </code>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => kopier("token")}
+              className={btn("outline", "sm")}
+            >
+              {kopiert === "token" ? k.copied : k.mcpCopyToken}
+            </button>
+            <button
+              type="button"
+              onClick={() => kopier("cmd")}
+              className={btn("outline", "sm")}
+            >
+              {kopiert === "cmd" ? k.copied : k.mcpCopyCommand}
+            </button>
+          </div>
+        </div>
+      )}
+      <form onSubmit={lag} className="flex flex-wrap items-end gap-2">
+        <label className="flex min-w-48 flex-1 flex-col gap-1 text-sm font-medium">
+          {k.mcpName}
+          <input
+            type="text"
+            value={navn}
+            maxLength={40}
+            placeholder={k.mcpNamePlaceholder}
+            onChange={(e) => setNavn(e.target.value)}
+            className={field}
+          />
+        </label>
+        <button type="submit" className={btn("primary", "sm")}>
+          {k.mcpCreate}
+        </button>
+      </form>
+      {liste === null ? (
+        <p className="text-sm text-subtle">{k.loading}</p>
+      ) : liste.length === 0 ? (
+        <p className="text-sm">{k.mcpNone}</p>
+      ) : (
+        <ul className="divide-y divide-line text-sm">
+          {liste.map((rad) => (
+            <li
+              key={rad.id}
+              className="flex flex-wrap items-center justify-between gap-2 py-2"
+            >
+              <span>
+                <span className="font-medium">{rad.name}</span>{" "}
+                <span className="font-mono text-xs text-subtle">
+                  {rad.label}
+                </span>
+                <span className="block text-xs text-subtle">
+                  {rad.lastUsedAt
+                    ? `${k.mcpLastUsed} ${dato(rad.lastUsedAt)}`
+                    : k.mcpNeverUsed}
+                </span>
+              </span>
+              <button
+                type="button"
+                onClick={() => trekk(rad)}
+                className="text-xs text-bad underline"
+              >
+                {k.mcpRevoke}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+      {feil && (
+        <p role="alert" className="text-sm font-medium text-bad">
+          {feil}
         </p>
       )}
     </section>

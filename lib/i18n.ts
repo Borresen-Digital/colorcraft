@@ -76,12 +76,29 @@ const nb = {
     deleteProfileConfirm: (tittel: string) =>
       `Slette «${tittel}»? Den korte lenken slutter å virke.`,
     updated: "Oppdatert",
+    mcp: "AI og MCP",
+    mcpHelp:
+      "Med et MCP-token kan en AI som Claude lese, lage og oppdatere profilene dine. Den kan ikke slette dem. Tokenet vises bare én gang, og du kan trekke det tilbake når som helst.",
+    mcpName: "Navn på tokenet",
+    mcpNamePlaceholder: "f.eks. Claude på jobb-PC-en",
+    mcpCreate: "Lag token",
+    mcpCreated:
+      "Kopier tokenet nå. Det vises ikke igjen. Legg det inn i Claude Code med kommandoen under.",
+    mcpCopyToken: "Kopier token",
+    mcpCopyCommand: "Kopier kommandoen",
+    mcpNone: "Ingen tokens.",
+    mcpLastUsed: "Sist brukt",
+    mcpNeverUsed: "Aldri brukt",
+    mcpRevoke: "Trekk tilbake",
+    mcpRevokeConfirm: (navn: string) =>
+      `Trekke tilbake «${navn}»? Det slutter å virke med en gang.`,
+    mcpLimit: "Du kan ha opptil 10 tokens. Trekk tilbake ett først.",
     yourData: "Dine data",
     exportHelp: "Last ned alt vi har lagret om kontoen din, som en JSON-fil.",
     export: "Last ned mine data",
     deleteTitle: "Slett kontoen",
     deleteHelp:
-      "Kontoen, innloggingene, passkeyene og de lagrede profilene slettes for godt, og de korte lenkene slutter å virke. Paletter i nettleseren og vanlige lenker du har delt, påvirkes ikke.",
+      "Kontoen, innloggingene, passkeyene, MCP-tokenene og de lagrede profilene slettes for godt, og de korte lenkene slutter å virke. Paletter i nettleseren og vanlige lenker du har delt, påvirkes ikke.",
     deleteConfirm: (epost: string) => `Skriv ${epost} for å bekrefte`,
     deleteButton: "Slett kontoen for godt",
     deleteNeedsFresh:
@@ -104,7 +121,7 @@ const nb = {
       },
       {
         heading: "Hva vi lagrer",
-        body: "E-postadressen din. For hver innlogging: når den startet og utløper, og IP-adressen og nettleseren du brukte, for sikkerhet og mot misbruk. For passkeys: navnet, når den ble laget og den offentlige nøkkelen. Den private nøkkelen forlater aldri enheten din. Innloggingslenken har en engangskode som virker i ti minutter. Profilene du lagrer, med farger, tekst og logo, vises for alle som har den korte lenken.",
+        body: "E-postadressen din. For hver innlogging: når den startet og utløper, og IP-adressen og nettleseren du brukte, for sikkerhet og mot misbruk. For passkeys: navnet, når den ble laget og den offentlige nøkkelen. Den private nøkkelen forlater aldri enheten din. Innloggingslenken har en engangskode som virker i ti minutter. Profilene du lagrer, med farger, tekst og logo, vises for alle som har den korte lenken. For MCP-tokens lagrer vi navnet, starten av tokenet og når det sist ble brukt, ikke selve tokenet.",
       },
       {
         heading: "Hvorfor",
@@ -840,13 +857,30 @@ const en: Messages = {
     deleteProfileConfirm: (title: string) =>
       `Delete “${title}”? The short link stops working.`,
     updated: "Updated",
+    mcp: "AI and MCP",
+    mcpHelp:
+      "With an MCP token, an AI such as Claude can read, create and update your profiles. It cannot delete them. The token is shown only once, and you can revoke it at any time.",
+    mcpName: "Token name",
+    mcpNamePlaceholder: "e.g. Claude on my work laptop",
+    mcpCreate: "Create token",
+    mcpCreated:
+      "Copy the token now. It is not shown again. Add it to Claude Code with the command below.",
+    mcpCopyToken: "Copy token",
+    mcpCopyCommand: "Copy command",
+    mcpNone: "No tokens.",
+    mcpLastUsed: "Last used",
+    mcpNeverUsed: "Never used",
+    mcpRevoke: "Revoke",
+    mcpRevokeConfirm: (name: string) =>
+      `Revoke “${name}”? It stops working immediately.`,
+    mcpLimit: "You can have up to 10 tokens. Revoke one first.",
     yourData: "Your data",
     exportHelp:
       "Download everything we store about your account, as a JSON file.",
     export: "Download my data",
     deleteTitle: "Delete the account",
     deleteHelp:
-      "The account, sign-ins, passkeys and saved profiles are deleted for good, and the short links stop working. Palettes in your browser and regular links you have shared are not affected.",
+      "The account, sign-ins, passkeys, MCP tokens and saved profiles are deleted for good, and the short links stop working. Palettes in your browser and regular links you have shared are not affected.",
     deleteConfirm: (email: string) => `Type ${email} to confirm`,
     deleteButton: "Delete the account for good",
     deleteNeedsFresh:
@@ -869,7 +903,7 @@ const en: Messages = {
       },
       {
         heading: "What we store",
-        body: "Your email address. For each sign-in: when it started and expires, and the IP address and browser you used, for security and against abuse. For passkeys: the name, when it was created and the public key. The private key never leaves your device. The sign-in link has a one-time code that works for ten minutes. The profiles you save, with colors, text and logo, are shown to anyone who has the short link.",
+        body: "Your email address. For each sign-in: when it started and expires, and the IP address and browser you used, for security and against abuse. For passkeys: the name, when it was created and the public key. The private key never leaves your device. The sign-in link has a one-time code that works for ten minutes. The profiles you save, with colors, text and logo, are shown to anyone who has the short link. For MCP tokens we store the name, the start of the token and when it was last used, not the token itself.",
       },
       {
         heading: "Why",
