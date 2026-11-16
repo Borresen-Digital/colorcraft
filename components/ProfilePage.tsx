@@ -395,9 +395,12 @@ function Profile({
   };
 
   // Teksten i feltet står som den er skrevet. Lenken får den rensede.
-  const endreRegel = (key: RuleKey, v: string) => {
+  // Uendret standardtekst lagres ikke i lenken, så den følger språket og
+  // senere endringer i standardteksten.
+  const endreRegel = (key: RuleKey, v: string, standard?: string) => {
     setRegler((r) => ({ ...r, [key]: v }));
-    const ny = withRule(hash, key, v);
+    const lik = standard && cleanRule(v) === cleanRule(standard);
+    const ny = withRule(hash, key, lik ? "" : v);
     setHash(ny);
     window.history.replaceState(null, "", `#${ny}`);
   };
@@ -631,7 +634,7 @@ function Profile({
               key={s.kind}
               s={s}
               regel={regler[s.kind] ?? ""}
-              onRegel={(v) => endreRegel(s.kind, v)}
+              onRegel={(v) => endreRegel(s.kind, v, s.usage)}
               pantone={pantone}
               onPantone={endrePantone}
             />

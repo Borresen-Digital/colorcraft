@@ -68,11 +68,20 @@ export function toneScale(hex: string): ToneStep[] {
   const nærmest = TONE_STEPS.reduce((a, b) =>
     Math.abs(LYSHET[b] - o.l) < Math.abs(LYSHET[a] - o.l) ? b : a,
   );
+  // Metningen regnes fra trinnet fargen står på. En lys farge som Mel står
+  // på 100, der trappen bare har 30 % metning, så trinnene ellers ville
+  // blitt grå. Ganges opp høyst tre ganger, så nesten grå farger forblir grå.
+  // Bare for lyse farger: mørke farger har nok metning i trinnene fra før.
+  const faktor = nærmest < 500 ? Math.min(3, 1 / METNING[nærmest]) : 1;
   return TONE_STEPS.map((step) => {
     const base = step === nærmest;
     const farge = base
       ? hex.toUpperCase()
-      : oklchToHex({ l: LYSHET[step], c: o.c * METNING[step], h: o.h });
+      : oklchToHex({
+          l: LYSHET[step],
+          c: o.c * METNING[step] * faktor,
+          h: o.h,
+        });
     return { step, hex: farge, base, text: tekstPå(farge) };
   });
 }

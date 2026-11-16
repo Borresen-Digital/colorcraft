@@ -102,6 +102,24 @@ function fromHsl(h: number, s: number, l: number): string {
   );
 }
 
+/**
+ * Fargen en ny rad starter med i «Fra profilmanual», ut fra første
+ * logofarge: en tydelig motfarge som highlight, en lys flate som
+ * støttefarge, og ellers en mørkere utgave av logofargen. Grått passer
+ * sjelden, og designeren bytter den uansett ut med fargen fra manualen.
+ */
+export function suggestColor(
+  list: "logo" | "support" | "highlight" | "internal",
+  logo: string | undefined,
+): string {
+  const hex = normalizeHex(logo ?? "");
+  if (!hex) return "#888888";
+  const { h, s } = hsl(hex);
+  if (list === "highlight") return fromHsl(h + 0.5, Math.max(0.65, s), 0.5);
+  if (list === "support") return fromHsl(h, Math.min(0.4, s), 0.94);
+  return fromHsl(h, s, 0.3);
+}
+
 /** Blander to farger i sRGB. t = 0 gir a, t = 1 gir b. */
 export function mix(a: string, b: string, t: number): string {
   const x = parseHex(a)!;

@@ -30,6 +30,20 @@ describe("tonetrapp 50–950", () => {
     expect(s[s.length - 1].text).toBe("#FFFFFF");
   });
 
+  it("holder fargen i trinnene når fargen er lys", () => {
+    // Mel: varm beige på trinn 100. Trinnene under skal ikke bli grå.
+    const mel = toneScale("#F3EBDD");
+    const base = hexToOklch("#F3EBDD")!;
+    expect(mel.find((t) => t.base)?.step).toBe(100);
+    for (const t of mel.filter((x) => x.step >= 200 && x.step <= 700)) {
+      expect(hexToOklch(t.hex)!.c).toBeGreaterThan(base.c);
+    }
+    // Grått forblir grått.
+    for (const t of toneScale("#808080")) {
+      expect(hexToOklch(t.hex)!.c).toBeLessThan(0.005);
+    }
+  });
+
   it("gir tom trapp for ugyldig farge", () => {
     expect(toneScale("tull")).toEqual([]);
   });

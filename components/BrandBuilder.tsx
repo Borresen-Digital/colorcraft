@@ -16,6 +16,7 @@ import {
   MAX_LOGO,
   MAX_SUPPORT,
   normalizeHex,
+  suggestColor,
   type BrandNote,
   type BrandResult,
   type Direction,
@@ -215,26 +216,46 @@ function Swatches({
   colors: ColorPalette["colors"];
   label: string;
 }) {
-  const vis = [
-    colors.background,
-    colors.surface,
-    colors.secondary,
-    colors.primary,
-    colors.accent,
-    colors.foreground,
-    colors.muted,
-  ];
+  const { t } = useI18n();
+  const roller = [
+    "background",
+    "surface",
+    "secondary",
+    "primary",
+    "accent",
+    "foreground",
+    "muted",
+  ] as const;
   return (
     <div>
       <p className="mb-1 text-xs font-medium text-subtle">{label}</p>
-      <div
-        className="flex overflow-hidden rounded-lg border border-line"
+      <ul className="flex overflow-hidden rounded-lg border border-line">
+        {roller.map((r) => (
+          <li
+            key={r}
+            className="h-10 flex-1"
+            style={{ backgroundColor: colors[r] }}
+            title={`${t.roles[r]}: ${colors[r]}`}
+          >
+            <span className="sr-only">{`${t.roles[r]}: ${colors[r]}`}</span>
+          </li>
+        ))}
+      </ul>
+      {/* Hvilken farge er hva: prikk og navn i samme rekkefølge som stripen. */}
+      <ul
+        className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-subtle"
         aria-hidden="true"
       >
-        {vis.map((c, i) => (
-          <div key={i} className="h-10 flex-1" style={{ backgroundColor: c }} />
+        {roller.map((r) => (
+          <li key={r} className="flex items-center gap-1">
+            <span
+              className="size-2.5 shrink-0 rounded-full border border-line"
+              style={{ backgroundColor: colors[r] }}
+            />
+            {t.roles[r]}
+          </li>
         ))}
-      </div>
+      </ul>
     </div>
   );
 }
@@ -476,7 +497,7 @@ export function BrandBuilder({
         {liste.length < maks && (
           <button
             type="button"
-            onClick={() => sett([...liste, "#888888"])}
+            onClick={() => sett([...liste, suggestColor(l, logo[0])])}
             className="text-sm font-medium text-accent underline-offset-4 hover:underline"
           >
             + {b.add}
