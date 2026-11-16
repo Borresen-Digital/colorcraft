@@ -401,6 +401,7 @@ const nb = {
       empty: "Fyll inn minst to av feltene.",
     },
     colorName: "Navn (valgfritt)",
+    pickColor: "Velg farge",
     colorNamePlaceholder: "For eksempel Varm rørfarge",
     add: "Legg til farge",
     remove: (n: number) => `Fjern farge ${n}`,
@@ -486,10 +487,11 @@ const nb = {
     openTool: "Åpne ColorCraft",
     toolbar: "For deg som designer",
     toolbarHelp:
-      "Denne linjen og knappene for bruksregler vises ikke for utskrift. Lenken til kunden inneholder fargene, navnet ditt, typografien, bruksreglene og logoen.",
+      "Denne linjen og knappene for bruksregler vises ikke for utskrift. Lenken til kunden inneholder fargene, navnet ditt, typografien, bruksreglene og logoen, og åpner siden uten knappene for redigering.",
     maker: "Laget av",
     makerPlaceholder: "Ditt navn eller firma",
     copyLink: "Kopier lenke til kunden",
+    previewClient: "Se kundens visning",
     linkCopied: "Lenke kopiert!",
     copyFailed: "Kunne ikke kopiere",
     print: "Skriv ut",
@@ -527,7 +529,9 @@ const nb = {
     export: "Eksport",
     exportHelp:
       "Fargene, tonetrappen og typografien i formatet du trenger. Filene lages i nettleseren.",
-    exportCode: "Til kode og design",
+    exportCode: "Filer til nettside, app og Figma",
+    exportCodeHelp:
+      "For den som lager nettsiden eller appen. Velg format, og kopier eller last ned.",
     exportFormats: "Format",
     exportGroups: {
       web: "Nett",
@@ -573,13 +577,14 @@ const nb = {
     copyShort: "Kopier",
     tones: "Tonetrapp",
     tonesHelp:
-      "Hver farge i elleve trinn fra 50 (lysest) til 950 (mørkest), som i Tailwind og de fleste designsystemer. Trinnene har lik lyshet på tvers av fargene. Fargen selv står uendret på trinnet som passer best, merket med en prikk. Teksten på hvert trinn er hvit eller svart, den som står best.",
+      "Hver merkefarge i elleve trinn fra lys til mørk, til nettsider og apper. Fargen selv står uendret på trinnet som passer best.",
+    tonesShow: "Vis tonetrappen",
     tonesBase: "fargen selv",
     tonesCopy: "Kopier som CSS",
     tonesCopyAll: "Kopier alle som CSS",
     tonesCopied: "Kopiert",
     tonesCssNote:
-      "Variablene (--color-navn-500) virker i vanlig CSS og i @theme i Tailwind 4.",
+      "Trinnene går fra 50 (lysest) til 950 (mørkest), som i de fleste designsystemer, og fargen selv er merket med en prikk. Variablene (--color-navn-500) virker i vanlig CSS og i @theme i Tailwind 4.",
     vision: "Se siden som",
     visionNormal: "Vanlig fargesyn",
     visions: {
@@ -680,7 +685,7 @@ const nb = {
     outOfGamut: "kan ikke trykkes likt",
     note: "CMYK er omtrentlig: regnet ut fra vanlig offset på bestrøket papir (Coated FOGRA39), uten fargestyring. Til trykk gjelder verdiene fra trykkeriets profil. Farger merket «kan ikke trykkes likt» er mer mettede på skjerm enn trykkfargene klarer.",
     cmykHelp:
-      "Skriv CMYK fra manualen, for eksempel 0 25 100 0. Omregnes omtrentlig.",
+      "Skriv HEX og CMYK slik de står i manualen, for eksempel 0 25 100 0. Har manualen bare CMYK, regnes HEX ut omtrentlig.",
     cmykInvalid: "Skriv fire tall fra 0 til 100: C M Y K.",
   },
   inUse: {
@@ -1184,6 +1189,7 @@ const en: Messages = {
       empty: "Fill in at least two of the fields.",
     },
     colorName: "Name (optional)",
+    pickColor: "Pick color",
     colorNamePlaceholder: "For example Warm pipe color",
     add: "Add color",
     remove: (n) => `Remove color ${n}`,
@@ -1269,10 +1275,11 @@ const en: Messages = {
     openTool: "Open ColorCraft",
     toolbar: "For you as the designer",
     toolbarHelp:
-      "This bar and the usage rule buttons are hidden when printing. The link for your client contains the colors, your name, the typography, the usage rules and the logo.",
+      "This bar and the usage rule buttons are hidden when printing. The link for your client contains the colors, your name, the typography, the usage rules and the logo, and opens the page without the editing buttons.",
     maker: "Made by",
     makerPlaceholder: "Your name or company",
     copyLink: "Copy link for the client",
+    previewClient: "See the client’s view",
     linkCopied: "Link copied!",
     copyFailed: "Could not copy",
     print: "Print",
@@ -1310,7 +1317,9 @@ const en: Messages = {
     export: "Export",
     exportHelp:
       "The colors, tone scale and typography in the format you need. The files are made in the browser.",
-    exportCode: "For code and design",
+    exportCode: "Files for websites, apps and Figma",
+    exportCodeHelp:
+      "For whoever builds the website or app. Pick a format, then copy or download.",
     exportFormats: "Format",
     exportGroups: {
       web: "Web",
@@ -1357,13 +1366,14 @@ const en: Messages = {
     copyShort: "Copy",
     tones: "Tone scale",
     tonesHelp:
-      "Each color in eleven steps from 50 (lightest) to 950 (darkest), as in Tailwind and most design systems. The steps have the same lightness across colors. The color itself stays unchanged at the step that fits best, marked with a dot. The text on each step is white or black, whichever works best.",
+      "Each brand color in eleven steps from light to dark, for websites and apps. The color itself stays unchanged at the step that fits best.",
+    tonesShow: "Show the tone scale",
     tonesBase: "the color itself",
     tonesCopy: "Copy as CSS",
     tonesCopyAll: "Copy all as CSS",
     tonesCopied: "Copied",
     tonesCssNote:
-      "The variables (--color-name-500) work in plain CSS and in @theme in Tailwind 4.",
+      "The steps go from 50 (lightest) to 950 (darkest), as in most design systems, and the color itself is marked with a dot. The variables (--color-name-500) work in plain CSS and in @theme in Tailwind 4.",
     vision: "View the page as",
     visionNormal: "Normal color vision",
     visions: {
@@ -1464,7 +1474,7 @@ const en: Messages = {
     outOfGamut: "can't be printed exactly",
     note: "CMYK is approximate: calculated for standard offset on coated paper (Coated FOGRA39), without color management. For print, use the values from your printer's profile. Colors marked “can't be printed exactly” are more saturated on screen than process inks can reach.",
     cmykHelp:
-      "Enter CMYK from the brand guide, for example 0 25 100 0. Converted approximately.",
+      "Enter HEX and CMYK as they appear in the brand guide, for example 0 25 100 0. If the guide only has CMYK, HEX is calculated approximately.",
     cmykInvalid: "Enter four numbers from 0 to 100: C M Y K.",
   },
   inUse: {

@@ -14,6 +14,8 @@ import {
   readRules,
   ruleLines,
   withMaker,
+  isReadonlyLink,
+  withReadonly,
   withoutMaker,
   withoutRules,
   withRule,
@@ -288,8 +290,12 @@ function Profile({
 
   const profil = buildProfile(palette, locale);
   const navn = maker.trim();
+  // Kundens visning: fra en kort lenke, eller fra «Kopier lenke til kunden».
+  const kunde = readonly || isReadonlyLink(hash);
+  // Fragmentet designeren jobber med, uten merket for kundens visning.
+  const egen = withReadonly(withoutSaved(hash), false);
   // Verktøyet leser ikke logoen fra lenken. Den følger med i nettleseren.
-  const tilVerktøy = `${localePath(locale)}#${withLogo(withoutSaved(withoutPantone(withoutTypography(withoutRules(withoutMaker(hash))))), null)}`;
+  const tilVerktøy = `${localePath(locale)}#${withLogo(withoutPantone(withoutTypography(withoutRules(withoutMaker(egen)))), null)}`;
   const farger = profil.sections.flatMap((s) => s.colors.map((c) => c.hex));
   // Tonetrappen og Figma-filen: merkefargene uten intern profil, og for en
   // palett uten profil bare hovedfarge, uthevingsfarge og flatefarge.
@@ -401,7 +407,7 @@ function Profile({
     const { origin, pathname } = window.location;
     try {
       await navigator.clipboard.writeText(
-        `${origin}${pathname}#${withLogo(withoutSaved(hash), logo)}`,
+        `${origin}${pathname}#${withReadonly(withLogo(egen, logo), true)}`,
       );
       setLenke("copied");
     } catch {
@@ -413,10 +419,10 @@ function Profile({
   return (
     <div
       className="min-h-screen bg-paper text-ink"
-      data-les={readonly ? "" : undefined}
+      data-les={kunde ? "" : undefined}
     >
       {/* Verktøylinjen er for designeren og skrives ikke ut. */}
-      {readonly ? (
+      {kunde ? (
         <aside
           aria-label={p.toolbar}
           className="border-b border-line bg-panel print:hidden"
@@ -500,6 +506,14 @@ function Profile({
                     ? p.copyFailed
                     : p.copyLink}
               </button>
+              <a
+                href={`#${withReadonly(egen, true)}`}
+                target="_blank"
+                rel="noopener"
+                className={btn("outline", "md")}
+              >
+                {p.previewClient}
+              </a>
               <label className="flex flex-col gap-1 text-xs font-medium">
                 {p.vision}
                 <select
@@ -526,7 +540,7 @@ function Profile({
                 hash={hash}
                 lagreHash={() =>
                   withLogo(
-                    withoutSaved(hash),
+                    egen,
                     medLogo && logoLenke.status === "ok"
                       ? logoLenke.verdi
                       : null,
@@ -606,7 +620,8 @@ function Profile({
             <h1 className="font-display text-4xl font-extrabold tracking-tight sm:text-5xl">
               {profil.title}
             </h1>
-            {navn && <p className="text-subtle">{p.madeBy(navn)}</p>}
+            {/* Linjen står alltid, så siden ikke hopper når navnet skrives. */}
+            <p className="min-h-6 text-subtle">{navn && p.madeBy(navn)}</p>
           </div>
         </header>
 
@@ -701,14 +716,17 @@ function Profile({
               <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-subtle">
                 {p.download}
               </p>
-              <ColorCardPanel palette={palette} defaultMaker={navn} />
+              <ColorCardPanel palette={palette} maker={navn} />
             </div>
-            <div className={`${panel} p-4`}>
-              <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-subtle">
+            <details className={`${panel} p-4`}>
+              <summary className="cursor-pointer text-xs font-semibold uppercase tracking-widest text-subtle hover:text-ink">
                 {p.exportCode}
-              </p>
-              <ProfileExport input={eksport} />
-            </div>
+              </summary>
+              <p className="mt-2 text-xs text-subtle">{p.exportCodeHelp}</p>
+              <div className="mt-3">
+                <ProfileExport input={eksport} />
+              </div>
+            </details>
           </div>
         </section>
 
@@ -1166,58 +1184,63 @@ function ToneScales({ farger }: { farger: { label: string; hex: string }[] }) {
         </h2>
         <p className="text-sm text-subtle">{p.tonesHelp}</p>
       </div>
-      <ul className="space-y-5">
-        {trapper.map((x) => {
-          const css = toneCss(x.label, x.skala);
-          return (
-            <li key={x.hex} className="space-y-2 break-inside-avoid">
-              <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <p className="text-sm font-semibold">{x.label}</p>
-                <button
-                  type="button"
-                  onClick={() => kopier(css)}
-                  className="text-xs font-medium text-subtle underline hover:text-ink print:hidden"
-                >
-                  {kopiert === css ? p.tonesCopied : p.tonesCopy}
-                </button>
-              </div>
-              <ol className="grid grid-cols-6 gap-1 sm:grid-cols-11">
-                {x.skala.map((s) => (
-                  <li
-                    key={s.step}
-                    className="flex h-16 flex-col justify-between rounded-md p-1.5 text-[10px] leading-tight"
-                    style={{ background: s.hex, color: s.text }}
-                    title={s.base ? `${s.hex}, ${p.tonesBase}` : s.hex}
+      <details>
+        <summary className="cursor-pointer text-sm font-medium text-subtle hover:text-ink print:hidden">
+          {p.tonesShow}
+        </summary>
+        <ul className="mt-4 space-y-5">
+          {trapper.map((x) => {
+            const css = toneCss(x.label, x.skala);
+            return (
+              <li key={x.hex} className="space-y-2 break-inside-avoid">
+                <div className="flex flex-wrap items-baseline justify-between gap-2">
+                  <p className="text-sm font-semibold">{x.label}</p>
+                  <button
+                    type="button"
+                    onClick={() => kopier(css)}
+                    className="text-xs font-medium text-subtle underline hover:text-ink print:hidden"
                   >
-                    <span className="flex items-center justify-between font-semibold">
-                      {s.step}
-                      {s.base && (
-                        <span
-                          className="h-2 w-2 rounded-full"
-                          style={{ background: s.text }}
-                        >
-                          <span className="sr-only">{p.tonesBase}</span>
-                        </span>
-                      )}
-                    </span>
-                    <span className="font-mono">{s.hex.slice(1)}</span>
-                  </li>
-                ))}
-              </ol>
-            </li>
-          );
-        })}
-      </ul>
-      <div className="flex flex-wrap items-center gap-3 print:hidden">
-        <button
-          type="button"
-          onClick={() => kopier(alt)}
-          className={btn("outline", "sm")}
-        >
-          {kopiert === alt ? p.tonesCopied : p.tonesCopyAll}
-        </button>
-        <p className="text-xs text-subtle">{p.tonesCssNote}</p>
-      </div>
+                    {kopiert === css ? p.tonesCopied : p.tonesCopy}
+                  </button>
+                </div>
+                <ol className="grid grid-cols-6 gap-1 sm:grid-cols-11">
+                  {x.skala.map((s) => (
+                    <li
+                      key={s.step}
+                      className="flex h-16 flex-col justify-between rounded-md p-1.5 text-[10px] leading-tight"
+                      style={{ background: s.hex, color: s.text }}
+                      title={s.base ? `${s.hex}, ${p.tonesBase}` : s.hex}
+                    >
+                      <span className="flex items-center justify-between font-semibold">
+                        {s.step}
+                        {s.base && (
+                          <span
+                            className="h-2 w-2 rounded-full"
+                            style={{ background: s.text }}
+                          >
+                            <span className="sr-only">{p.tonesBase}</span>
+                          </span>
+                        )}
+                      </span>
+                      <span className="font-mono">{s.hex.slice(1)}</span>
+                    </li>
+                  ))}
+                </ol>
+              </li>
+            );
+          })}
+        </ul>
+        <div className="flex flex-wrap items-center gap-3 print:hidden">
+          <button
+            type="button"
+            onClick={() => kopier(alt)}
+            className={btn("outline", "sm")}
+          >
+            {kopiert === alt ? p.tonesCopied : p.tonesCopyAll}
+          </button>
+          <p className="text-xs text-subtle">{p.tonesCssNote}</p>
+        </div>
+      </details>
     </section>
   );
 }

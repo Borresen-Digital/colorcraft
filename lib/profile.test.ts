@@ -3,6 +3,7 @@ import { colorPalettes } from "@/data/palettes";
 import { buildCardModel } from "./colorCard";
 import {
   buildProfile,
+  isReadonlyLink,
   cleanRule,
   MAKER_PARAM,
   MAX_RULE,
@@ -15,6 +16,7 @@ import {
   withoutMaker,
   withoutRules,
   withRule,
+  withReadonly,
 } from "./profile";
 import { decodeShare, encodeShare } from "./share";
 import { generateFromBrand } from "./brand";
@@ -153,5 +155,22 @@ describe("bruksregler", () => {
       "tre",
       "fire",
     ]);
+  });
+});
+
+describe("kundens visning (ro=1)", () => {
+  it("setter og fjerner merket uten å røre resten", () => {
+    const h = withReadonly("p=havet&mk=Testdesign", true);
+    expect(isReadonlyLink(h)).toBe(true);
+    expect(readMaker(h)).toBe("Testdesign");
+    const tilbake = withReadonly(h, false);
+    expect(isReadonlyLink(tilbake)).toBe(false);
+    expect(tilbake).toBe("p=havet&mk=Testdesign");
+  });
+
+  it("godtar bare ro=1", () => {
+    expect(isReadonlyLink("p=havet")).toBe(false);
+    expect(isReadonlyLink("p=havet&ro=0")).toBe(false);
+    expect(isReadonlyLink("#p=havet&ro=1")).toBe(true);
   });
 });
