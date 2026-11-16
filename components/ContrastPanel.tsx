@@ -5,6 +5,7 @@ import { formatRatio, THRESHOLDS, type ContrastLevel } from "@/lib/contrast";
 import { checkPalette, type ContrastResult } from "@/lib/contrastPairs";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/components/I18nProvider";
+import { useSimple } from "@/components/SimpleMode";
 import { localizeRatio } from "@/lib/i18n";
 import type { ColorPalette } from "@/types/palette";
 
@@ -45,6 +46,7 @@ function ContrastRow({
   onApply?: ApplyFn;
 }) {
   const { locale, t } = useI18n();
+  const { simple } = useSimple();
   const [copied, setCopied] = useState(false);
   const { pair, fg, bg, ratio, level, suggestion } = result;
   const krav = pair.large ? THRESHOLDS.large : THRESHOLDS.normal;
@@ -82,7 +84,8 @@ function ContrastRow({
         </span>
         <div className="ml-auto flex shrink-0 gap-1">
           <Badge label="AA" pass={passes(level, "AA")} />
-          <Badge label="AAA" pass={passes(level, "AAA")} />
+          {/* AAA er for utviklere. Designerne trenger bare om det holder. */}
+          {!simple && <Badge label="AAA" pass={passes(level, "AAA")} />}
         </div>
       </div>
 
@@ -134,6 +137,7 @@ function ContrastRow({
  */
 export function ContrastPanel({ palette, brand, onApply }: ContrastPanelProps) {
   const { t } = useI18n();
+  const { simple } = useSimple();
   const results = checkPalette(palette, { brand });
   const failing = results.filter((r) => r.level === "fail").length;
 
@@ -152,7 +156,13 @@ export function ContrastPanel({ palette, brand, onApply }: ContrastPanelProps) {
             failing === 0 ? "text-ok" : "text-warn",
           )}
         >
-          {failing === 0 ? t.contrast.allPass : t.contrast.below(failing)}
+          {simple
+            ? failing === 0
+              ? t.contrast.allPassPlain
+              : t.contrast.belowPlain(failing)
+            : failing === 0
+              ? t.contrast.allPass
+              : t.contrast.below(failing)}
         </span>
       </div>
       <ul className="space-y-2">
@@ -160,7 +170,9 @@ export function ContrastPanel({ palette, brand, onApply }: ContrastPanelProps) {
           <ContrastRow key={r.pair.id} result={r} onApply={onApply} />
         ))}
       </ul>
-      <p className="mt-2 text-[11px] text-subtle">{t.contrast.footnote}</p>
+      <p className="mt-2 text-[11px] text-subtle">
+        {simple ? t.contrast.footnotePlain : t.contrast.footnote}
+      </p>
     </section>
   );
 }

@@ -46,21 +46,24 @@ export function ColorDetails({
         <ColorSwatch label={t.roles.primary} color={c.primary} />
         <ColorSwatch label={t.roles.secondary} color={c.secondary} />
         <ColorSwatch label={t.roles.accent} color={c.accent} />
-        <ColorSwatch label={t.roles.warm} color={c.warm} />
-        <ColorSwatch label={t.roles.cool} color={c.cool} />
+        {!simple && <ColorSwatch label={t.roles.warm} color={c.warm} />}
+        {!simple && <ColorSwatch label={t.roles.cool} color={c.cool} />}
         <ColorSwatch label={t.roles.surface} color={c.surface} />
       </div>
-      <div>
-        <h3 className="mb-2 text-sm font-semibold text-ink">
-          {t.details.semantic}
-        </h3>
-        <div className="grid grid-cols-4 gap-2">
-          <ColorSwatch label={t.roles.success} color={c.success} size="sm" />
-          <ColorSwatch label={t.roles.warning} color={c.warning} size="sm" />
-          <ColorSwatch label={t.roles.error} color={c.error} size="sm" />
-          <ColorSwatch label={t.roles.info} color={c.info} size="sm" />
+      {/* Varslingsfargene er for nettsider og apper, ikke for designerne. */}
+      {!simple && (
+        <div>
+          <h3 className="mb-2 text-sm font-semibold text-ink">
+            {t.details.semantic}
+          </h3>
+          <div className="grid grid-cols-4 gap-2">
+            <ColorSwatch label={t.roles.success} color={c.success} size="sm" />
+            <ColorSwatch label={t.roles.warning} color={c.warning} size="sm" />
+            <ColorSwatch label={t.roles.error} color={c.error} size="sm" />
+            <ColorSwatch label={t.roles.info} color={c.info} size="sm" />
+          </div>
         </div>
-      </div>
+      )}
     </>
   );
 
@@ -114,7 +117,7 @@ export function ColorDetails({
 
       <Glossary />
 
-      {/* I enkel visning er kontrasten bare informasjon. Forslagene kan
+      {/* For designere er kontrasten bare informasjon. Forslagene kan
           kopieres, men endrer ikke fargene. */}
       <ContrastPanel
         palette={palette}

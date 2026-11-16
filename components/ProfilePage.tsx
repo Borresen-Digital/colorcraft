@@ -36,6 +36,7 @@ import {
 } from "@/lib/pantone";
 import { ProfileExport } from "@/components/ProfileExport";
 import { SectionNav, type NavItem } from "@/components/SectionNav";
+import { SimpleToggle, useSimple } from "@/components/SimpleMode";
 import { ViewSwitch } from "@/components/ViewSwitch";
 import { SaveToAccount } from "@/components/SaveToAccount";
 import { withSaved, withoutSaved } from "@/lib/savedProfiles";
@@ -223,6 +224,8 @@ function Profile({
   readonly: boolean;
 }) {
   const { locale, t } = useI18n();
+  // «For designere / For utviklere»: utviklerne får tonetrappen og filene.
+  const { simple } = useSimple();
   const p = t.profile;
   // null til fragmentet er lest. Det finnes bare i nettleseren.
   const [hash, setHash] = useState<string | null>(null);
@@ -292,6 +295,7 @@ function Profile({
   const navn = maker.trim();
   // Kundens visning: fra en kort lenke, eller fra «Kopier lenke til kunden».
   const kunde = readonly || isReadonlyLink(hash);
+  const utvikler = !simple;
   // Fragmentet designeren jobber med, uten merket for kundens visning.
   const egen = withReadonly(withoutSaved(hash), false);
   // Verktøyet leser ikke logoen fra lenken. Den følger med i nettleseren.
@@ -356,7 +360,7 @@ function Profile({
   // med når de har innhold.
   const navItems: NavItem[] = [
     { id: "profil-farger", label: p.navColors },
-    ...(unikeTonefarger.length > 0
+    ...(utvikler && unikeTonefarger.length > 0
       ? [{ id: "profil-toner", label: p.tones }]
       : []),
     ...(typo.some((x) => cleanFont(x.font))
@@ -440,6 +444,7 @@ function Profile({
                 Color<span className="font-semibold text-subtle">Craft</span>
               </span>
             </a>
+            <SimpleToggle />
             <label className="flex flex-col gap-1 text-xs font-medium">
               {p.vision}
               <select
@@ -517,6 +522,7 @@ function Profile({
               >
                 {p.previewClient}
               </a>
+              <SimpleToggle />
               <label className="flex flex-col gap-1 text-xs font-medium">
                 {p.vision}
                 <select
@@ -641,7 +647,8 @@ function Profile({
           ))}
         </div>
 
-        <ToneScales farger={tonefarger} />
+        {/* Tonetrappen er for nettsider og apper, så den er i utviklerdelen. */}
+        {utvikler && <ToneScales farger={tonefarger} />}
 
         <Typography liste={typo} onListe={endreTypo} />
 
@@ -714,22 +721,31 @@ function Profile({
             </h2>
             <p className="text-sm text-subtle">{p.exportHelp}</p>
           </div>
-          <div className="grid gap-4 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)]">
+          <div
+            className={
+              utvikler
+                ? "grid gap-4 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)]"
+                : "max-w-md"
+            }
+          >
             <div className={`${panel} p-4`}>
               <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-subtle">
                 {p.download}
               </p>
               <ColorCardPanel palette={palette} maker={navn} />
             </div>
-            <details className={`${panel} p-4`}>
-              <summary className="cursor-pointer text-xs font-semibold uppercase tracking-widest text-subtle hover:text-ink">
-                {p.exportCode}
-              </summary>
-              <p className="mt-2 text-xs text-subtle">{p.exportCodeHelp}</p>
-              <div className="mt-3">
-                <ProfileExport input={eksport} />
+            {/* Filene til nettside og app er for utviklerne. */}
+            {utvikler && (
+              <div className={`${panel} p-4`}>
+                <p className="text-xs font-semibold uppercase tracking-widest text-subtle">
+                  {p.exportCode}
+                </p>
+                <p className="mt-2 text-xs text-subtle">{p.exportCodeHelp}</p>
+                <div className="mt-3">
+                  <ProfileExport input={eksport} />
+                </div>
               </div>
-            </details>
+            )}
           </div>
         </section>
 
@@ -1187,7 +1203,8 @@ function ToneScales({ farger }: { farger: { label: string; hex: string }[] }) {
         </h2>
         <p className="text-sm text-subtle">{p.tonesHelp}</p>
       </div>
-      <details>
+      {/* Bare i utviklerdelen, så den står åpen. */}
+      <details open>
         <summary className="cursor-pointer text-sm font-medium text-subtle hover:text-ink print:hidden">
           {p.tonesShow}
         </summary>

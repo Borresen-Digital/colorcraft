@@ -31,7 +31,7 @@ ColorCraft is a free tool from [Børresen Digital](https://www.borresendigital.n
 - **Colour card** for the customer as PDF or PNG, with HEX, RGB, CMYK, tints, contrast and a second page showing the palette in use.
 - **Profile page** (prototype, `/profil`): the colour profile as a clean page the designer can send to the customer.
 - **Glossary**: what each colour is called in ColorCraft and what other people call it.
-- **Simple mode** is the default and shows the manual's colours as they are. «Alt» opens the full tool. The choice is remembered.
+- **For designers / For developers:** the designer view is the default and shows the manual's colours as they are, without code. The developer view adds roles, dark mode, suggestions, the tone scale and files for websites and apps. The choice is remembered and applies to the profile page too.
 
 ### For developers
 
