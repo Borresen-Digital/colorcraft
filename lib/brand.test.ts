@@ -5,6 +5,7 @@ import {
   generateFromBrand,
   mix,
   normalizeHex,
+  suggestColor,
 } from "./brand";
 import { contrastRatio } from "./contrast";
 import { checkPalette, headingColor } from "./contrastPairs";
@@ -40,6 +41,18 @@ describe("normalizeHex og mix", () => {
     expect(mix("#000000", "#FFFFFF", 0)).toBe("#000000");
     expect(mix("#000000", "#FFFFFF", 1)).toBe("#FFFFFF");
     expect(mix("#000000", "#FFFFFF", 0.5)).toBe("#808080");
+  });
+});
+
+describe("suggestColor", () => {
+  it("foreslår motfarge, lys flate og mørk logofarge, ikke grått", () => {
+    const blå = "#1F4FA0";
+    const hl = hexToOklch(suggestColor("highlight", blå))!;
+    expect(hueDistance(hl.h, hexToOklch(blå)!.h)).toBeGreaterThan(90);
+    expect(hl.c).toBeGreaterThan(0.1);
+    expect(hexToOklch(suggestColor("support", blå))!.l).toBeGreaterThan(0.9);
+    expect(hexToOklch(suggestColor("logo", blå))!.l).toBeLessThan(0.5);
+    expect(suggestColor("highlight", "tull")).toBe("#888888");
   });
 });
 

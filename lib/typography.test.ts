@@ -72,6 +72,22 @@ describe("typografi i lenken", () => {
     );
   });
 
+  it("velger generisk familie etter reservefonten", () => {
+    expect(fontStack({ font: "Playfair Display", fallback: "Georgia" })).toBe(
+      '"Playfair Display", "Georgia", serif',
+    );
+    expect(fontStack({ font: "Lora", fallback: "" })).toBe('"Lora", serif');
+    expect(fontStack({ font: "PT Serif", fallback: "Arial" })).toBe(
+      '"PT Serif", "Arial", sans-serif',
+    );
+    expect(fontStack({ font: "Fira Code", fallback: "" })).toBe(
+      '"Fira Code", monospace',
+    );
+    expect(fontStack({ font: "Noto Sans", fallback: "serif" })).toBe(
+      '"Noto Sans", serif',
+    );
+  });
+
   it("tar | ut av teksten og runder vekten", () => {
     const t = decodeType(encodeType({ ...OVERSKRIFT, note: "a|b" }));
     expect(t?.note).toBe("a b");

@@ -120,11 +120,33 @@ export function withoutTypography(hash: string): string {
   return withTypography(hash, []);
 }
 
-/** font-family for prøven: fonten, reservefonten og sans-serif til slutt. */
+const GENERISKE = ["serif", "sans-serif", "monospace", "cursive", "system-ui"];
+const SERIF =
+  /georgia|times|garamond|baskerville|cambria|palatino|antiqua|didot|bodoni|merriweather|playfair|lora|crimson|cormorant|caslon|minion|serif/i;
+const MONO = /mono|courier|consolas|menlo|code/i;
+
+/** Den generiske familien som passer til fonten: serif, monospace eller sans-serif. */
+export function genericFamily(navn: string): string {
+  if (/sans/i.test(navn)) return "sans-serif";
+  if (MONO.test(navn)) return "monospace";
+  if (SERIF.test(navn)) return "serif";
+  return "sans-serif";
+}
+
+/**
+ * font-family for prøven og eksporten: fonten, reservefonten og en generisk
+ * familie til slutt. Den generiske følger reservefonten (ellers fonten), så
+ * Georgia får serif. Er reserven selv generisk, står den uten anførselstegn.
+ */
 export function fontStack(t: Pick<TypeSpec, "font" | "fallback">): string {
-  return [cleanFont(t.font), cleanFont(t.fallback)]
-    .filter(Boolean)
+  const font = cleanFont(t.font);
+  const reserve = cleanFont(t.fallback);
+  const generisk = GENERISKE.includes(reserve.toLowerCase())
+    ? reserve.toLowerCase()
+    : genericFamily(reserve || font);
+  return [font, reserve]
+    .filter((f) => f && !GENERISKE.includes(f.toLowerCase()))
     .map((f) => `"${f}"`)
-    .concat("sans-serif")
+    .concat(generisk)
     .join(", ");
 }
