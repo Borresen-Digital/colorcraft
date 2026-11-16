@@ -5,24 +5,31 @@ import { cn } from "@/lib/utils";
 import { useI18n } from "@/components/I18nProvider";
 
 /**
- * Bryteren mellom de to visningene: verktøyet der paletten lages, og
- * profilsiden som sendes til kunden. Den står på samme sted i begge, og
+ * Bryteren mellom visningene: verktøyet der paletten lages, nettsiden der
+ * den vises på en hel side, og profilsiden som sendes til kunden. Den står på samme sted i begge, og
  * begge lenkene tar med paletten, så du kan gå fram og tilbake.
  */
 export function ViewSwitch({
   active,
   toolHref,
   profileHref,
+  siteHref,
   className,
 }: {
-  active: "tool" | "profile";
+  active: "tool" | "profile" | "site";
   toolHref: string;
   profileHref: string;
+  /** Nettsidevisningen: paletten på en hel nettside. */
+  siteHref?: string;
   className?: string;
 }) {
   const { t } = useI18n();
   const v = t.views;
-  const lenke = (key: "tool" | "profile", href: string, tekst: string) => (
+  const lenke = (
+    key: "tool" | "profile" | "site",
+    href: string,
+    tekst: string,
+  ) => (
     <Link
       href={href}
       aria-current={active === key ? "page" : undefined}
@@ -45,6 +52,7 @@ export function ViewSwitch({
       )}
     >
       {lenke("tool", toolHref, v.tool)}
+      {siteHref && lenke("site", siteHref, v.site)}
       {lenke("profile", profileHref, v.profile)}
     </nav>
   );
