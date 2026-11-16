@@ -1,6 +1,7 @@
 "use client";
 
 import { ViewSwitch } from "@/components/ViewSwitch";
+import { sitePath } from "@/lib/site";
 import { AccountLink } from "@/components/AccountLink";
 import { useState, useEffect, useRef } from "react";
 import type { ImportedProfile, ProfileExtras } from "@/lib/profileImport";
@@ -531,6 +532,7 @@ function ColorCraft() {
             active="tool"
             toolHref={`${localePath(locale)}#${encodeShare(currentExtended, false)}`}
             profileHref={`${profilePath(locale)}#${profilHash}`}
+            siteHref={`${sitePath(locale)}#${profilHash}`}
           />
           <p className="order-last hidden w-full text-sm text-subtle lg:order-none lg:block lg:w-auto lg:max-w-md">
             {t.app.tagline}

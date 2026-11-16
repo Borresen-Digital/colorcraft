@@ -38,6 +38,7 @@ import { ProfileExport } from "@/components/ProfileExport";
 import { SectionNav, type NavItem } from "@/components/SectionNav";
 import { SimpleToggle, useSimple } from "@/components/SimpleMode";
 import { ViewSwitch } from "@/components/ViewSwitch";
+import { sitePath } from "@/lib/site";
 import { SaveToAccount } from "@/components/SaveToAccount";
 import { withSaved, withoutSaved } from "@/lib/savedProfiles";
 import type { ProfileExportInput } from "@/lib/profileExport";
@@ -490,6 +491,7 @@ function Profile({
                 active="profile"
                 toolHref={tilVerktøy}
                 profileHref={`#${hash}`}
+                siteHref={`${sitePath(locale)}#${egen}`}
                 className="mr-auto"
               />
               <label className="flex min-w-48 flex-col gap-1 text-xs font-medium">

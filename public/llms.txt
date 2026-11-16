@@ -8,6 +8,7 @@ The interface is Norwegian by default (`/`), with English at `/en`.
 
 - [Tool](https://farger.borresendigital.no/): create and adjust palettes. English: https://farger.borresendigital.no/en
 - [Profile page](https://farger.borresendigital.no/profil): the color profile for a client, read from the URL fragment. English: https://farger.borresendigital.no/en/profil
+- [Website view](https://farger.borresendigital.no/nettside): the palette on an example website, with a color bar to change the colors live. Same URL fragment as the profile page. English: https://farger.borresendigital.no/en/nettside
 - [Profile file schema](https://farger.borresendigital.no/schema/colorcraft-profile-1.schema.json): JSON Schema for the profile file below.
 
 ## Recommended way for an AI to create a profile
