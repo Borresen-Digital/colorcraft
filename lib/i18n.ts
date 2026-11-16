@@ -162,6 +162,15 @@ const nb = {
     toolbar: "Fargene på siden",
     help: "Klikk på en farge for å bytte den. Resten av paletten følger med, og siden endres med en gang. Endringene står i lenken. Gå til verktøyet for å lagre paletten.",
     undo: "Tilbake til start",
+    fonts: (overskrift: string, tekst: string) =>
+      [
+        overskrift && `Overskrifter: ${overskrift}.`,
+        tekst && `Tekst: ${tekst}.`,
+        "Fontene vises hvis de er installert på maskinen.",
+      ]
+        .filter(Boolean)
+        .join(" "),
+    noFonts: "Legg inn typografi på profilsiden, så vises fontene her.",
     changed: "Endret",
     pick: (navn: string) => `Bytt ${navn.toLowerCase()}`,
     roles: {
@@ -240,8 +249,13 @@ const nb = {
     otherLanguageLabel: "Switch to English",
     footer: "Et gratis verktøy fra",
     home: "ColorCraft, til forsiden",
-    theme: { system: "System", light: "Lys", dark: "Mørk" },
-    themeLabel: (navn: string) => `Utseende: ${navn}. Trykk for å bytte.`,
+    theme: { light: "Lys", dark: "Mørk" },
+    themeLabel: (navn: string, annet: string) =>
+      `Utseende: ${navn}. Trykk for ${annet.toLowerCase()}.`,
+    themeLocked: "Alltid lys",
+    themeLockedHelp:
+      "Profilsiden vises alltid lys, som på papir, så kunden ser det samme som på trykk.",
+    newPalette: "+ Ny tom palett",
     paletteMode: "Vis paletten i",
     paletteActions: "Handlinger for paletten",
     paletteList: "Paletter",
@@ -1025,6 +1039,15 @@ const en: Messages = {
     toolbar: "The colors on the page",
     help: "Click a color to change it. The rest of the palette follows, and the page updates right away. The changes are kept in the link. Go to the tool to save the palette.",
     undo: "Back to start",
+    fonts: (heading, body) =>
+      [
+        heading && `Headings: ${heading}.`,
+        body && `Text: ${body}.`,
+        "The fonts show if they are installed on this computer.",
+      ]
+        .filter(Boolean)
+        .join(" "),
+    noFonts: "Add typography on the profile page, and the fonts show here.",
     changed: "Changed",
     pick: (navn) => `Change ${navn.toLowerCase()}`,
     roles: {
@@ -1098,8 +1121,13 @@ const en: Messages = {
     otherLanguageLabel: "Bytt til norsk",
     footer: "A free tool from",
     home: "ColorCraft, home",
-    theme: { system: "System", light: "Light", dark: "Dark" },
-    themeLabel: (name) => `Appearance: ${name}. Click to switch.`,
+    theme: { light: "Light", dark: "Dark" },
+    themeLabel: (name, other) =>
+      `Appearance: ${name}. Click for ${other.toLowerCase()}.`,
+    themeLocked: "Always light",
+    themeLockedHelp:
+      "The profile page is always light, like paper, so the client sees the same as in print.",
+    newPalette: "+ New empty palette",
     paletteMode: "Show the palette in",
     paletteActions: "Palette actions",
     paletteList: "Palettes",

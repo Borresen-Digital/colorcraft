@@ -1,31 +1,34 @@
 /**
  * Lys og mørk ramme.
  *
- * Standard er systemvalget. Bryteren i toppen kan låse lys eller mørk, og
- * valget huskes i nettleseren (localStorage). Det er en bekvemmelighet for den
- * som bruker siden, ikke noe som må overleve: får vi ikke lest det, følger
- * siden systemet.
+ * Fra start følger rammen systemet. Bryteren i toppen bytter mellom lys og
+ * mørk, og valget huskes i nettleseren (localStorage). Det er en
+ * bekvemmelighet for den som bruker siden, ikke noe som må overleve: får vi
+ * ikke lest det, følger siden systemet.
  */
 
-export type ThemeChoice = "system" | "light" | "dark";
+export type Theme = "light" | "dark";
 
 export const THEME_KEY = "colorcraft-theme";
 
-export const THEME_ORDER: ThemeChoice[] = ["system", "light", "dark"];
-
-export function nextTheme(t: ThemeChoice): ThemeChoice {
-  return THEME_ORDER[(THEME_ORDER.indexOf(t) + 1) % THEME_ORDER.length];
+export function isTheme(v: unknown): v is Theme {
+  return v === "light" || v === "dark";
 }
 
-export function isThemeChoice(v: unknown): v is ThemeChoice {
-  return v === "system" || v === "light" || v === "dark";
+/** Det motsatte valget: det bryteren bytter til. */
+export function otherTheme(t: Theme): Theme {
+  return t === "light" ? "dark" : "light";
 }
 
-/** Setter eller fjerner data-theme på <html>. */
-export function applyTheme(t: ThemeChoice): void {
-  const html = document.documentElement;
-  if (t === "system") html.removeAttribute("data-theme");
-  else html.setAttribute("data-theme", t);
+/** Rammen som vises nå: det lagrede valget, ellers systemets. */
+export function currentTheme(lagret: unknown, systemMørk: boolean): Theme {
+  if (isTheme(lagret)) return lagret;
+  return systemMørk ? "dark" : "light";
+}
+
+/** Setter data-theme på <html>. */
+export function applyTheme(t: Theme): void {
+  document.documentElement.setAttribute("data-theme", t);
 }
 
 /**

@@ -5,11 +5,11 @@ import { colorPalettes, type ExtendedColorPalette } from "@/data/palettes";
 import { localePath, localizePalette, type Locale } from "@/lib/i18n";
 import { checkPalette, headingColor, textOn } from "@/lib/contrastPairs";
 import { decodeShare, encodeShare } from "@/lib/share";
-import { profilePath } from "@/lib/profile";
+import { cleanFont, fontStack, readTypography } from "@/lib/typography";
 import {
   editPalette,
   SITE_ROLES,
-  sitePath,
+  siteFonts,
   withPalette,
   type BrandList,
   type SiteEdit,
@@ -19,8 +19,8 @@ import { cn } from "@/lib/utils";
 import { I18nProvider, useI18n } from "@/components/I18nProvider";
 import { BrandLogo } from "@/components/BrandLogo";
 import { FanMark } from "@/components/FanMark";
-import { SimpleToggle, useSimple } from "@/components/SimpleMode";
-import { ViewSwitch } from "@/components/ViewSwitch";
+import { useSimple } from "@/components/SimpleMode";
+import { SiteHeader } from "@/components/SiteHeader";
 import type { ColorPalette } from "@/types/palette";
 
 interface Farge {
@@ -155,61 +155,29 @@ function Nettside({ locale }: { locale: Locale }) {
       ? t.contrast.allPass
       : t.contrast.below(svake);
   const endret = encodeShare(palette, false) !== encodeShare(start, false);
+  // Typografien fra profilsiden, hvis den er lagt inn.
+  const fonter = siteFonts(readTypography(hash));
 
   return (
     <div className="min-h-screen bg-paper pb-32 text-ink sm:pb-40">
-      <header className="border-b border-line bg-panel">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-3 px-4 py-3 sm:px-6">
-          <a
-            href={localePath(locale)}
-            className="flex items-center gap-2 rounded-lg"
-          >
-            <FanMark size={28} />
-            <span className="font-display text-lg font-extrabold tracking-tight">
-              Color<span className="font-semibold text-subtle">Craft</span>
-            </span>
-          </a>
-          <ViewSwitch
-            active="site"
-            toolHref={`${localePath(locale)}#${hash}`}
-            siteHref={`${sitePath(locale)}#${hash}`}
-            profileHref={`${profilePath(locale)}#${hash}`}
-            className="mr-auto"
-          />
-          {!simple && palette.darkVariant && (
-            <div
-              role="group"
-              aria-label={t.app.paletteMode}
-              className="flex rounded-full border border-line bg-sunken p-0.5"
-            >
-              {(
-                [
-                  [false, t.app.light],
-                  [true, t.app.dark],
-                ] as const
-              ).map(([m, navn]) => (
-                <button
-                  key={navn}
-                  type="button"
-                  aria-pressed={visMørk === m}
-                  onClick={() => setMørk(m)}
-                  className={
-                    visMørk === m
-                      ? "rounded-full bg-panel px-3 py-1 text-xs font-semibold text-ink shadow-sm"
-                      : "rounded-full px-3 py-1 text-xs font-medium text-subtle hover:text-ink"
-                  }
-                >
-                  {navn}
-                </button>
-              ))}
-            </div>
-          )}
-          <SimpleToggle />
-        </div>
-      </header>
+      <SiteHeader
+        active="site"
+        hash={hash}
+        fanColors={[
+          variant.colors.primary,
+          variant.colors.accent,
+          variant.colors.secondary,
+          variant.colors.warm,
+        ]}
+      />
 
       <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
-        <EksempelSide palette={variant} navn={palette.name} brand={!!brand} />
+        <EksempelSide
+          palette={variant}
+          navn={palette.name}
+          brand={!!brand}
+          fonter={fonter}
+        />
       </main>
 
       <aside
@@ -260,17 +228,51 @@ function Nettside({ locale }: { locale: Locale }) {
               </li>
             ))}
           </ul>
-          {endret && (
-            <button
-              type="button"
-              onClick={angre}
-              className={btn("ghost", "sm")}
+          {!simple && palette.darkVariant && (
+            <div
+              role="group"
+              aria-label={t.app.paletteMode}
+              className="flex rounded-full border border-line bg-sunken p-0.5"
             >
-              {s.undo}
-            </button>
+              {(
+                [
+                  [false, t.app.light],
+                  [true, t.app.dark],
+                ] as const
+              ).map(([m, navn]) => (
+                <button
+                  key={navn}
+                  type="button"
+                  aria-pressed={visMørk === m}
+                  onClick={() => setMørk(m)}
+                  className={
+                    visMørk === m
+                      ? "rounded-full bg-panel px-3 py-1 text-xs font-semibold text-ink shadow-sm"
+                      : "rounded-full px-3 py-1 text-xs font-medium text-subtle hover:text-ink"
+                  }
+                >
+                  {navn}
+                </button>
+              ))}
+            </div>
           )}
+          {/* Står alltid, så linjen ikke hopper når noe endres. */}
+          <button
+            type="button"
+            onClick={angre}
+            disabled={!endret}
+            className={cn(btn("ghost", "sm"), "disabled:opacity-40")}
+          >
+            {s.undo}
+          </button>
           <p className="hidden w-full text-[11px] text-subtle sm:block">
-            {s.help}
+            {s.help}{" "}
+            {fonter.heading || fonter.body
+              ? s.fonts(
+                  fonter.heading ? cleanFont(fonter.heading.font) : "",
+                  fonter.body ? cleanFont(fonter.body.font) : "",
+                )
+              : s.noFonts}
           </p>
         </div>
       </aside>
@@ -287,10 +289,12 @@ function EksempelSide({
   palette,
   navn,
   brand,
+  fonter,
 }: {
   palette: ColorPalette;
   navn: string;
   brand: boolean;
+  fonter: ReturnType<typeof siteFonts>;
 }) {
   const { t } = useI18n();
   const s = t.site;
@@ -301,11 +305,25 @@ function EksempelSide({
   const påFlate = textOn(palette, c.secondary);
   const felt =
     "mt-1 block w-full rounded-lg border px-3 py-2 text-sm outline-none";
+  // Fontene fra profilen. Uten dem brukes verktøyets egne.
+  const tittelFont = fonter.heading
+    ? {
+        fontFamily: fontStack(fonter.heading),
+        fontWeight: fonter.heading.weight,
+      }
+    : {};
+  const tekstFont = fonter.body
+    ? { fontFamily: fontStack(fonter.body), fontWeight: fonter.body.weight }
+    : {};
 
   return (
     <div
       className="overflow-hidden rounded-2xl border border-line shadow-sm"
-      style={{ backgroundColor: c.background, color: c.foreground }}
+      style={{
+        backgroundColor: c.background,
+        color: c.foreground,
+        ...tekstFont,
+      }}
     >
       {/* Meny */}
       <div
@@ -315,7 +333,7 @@ function EksempelSide({
         <BrandLogo bg={c.background} inColor size="md">
           <span
             className="font-display text-xl font-extrabold"
-            style={{ color: overskrift }}
+            style={{ color: overskrift, ...tittelFont }}
           >
             {navn}
           </span>
@@ -346,7 +364,7 @@ function EksempelSide({
           </span>
           <h1
             className="font-display text-4xl leading-tight font-extrabold tracking-tight md:text-5xl"
-            style={{ color: overskrift }}
+            style={{ color: overskrift, ...tittelFont }}
           >
             {s.heroTitle}
           </h1>
@@ -383,7 +401,7 @@ function EksempelSide({
           </div>
           <p
             className="font-display text-4xl font-extrabold"
-            style={{ color: overskrift }}
+            style={{ color: overskrift, ...tittelFont }}
           >
             {s.statValue}
             <span style={{ color: c.accent }}> ★</span>
@@ -399,7 +417,7 @@ function EksempelSide({
         className="px-6 py-12"
         style={{ backgroundColor: c.secondary, color: påFlate }}
       >
-        <h2 className="mb-6 font-display text-2xl font-bold">
+        <h2 className="mb-6 font-display text-2xl font-bold" style={tittelFont}>
           {s.featuresTitle}
         </h2>
         <ul className="grid gap-6 md:grid-cols-3">
@@ -410,7 +428,9 @@ function EksempelSide({
                 style={{ backgroundColor: c.accent }}
                 aria-hidden="true"
               />
-              <h3 className="font-semibold">{tittel}</h3>
+              <h3 className="font-semibold" style={tittelFont}>
+                {tittel}
+              </h3>
               <p className="text-sm opacity-85">{tekst}</p>
             </li>
           ))}
@@ -421,7 +441,7 @@ function EksempelSide({
       <section className="px-6 py-12">
         <h2
           className="mb-6 font-display text-2xl font-bold"
-          style={{ color: overskrift }}
+          style={{ color: overskrift, ...tittelFont }}
         >
           {s.servicesTitle}
         </h2>
@@ -433,7 +453,9 @@ function EksempelSide({
               style={{ backgroundColor: c.surface, borderColor: c.border }}
             >
               <div className="flex items-center justify-between gap-2">
-                <h3 className="font-semibold">{tittel}</h3>
+                <h3 className="font-semibold" style={tittelFont}>
+                  {tittel}
+                </h3>
                 {merke && (
                   <span
                     className="rounded-full px-2.5 py-0.5 text-xs font-semibold"
@@ -448,7 +470,7 @@ function EksempelSide({
               </p>
               <span
                 className="inline-block text-sm font-semibold underline underline-offset-4"
-                style={{ color: overskrift }}
+                style={{ color: overskrift, ...tittelFont }}
               >
                 {s.readMore} →
               </span>
@@ -462,7 +484,10 @@ function EksempelSide({
         className="px-6 py-12 text-center"
         style={{ backgroundColor: c.primary, color: påHoved }}
       >
-        <p className="mx-auto max-w-2xl font-display text-2xl leading-snug font-bold">
+        <p
+          className="mx-auto max-w-2xl font-display text-2xl leading-snug font-bold"
+          style={tittelFont}
+        >
           {s.quote}
         </p>
         <p className="mt-3 text-sm opacity-85">{s.quoteBy}</p>
@@ -473,7 +498,7 @@ function EksempelSide({
         <div className="space-y-2">
           <h2
             className="font-display text-2xl font-bold"
-            style={{ color: overskrift }}
+            style={{ color: overskrift, ...tittelFont }}
           >
             {s.contactTitle}
           </h2>

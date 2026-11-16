@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { colorPalettes, type ExtendedColorPalette } from "@/data/palettes";
 import { generateFromBrand } from "./brand";
-import { editPalette, sitePath, withPalette } from "./site";
+import { editPalette, siteFonts, sitePath, withPalette } from "./site";
 
 const r = generateFromBrand({ logo: ["#1F4D3A"], support: ["#F3EBDD"] });
 const MERKE: ExtendedColorPalette = {
@@ -96,5 +96,38 @@ describe("withPalette", () => {
     expect(q.get("mk")).toBe("Anne Design");
     expect(q.get("ty1")).toBe("x");
     expect(h).not.toContain("+");
+  });
+});
+
+describe("siteFonts", () => {
+  const t = (role: string, font: string) => ({
+    role,
+    font,
+    weight: 400,
+    size: "",
+    fallback: "",
+    note: "",
+  });
+
+  it("finner overskrift og brødtekst etter rollen", () => {
+    const f = siteFonts([
+      t("Brødtekst", "Inter"),
+      t("Overskrifter", "Georgia"),
+    ]);
+    expect(f.heading?.font).toBe("Georgia");
+    expect(f.body?.font).toBe("Inter");
+  });
+
+  it("bruker rekkefølgen når rollen ikke sier noe", () => {
+    const f = siteFonts([t("Logo", "Lora"), t("Annet", "Arial")]);
+    expect(f.heading?.font).toBe("Lora");
+    expect(f.body?.font).toBe("Arial");
+  });
+
+  it("hopper over tomme fonter, og tåler én eller ingen", () => {
+    expect(siteFonts([t("Overskrifter", "")])).toEqual({});
+    const en = siteFonts([t("Overskrifter", "Georgia")]);
+    expect(en.heading?.font).toBe("Georgia");
+    expect(en.body).toBeUndefined();
   });
 });

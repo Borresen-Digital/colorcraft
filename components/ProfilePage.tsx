@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { colorPalettes, type ExtendedColorPalette } from "@/data/palettes";
 import { formatCmyk } from "@/lib/cmyk";
@@ -37,8 +36,7 @@ import {
 import { ProfileExport } from "@/components/ProfileExport";
 import { SectionNav, type NavItem } from "@/components/SectionNav";
 import { SimpleToggle, useSimple } from "@/components/SimpleMode";
-import { ViewSwitch } from "@/components/ViewSwitch";
-import { sitePath } from "@/lib/site";
+import { SiteHeader } from "@/components/SiteHeader";
 import { SaveToAccount } from "@/components/SaveToAccount";
 import { withSaved, withoutSaved } from "@/lib/savedProfiles";
 import type { ProfileExportInput } from "@/lib/profileExport";
@@ -430,6 +428,18 @@ function Profile({
       data-les={kunde ? "" : undefined}
     >
       {/* Verktøylinjen er for designeren og skrives ikke ut. */}
+      {/* Den felles toppen, som i verktøyet og på nettsiden. Kunden får
+          sin egen enkle linje i stedet. */}
+      {!kunde && (
+        <SiteHeader
+          active="profile"
+          hash={hash}
+          toolHash={tilVerktøy.slice(tilVerktøy.indexOf("#") + 1)}
+          fanColors={farger}
+          lockTheme
+          sticky={false}
+        />
+      )}
       {kunde ? (
         <aside
           aria-label={p.toolbar}
@@ -477,23 +487,6 @@ function Profile({
         >
           <div className="mx-auto max-w-5xl space-y-3 px-4 py-3 sm:px-6">
             <div className="flex flex-wrap items-end gap-2">
-              <Link
-                href={tilVerktøy}
-                className="flex items-center gap-2 rounded-lg"
-                title={p.edit}
-              >
-                <FanMark colors={farger} size={28} />
-                <span className="font-display text-lg font-extrabold tracking-tight">
-                  Color<span className="font-semibold text-subtle">Craft</span>
-                </span>
-              </Link>
-              <ViewSwitch
-                active="profile"
-                toolHref={tilVerktøy}
-                profileHref={`#${hash}`}
-                siteHref={`${sitePath(locale)}#${egen}`}
-                className="mr-auto"
-              />
               <label className="flex min-w-48 flex-col gap-1 text-xs font-medium">
                 {p.maker}
                 <input
@@ -524,7 +517,6 @@ function Profile({
               >
                 {p.previewClient}
               </a>
-              <SimpleToggle />
               <label className="flex flex-col gap-1 text-xs font-medium">
                 {p.vision}
                 <select

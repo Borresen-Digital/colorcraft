@@ -1,14 +1,11 @@
 "use client";
 
-import { ViewSwitch } from "@/components/ViewSwitch";
-import { sitePath } from "@/lib/site";
-import { AccountLink } from "@/components/AccountLink";
+import { SiteHeader } from "@/components/SiteHeader";
 import { useState, useEffect, useRef } from "react";
 import type { ImportedProfile, ProfileExtras } from "@/lib/profileImport";
 import { loadExtras, saveExtras, withProfileExtras } from "@/lib/profileExtras";
 import { colorPalettes, ExtendedColorPalette } from "@/data/palettes";
 import { decodeShare, encodeShare } from "@/lib/share";
-import { profilePath } from "@/lib/profile";
 import {
   applyOverrides,
   builtinOriginal,
@@ -16,23 +13,16 @@ import {
   isModifiedBuiltin,
 } from "@/lib/builtin";
 import { PaginatedPaletteSelector } from "@/components/PaletteSelector";
-import { SimpleToggle, useSimple } from "@/components/SimpleMode";
+import { useSimple } from "@/components/SimpleMode";
 import { LivePreview } from "@/components/LivePreview";
 import { ColorDetails } from "@/components/ColorDetails";
 import { PaletteEditor } from "@/components/PaletteEditor";
 import { BrandBuilder } from "@/components/BrandBuilder";
 import { ColorPalette } from "@/types/palette";
 import { storageUtils } from "@/utils/localStorage";
-import { FanMark } from "@/components/FanMark";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { btn, panel } from "@/lib/ui";
 import { I18nProvider, useI18n } from "@/components/I18nProvider";
-import {
-  localePath,
-  localizePalette,
-  type Locale,
-  type Messages,
-} from "@/lib/i18n";
+import { localizePalette, type Locale, type Messages } from "@/lib/i18n";
 
 // En palett fra en lenke lagres ikke før brukeren ber om det. Da får den en
 // vanlig custom-id og havner i localStorage som de andre egne palettene.
@@ -448,12 +438,6 @@ function ColorCraft() {
   };
 
   const currentPalette = getCurrentPalette();
-  const otherLocale: Locale = locale === "nb" ? "en" : "nb";
-  // Paletten i lenken følger med over til det andre språket.
-  const switchLanguage = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    window.location.href = localePath(otherLocale) + window.location.hash;
-  };
   // Paletten som vises, på formen den lagres i (uten oversettelse).
   const currentRaw =
     palettes.find(
@@ -516,74 +500,12 @@ function ColorCraft() {
 
   return (
     <div className="min-h-screen bg-paper text-ink">
-      <header className="sticky top-0 z-30 border-b border-line bg-paper/90 backdrop-blur">
-        <div className="mx-auto flex max-w-[1440px] flex-wrap items-center justify-between gap-x-4 gap-y-3 px-4 py-3 sm:px-6">
-          <a
-            href={localePath(locale)}
-            className="flex min-w-0 items-center gap-2.5 rounded-lg"
-            aria-label={t.app.home}
-          >
-            <FanMark colors={fanFarger} />
-            <h1 className="font-display text-xl font-extrabold tracking-tight sm:text-2xl">
-              Color<span className="font-semibold text-subtle">Craft</span>
-            </h1>
-          </a>
-          <ViewSwitch
-            active="tool"
-            toolHref={`${localePath(locale)}#${encodeShare(currentExtended, false)}`}
-            profileHref={`${profilePath(locale)}#${profilHash}`}
-            siteHref={`${sitePath(locale)}#${profilHash}`}
-          />
-          <p className="order-last hidden w-full text-sm text-subtle lg:order-none lg:block lg:w-auto lg:max-w-md">
-            {t.app.tagline}
-          </p>
-
-          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-            <a
-              href={localePath(otherLocale)}
-              hrefLang={otherLocale}
-              lang={otherLocale}
-              aria-label={t.app.otherLanguageLabel}
-              onClick={switchLanguage}
-              className={btn("ghost", "sm")}
-            >
-              {t.app.otherLanguage}
-            </a>
-            <SimpleToggle />
-            <ThemeToggle />
-            <AccountLink />
-            <button
-              type="button"
-              onClick={copyShareLink}
-              className={btn("outline", "sm")}
-              title={t.app.shareTitle}
-            >
-              {linkStatus === "copied"
-                ? t.app.linkCopied
-                : linkStatus === "failed"
-                  ? t.app.copyFailed
-                  : t.app.share}
-            </button>
-            {!simple && (
-              <button
-                type="button"
-                onClick={handleCreatePalette}
-                className={btn("outline", "sm")}
-              >
-                {t.app.add}
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={() => setBrandOpen(true)}
-              title={t.brand.openTitle}
-              className={btn("primary", "sm")}
-            >
-              {t.brand.open}
-            </button>
-          </div>
-        </div>
-      </header>
+      <SiteHeader
+        active="tool"
+        hash={profilHash}
+        toolHash={encodeShare(currentExtended, false)}
+        fanColors={fanFarger}
+      />
 
       <main className="mx-auto max-w-[1440px] px-4 py-5 sm:px-6 sm:py-6">
         {currentExtended.id.startsWith("shared-") && (
@@ -614,6 +536,7 @@ function ColorCraft() {
               selectedId={selectedPaletteId}
               onSelect={handlePaletteSelect}
               onNew={() => setBrandOpen(true)}
+              onNewEmpty={handleCreatePalette}
             />
           </nav>
 
@@ -670,6 +593,18 @@ function ColorCraft() {
                   aria-label={t.app.paletteActions}
                   className="flex items-center gap-0.5"
                 >
+                  <button
+                    type="button"
+                    onClick={copyShareLink}
+                    className={btn("ghost", "sm")}
+                    title={t.app.shareTitle}
+                  >
+                    {linkStatus === "copied"
+                      ? t.app.linkCopied
+                      : linkStatus === "failed"
+                        ? t.app.copyFailed
+                        : t.app.share}
+                  </button>
                   <button
                     type="button"
                     onClick={handleEditPalette}
