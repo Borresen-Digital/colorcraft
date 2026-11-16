@@ -1,6 +1,6 @@
 # ColorCraft
 
-> ColorCraft (https://farger.borresendigital.no) is a free color tool for designers, made by Børresen Digital in Norway. It turns the colors from a brand guide (logo colors, surface colors, highlight colors) into a full screen palette with light and dark mode, checks contrast against WCAG 2.2, and makes a profile page the designer can send to a client. Everything runs in the browser: there is no account, no database and no API. Palettes and profiles live in the URL fragment (after #), which is never sent to the server.
+> ColorCraft (https://farger.borresendigital.no) is a free color tool for designers, made by Børresen Digital in Norway. It turns the colors from a brand guide (logo colors, surface colors, highlight colors) into a full screen palette with light and dark mode, checks contrast against WCAG 2.2, and makes a profile page the designer can send to a client. The tool runs in the browser without an account: palettes and profiles live in the URL fragment (after #), which is never sent to the server. Optional accounts add saved profiles, short links and an MCP server (see below).
 
 The interface is Norwegian by default (`/`), with English at `/en`.
 
@@ -75,6 +75,10 @@ Profile page only:
 
 CSS variables, SCSS, Tailwind 4 (`@theme`), Figma variables (DTCG as Figma imports it), design tokens (DTCG with hex strings), SwiftUI, Flutter, Android `colors.xml`, and the profile file. Every brand color also gets a tone scale 50–950 in OKLCH with fixed lightness per step; the brand color itself is placed unchanged at the step with the closest lightness.
 
-## Not available yet
+## Accounts and MCP
 
-There is no API or MCP server. Accounts and an authenticated MCP server are planned; until then, use the profile file.
+The tool works without an account. With an account (sign-in by email link or passkey, no passwords), a designer can save profiles and share them as short links (`/p/<slug>`), which always show the latest saved version.
+
+An MCP server is available at `https://farger.borresendigital.no/mcp` (Streamable HTTP, JSON responses, no sessions). It needs a token the designer creates on the account page (`/konto`), sent as `Authorization: Bearer ccmcp_…`. Tools: `list_profiles`, `get_profile`, `create_profile` and `update_profile` (all using the profile file format above), `check_contrast` and `tone_scale`. Profiles cannot be deleted through MCP. A saved profile is visible to anyone with its short link, so give the designer the links to review it.
+
+Accounts are switched on when the service is fully set up. Until then the MCP server answers 503 and the profile file is the way in.

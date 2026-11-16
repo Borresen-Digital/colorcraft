@@ -186,6 +186,14 @@ jobs:
                 exit 1
               fi
               echo "ok: ukjent kort lenke gir 404"
+              # MCP: uten token 401, og GET støttes ikke.
+              mcp=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 -X POST -H 'Content-Type: application/json' -d '{"jsonrpc":"2.0","id":1,"method":"ping"}' "http://localhost:8787/mcp" || true)
+              mcpget=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "http://localhost:8787/mcp" || true)
+              if [ "$mcp" != "401" ] || [ "$mcpget" != "405" ]; then
+                echo "::error::/mcp svarte POST $mcp og GET $mcpget, ventet 401 og 405."
+                exit 1
+              fi
+              echo "ok: /mcp krever token"
               # Favikonet ligger under [lang] og får en uvanlig adresse
               # (/-/icon.svg). Lenken i siden må gå til noe som svarer.
               ikon=$(grep -o '<link rel="icon" href="[^"]*' forside.html | head -1 | sed 's/.*href="//')
