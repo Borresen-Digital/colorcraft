@@ -155,6 +155,26 @@ export function withMaker(hash: string, maker: string): string {
   return q.toString().replace(/\+/g, "%20");
 }
 
+/**
+ * Kundens visning: lenken fra «Kopier lenke til kunden» har `ro=1`, og
+ * profilsiden vises da uten knappene for redigering. Det er ikke en
+ * tilgangskontroll (alt står i lenken), bare en ren side til kunden.
+ */
+export const READONLY_PARAM = "ro";
+
+export function isReadonlyLink(hash: string): boolean {
+  return (
+    new URLSearchParams(hash.replace(/^#/, "")).get(READONLY_PARAM) === "1"
+  );
+}
+
+export function withReadonly(hash: string, on: boolean): string {
+  const q = new URLSearchParams(hash.replace(/^#/, ""));
+  if (on) q.set(READONLY_PARAM, "1");
+  else q.delete(READONLY_PARAM);
+  return q.toString().replace(/\+/g, "%20");
+}
+
 /** Fragmentet uten «Laget av», til lenken tilbake til verktøyet. */
 export function withoutMaker(hash: string): string {
   return withMaker(hash, "");

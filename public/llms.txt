@@ -70,6 +70,7 @@ Profile page only:
 - `ty1` … `ty4`: typography as `role|font|weight|size|fallback|note`.
 - `pn`: Pantone numbers as `RRGGBB~number`, separated by `|`.
 - `lg`: the logo, compressed. Made by the profile page; do not create it.
+- `ro=1`: the client's view, without the editing buttons. Add it to links meant for the client.
 
 ## Exports on the profile page
 

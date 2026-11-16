@@ -14,14 +14,21 @@ import { useLogos } from "@/components/BrandLogo";
 export function ColorCardPanel({
   palette,
   defaultMaker = "",
+  maker: fast,
 }: {
   palette: ExtendedColorPalette;
-  /** Navnet som står i «Laget av» fra start, for eksempel fra profilsiden. */
+  /** Navnet som står i «Laget av» fra start. */
   defaultMaker?: string;
+  /**
+   * «Laget av» bestemt av siden, som på profilsiden der feltet står øverst.
+   * Da vises ikke feltet her.
+   */
+  maker?: string;
 }) {
   const { locale, t } = useI18n();
   const k = t.card;
-  const [maker, setMaker] = useState(defaultMaker);
+  const [egetNavn, setMaker] = useState(defaultMaker);
+  const maker = fast ?? egetNavn;
   const [medIBruk, setMedIBruk] = useState(true);
   const { logos } = useLogos();
   const harLogo = Object.keys(logos).length > 0;
@@ -74,21 +81,25 @@ export function ColorCardPanel({
         {k.panelTitle}
       </h3>
       <p className="text-[11px] text-subtle">{k.panelHelp}</p>
-      <label
-        htmlFor="card-maker"
-        className="block text-xs font-medium text-ink"
-      >
-        {k.maker}
-      </label>
-      <input
-        id="card-maker"
-        type="text"
-        value={maker}
-        maxLength={60}
-        onChange={(e) => setMaker(e.target.value)}
-        placeholder={k.makerPlaceholder}
-        className="w-full rounded border border-line bg-panel px-2 py-1.5 text-sm text-ink focus:border-accent focus:outline-none"
-      />
+      {fast === undefined && (
+        <>
+          <label
+            htmlFor="card-maker"
+            className="block text-xs font-medium text-ink"
+          >
+            {k.maker}
+          </label>
+          <input
+            id="card-maker"
+            type="text"
+            value={maker}
+            maxLength={60}
+            onChange={(e) => setMaker(e.target.value)}
+            placeholder={k.makerPlaceholder}
+            className="w-full rounded border border-line bg-panel px-2 py-1.5 text-sm text-ink focus:border-accent focus:outline-none"
+          />
+        </>
+      )}
       <label className="flex items-center gap-2 text-xs text-ink">
         <input
           type="checkbox"

@@ -56,10 +56,10 @@ interface BrandBuilderProps {
 }
 
 /**
- * Én rad med fargevelger, HEX-felt og CMYK-felt. CMYK kan skrives inn fra
- * profilmanualen, og blir omregnet til HEX (omtrentlig). Det som er skrevet,
- * blir stående så lenge HEX-verdien er den det ga, så tallene ikke hopper
- * mens man skriver.
+ * Én rad med fargevelger, HEX-felt og CMYK-felt. En manual oppgir ofte både
+ * HEX og CMYK, og begge skal stå slik de er skrevet. CMYK regnes bare om til
+ * HEX når HEX ikke er skrevet inn for hånd (for eksempel når manualen bare
+ * har CMYK). Skrives HEX etter CMYK, blir CMYK-tallene stående.
  */
 function ColorRow({
   value,
@@ -91,6 +91,12 @@ function ColorRow({
   const [skrevet, setSkrevet] = useState<{ text: string; hex: string } | null>(
     null,
   );
+  // Om HEX er skrevet for hånd. Da endrer ikke CMYK den. En lagret palett
+  // der manualens CMYK gir en annen HEX, har begge fra manualen.
+  const [hexFast, setHexFast] = useState(() => {
+    const m = manual ? parseCmyk(manual) : null;
+    return !!m && !!gyldig && cmykToHex(m) !== gyldig;
+  });
   const avledet = gyldig ? formatCmyk(hexToCmyk(gyldig)!.cmyk) : "";
   // Det som er skrevet, vises så lenge HEX er den det hørte til. Endres HEX
   // et annet sted (fargevelger eller HEX-feltet), følger CMYK etter.
@@ -99,13 +105,26 @@ function ColorRow({
   const cmykTekst =
     skrevet && skrevet.hex === gyldig ? skrevet.text : (manual ?? avledet);
   const cmykGyldig = cmykTekst === "" || !!parseCmyk(cmykTekst);
+  const fraManual = (skrevet && skrevet.hex === gyldig) || !!manual;
   const handleCmyk = (text: string) => {
     const cmyk = parseCmyk(text);
-    const hex = cmyk ? cmykToHex(cmyk) : (gyldig ?? "");
+    const behold = hexFast && gyldig;
+    const hex = cmyk && !behold ? cmykToHex(cmyk) : (gyldig ?? "");
     setSkrevet({ text, hex });
     if (cmyk) {
-      onChange(hex);
+      if (hex !== gyldig) onChange(hex);
       onCmyk(hex, formatCmyk(cmyk));
+    }
+  };
+  // HEX skrevet for hånd: CMYK fra manualen blir stående på den nye HEX-en.
+  const handleHex = (v: string) => {
+    setHexFast(true);
+    onChange(v);
+    const ny = normalizeHex(v);
+    const tall = skrevet ? parseCmyk(skrevet.text) : null;
+    if (ny && tall) {
+      setSkrevet({ text: skrevet!.text, hex: ny });
+      onCmyk(ny, formatCmyk(tall));
     }
   };
   return (
@@ -114,15 +133,21 @@ function ColorRow({
         <input
           type="color"
           value={gyldig ?? "#000000"}
-          onChange={(e) => onChange(e.target.value.toUpperCase())}
-          aria-label={value}
+          onChange={(e) => {
+            // Fargevelgeren er å prøve seg fram, så CMYK følger med.
+            setSkrevet(null);
+            setHexFast(false);
+            onChange(e.target.value.toUpperCase());
+          }}
+          aria-label={`${t.brand.pickColor}: ${value}`}
           className="h-10 w-12 shrink-0 cursor-pointer rounded border border-field"
         />
         <input
           id={id}
           type="text"
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => handleHex(e.target.value)}
+          aria-label="HEX"
           aria-invalid={!gyldig}
           aria-describedby={gyldig ? undefined : `${id}-feil`}
           className="min-w-0 flex-1 rounded border border-field bg-panel p-2 font-mono text-sm text-ink focus:border-accent focus:outline-none aria-[invalid=true]:border-bad"
@@ -149,7 +174,7 @@ function ColorRow({
           htmlFor={`${id}-cmyk`}
           className="shrink-0 text-xs font-medium text-subtle"
         >
-          CMYK ≈
+          {fraManual ? "CMYK" : "CMYK ≈"}
         </label>
         <input
           id={`${id}-cmyk`}
@@ -464,7 +489,7 @@ export function BrandBuilder({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 p-4 sm:pt-[5vh]"
       role="dialog"
       aria-modal="true"
       aria-labelledby="brand-title"
