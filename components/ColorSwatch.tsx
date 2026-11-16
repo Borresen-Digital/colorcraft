@@ -8,10 +8,17 @@ interface ColorSwatchProps {
   label: string;
   color: string;
   size?: "sm" | "md" | "lg";
+  /** «row»: liten prøve til venstre og hele navnet ved siden av. */
+  layout?: "grid" | "row";
 }
 
 /** En fargeprøve som kopierer HEX-verdien ved klikk. */
-export function ColorSwatch({ label, color, size = "md" }: ColorSwatchProps) {
+export function ColorSwatch({
+  label,
+  color,
+  size = "md",
+  layout = "grid",
+}: ColorSwatchProps) {
   const { t } = useI18n();
   const [copied, setCopied] = useState(false);
 
@@ -31,6 +38,32 @@ export function ColorSwatch({ label, color, size = "md" }: ColorSwatchProps) {
     lg: "h-20 w-full",
   };
 
+  if (layout === "row") {
+    // Hele raden kopierer HEX. Navnet får plass i stedet for å kuttes.
+    return (
+      <button
+        type="button"
+        onClick={copyToClipboard}
+        aria-label={`${t.export.copy} ${label} ${color}`}
+        className="flex w-full min-w-0 items-center gap-3 rounded-xl p-1 text-left hover:bg-sunken"
+      >
+        <span
+          className="relative h-11 w-11 shrink-0 rounded-lg border border-line"
+          style={{ backgroundColor: color }}
+          aria-hidden="true"
+        />
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm leading-snug font-medium text-ink">
+            {label}
+          </span>
+          <span className="block font-mono text-[11px] text-subtle">
+            {copied ? t.details.copied : color}
+          </span>
+        </span>
+      </button>
+    );
+  }
+
   return (
     <div className="group min-w-0">
       <button
@@ -49,7 +82,9 @@ export function ColorSwatch({ label, color, size = "md" }: ColorSwatchProps) {
           </span>
         )}
       </button>
-      <p className="mt-1.5 truncate text-xs font-medium text-ink">{label}</p>
+      <p className="mt-1.5 truncate text-xs font-medium text-ink" title={label}>
+        {label}
+      </p>
       <p className="truncate font-mono text-[11px] text-subtle">{color}</p>
     </div>
   );
