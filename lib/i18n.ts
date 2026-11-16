@@ -284,6 +284,9 @@ const nb = {
     title: "Kontrastsjekk",
     allPass: "Alle par består AA",
     below: (n: number) => `${n} under AA`,
+    allPassPlain: "All teksten er lett å lese",
+    belowPlain: (n: number) =>
+      n === 1 ? "1 par er for svakt" : `${n} par er for svake`,
     large: "(stor tekst)",
     invalid: "Ugyldig farge",
     passes: "består",
@@ -297,6 +300,8 @@ const nb = {
     copied: "Kopiert!",
     footnote:
       "WCAG 2.2: AA krever 4,5:1 for tekst og 3:1 for stor tekst. AAA krever 7:1 og 4,5:1.",
+    footnotePlain:
+      "Tekst må ha kontrast på minst 4,5:1 mot bakgrunnen, og stor tekst 3:1. Det er kravet i WCAG (AA).",
     pairs: {
       "text-background": "Tekst på bakgrunn",
       "text-surface": "Tekst på kort og bokser",
@@ -641,13 +646,13 @@ const nb = {
     } as Record<number, string>,
   },
   simple: {
-    label: "Visning",
-    simple: "Enkel",
-    all: "Alt",
+    label: "Vis for",
+    simple: "Designere",
+    all: "Utviklere",
     simpleHelp:
-      "Enkel: fargene vises slik de står i manualen, i lys modus, uten automatikk og ekstra valg. Velg «Alt» for hele verktøyet.",
+      "For designere: fargene slik de står i manualen, i lys modus, uten automatikk, kode og ekstra valg.",
     allHelp:
-      "Alt: hele verktøyet, med mørk modus, valør og varme, forslag, flere valg og utviklerdelen.",
+      "For utviklere: alt designerne ser, og i tillegg roller, mørk modus, valør og varme, forslag, tonetrapp og filer til nettside og app.",
   },
   logoColors: {
     title: "Farger fra logoen",
@@ -1072,6 +1077,9 @@ const en: Messages = {
     title: "Contrast check",
     allPass: "All pairs pass AA",
     below: (n) => `${n} below AA`,
+    allPassPlain: "All the text is easy to read",
+    belowPlain: (n) =>
+      n === 1 ? "1 pair is too weak" : `${n} pairs are too weak`,
     large: "(large text)",
     invalid: "Invalid color",
     passes: "passes",
@@ -1084,6 +1092,8 @@ const en: Messages = {
     copied: "Copied!",
     footnote:
       "WCAG 2.2: AA needs 4.5:1 for text and 3:1 for large text. AAA needs 7:1 and 4.5:1.",
+    footnotePlain:
+      "Text needs a contrast of at least 4.5:1 against the background, and large text 3:1. That is the WCAG requirement (AA).",
     pairs: {
       "text-background": "Text on background",
       "text-surface": "Text on cards and boxes",
@@ -1430,13 +1440,13 @@ const en: Messages = {
     } as Record<number, string>,
   },
   simple: {
-    label: "View",
-    simple: "Simple",
-    all: "All",
+    label: "Show for",
+    simple: "Designers",
+    all: "Developers",
     simpleHelp:
-      "Simple: the colors are shown as they are in the brand guide, in light mode, without automation and extra options. Choose “All” for the whole tool.",
+      "For designers: the colors as they are in the brand guide, in light mode, without automation, code and extra options.",
     allHelp:
-      "All: the whole tool, with dark mode, tints and temperature, suggestions, more options and the developer section.",
+      "For developers: everything designers see, plus roles, dark mode, tints and temperature, suggestions, the tone scale and files for websites and apps.",
   },
   logoColors: {
     title: "Colors from the logo",

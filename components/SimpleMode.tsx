@@ -11,9 +11,9 @@ import {
 import { useI18n } from "@/components/I18nProvider";
 
 /**
- * Enkel visning (standard): fargene fra manualen vises slik de er, uten
+ * «For designere» (standard, `simple`): fargene fra manualen vises slik de er, uten
  * automatikk og ekstra valg. Bare lys modus, ingen «Valør og varme», ingen
- * forslag som endrer fargene, og ingen utviklerdel. «Alt» viser hele
+ * forslag som endrer fargene, og ingen utviklerdel. «For utviklere» viser hele
  * verktøyet. Valget huskes i nettleseren.
  */
 export const SIMPLE_KEY = "colorcraft-simple";
@@ -61,7 +61,7 @@ export function SimpleModeProvider({ children }: { children: ReactNode }) {
   );
 }
 
-/** Bryteren i toppen: «Enkel» eller «Alt». */
+/** Bryteren i toppen: «For designere» eller «For utviklere». */
 export function SimpleToggle() {
   const { simple, setSimple } = useSimple();
   const { t } = useI18n();
