@@ -118,6 +118,11 @@ const nb = {
     email: "E-postadresse",
     sendLink: "Send innloggingslenke",
     sending: "Sender …",
+    captchaFailed:
+      "Sikkerhetssjekken fra Cloudflare lastet ikke, så lenken kan ikke sendes. Ofte er det en annonseblokkering eller et personvernvalg i nettleseren som stopper challenges.cloudflare.com. Gi denne siden et unntak, eller prøv et privat vindu.",
+    captchaSlow:
+      "Ser du ingen boks over knappen? Da stopper nettleseren sikkerhetssjekken fra Cloudflare, ofte på grunn av en annonseblokkering. Gi denne siden et unntak, eller prøv et privat vindu.",
+    captchaReload: "Last siden på nytt",
     sentTitle: "Sjekk e-posten din",
     sent: (epost: string) =>
       `Vi har sendt en innloggingslenke til ${epost}. Den virker i ti minutter.`,
@@ -1055,6 +1060,11 @@ const en: Messages = {
     email: "Email address",
     sendLink: "Send sign-in link",
     sending: "Sending …",
+    captchaFailed:
+      "The security check from Cloudflare did not load, so the link cannot be sent. Usually an ad blocker or a privacy setting in the browser is stopping challenges.cloudflare.com. Allow this page, or try a private window.",
+    captchaSlow:
+      "No box above the button? Then the browser is stopping the security check from Cloudflare, often because of an ad blocker. Allow this page, or try a private window.",
+    captchaReload: "Reload the page",
     sentTitle: "Check your email",
     sent: (email: string) =>
       `We have sent a sign-in link to ${email}. It works for ten minutes.`,
