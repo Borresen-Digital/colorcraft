@@ -1,10 +1,20 @@
 import { notFound } from "next/navigation";
-import { ColorCraftApp } from "@/components/ColorCraftApp";
-import { isLocale } from "@/lib/i18n";
+import { LandingPage } from "@/components/LandingPage";
+import { isLocale, legacyRedirectScript } from "@/lib/i18n";
 
+/**
+ * Forsiden er landingssiden. Verktøyet ligger på /verktoy. Delte lenker fra
+ * før flyttingen (`/#p=…`) sendes dit av skriptet øverst, før siden tegnes.
+ */
 export default async function Page({ params }: PageProps<"/[lang]">) {
   const { lang } = await params;
   if (!isLocale(lang)) notFound();
-  // Logoen ligger i LogoProvider i layouten, så profilsiden får den også.
-  return <ColorCraftApp locale={lang} />;
+  return (
+    <>
+      <script
+        dangerouslySetInnerHTML={{ __html: legacyRedirectScript(lang) }}
+      />
+      <LandingPage locale={lang} />
+    </>
+  );
 }

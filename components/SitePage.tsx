@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { colorPalettes, type ExtendedColorPalette } from "@/data/palettes";
-import { localePath, localizePalette, type Locale } from "@/lib/i18n";
+import { localizePalette, toolPath, type Locale } from "@/lib/i18n";
 import { checkPalette, headingColor, textOn } from "@/lib/contrastPairs";
 import { decodeShare, encodeShare } from "@/lib/share";
 import { cleanFont, fontStack, readTypography } from "@/lib/typography";
@@ -84,7 +84,7 @@ function Nettside({ locale }: { locale: Locale }) {
         <FanMark />
         <h1 className="font-display text-2xl font-bold">{s.empty}</h1>
         <p className="text-subtle">{s.emptyHelp}</p>
-        <a href={localePath(locale)} className={btn("primary", "md")}>
+        <a href={toolPath(locale)} className={btn("primary", "md")}>
           {s.openTool}
         </a>
       </main>
@@ -285,7 +285,7 @@ function Nettside({ locale }: { locale: Locale }) {
  * tjenester på kort, et sitat på hovedfargen, kontaktskjema og bunntekst.
  * Fargene settes direkte fra rollene, så siden viser nøyaktig paletten.
  */
-function EksempelSide({
+export function EksempelSide({
   palette,
   navn,
   brand,
