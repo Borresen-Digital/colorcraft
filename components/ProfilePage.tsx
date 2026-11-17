@@ -4,7 +4,12 @@ import { useEffect, useRef, useState } from "react";
 import { colorPalettes, type ExtendedColorPalette } from "@/data/palettes";
 import { formatCmyk } from "@/lib/cmyk";
 import { contrastLevel, contrastRatio, formatRatio } from "@/lib/contrast";
-import { localePath, localizePalette, localizeRatio } from "@/lib/i18n";
+import {
+  localePath,
+  localizePalette,
+  localizeRatio,
+  toolPath,
+} from "@/lib/i18n";
 import {
   buildProfile,
   cleanRule,
@@ -283,7 +288,7 @@ function Profile({
         <FanMark />
         <h1 className="font-display text-2xl font-bold">{p.empty}</h1>
         <p className="text-subtle">{p.emptyHelp}</p>
-        <a href={localePath(locale)} className={btn("primary", "md")}>
+        <a href={toolPath(locale)} className={btn("primary", "md")}>
           {p.openTool}
         </a>
       </main>
@@ -298,7 +303,7 @@ function Profile({
   // Fragmentet designeren jobber med, uten merket for kundens visning.
   const egen = withReadonly(withoutSaved(hash), false);
   // Verktøyet leser ikke logoen fra lenken. Den følger med i nettleseren.
-  const tilVerktøy = `${localePath(locale)}#${withLogo(withoutPantone(withoutTypography(withoutRules(withoutMaker(egen)))), null)}`;
+  const tilVerktøy = `${toolPath(locale)}#${withLogo(withoutPantone(withoutTypography(withoutRules(withoutMaker(egen)))), null)}`;
   const farger = profil.sections.flatMap((s) => s.colors.map((c) => c.hex));
   // Tonetrappen og Figma-filen: merkefargene uten intern profil, og for en
   // palett uten profil bare hovedfarge, uthevingsfarge og flatefarge.

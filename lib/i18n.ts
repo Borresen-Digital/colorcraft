@@ -22,14 +22,88 @@ export function localePath(locale: Locale): string {
   return locale === DEFAULT_LOCALE ? "/" : `/${locale}`;
 }
 
+/** Stien til verktøyet. Forsiden er landingssiden. */
+export function toolPath(locale: Locale): string {
+  return locale === DEFAULT_LOCALE ? "/verktoy" : `/${locale}/verktoy`;
+}
+
+/**
+ * Skriptet på landingssiden som sender gamle delte lenker (`/#p=…`,
+ * `/#v=1&n=…`) videre til verktøyet. Fragmentet når aldri serveren, så det
+ * må gjøres i nettleseren, og før siden tegnes. Også når bare fragmentet
+ * endres på forsiden. Ankere som `#slik` røres ikke.
+ */
+export function legacyRedirectScript(locale: Locale): string {
+  return `(function(){function f(){var h=location.hash;if(/^#(?:.*&)?(?:p|v|l)=/.test(h))location.replace(${JSON.stringify(toolPath(locale))}+h)}f();addEventListener("hashchange",f)})()`;
+}
+
 type Role = keyof ColorPalette["colors"];
 
 const nb = {
   meta: {
-    title: "ColorCraft: test fargepaletter og kontrast",
+    title: "ColorCraft: fra profilmanual til farger på skjerm",
     description:
+      "Gratis fargeverktøy for designere. Legg inn fargene fra profilmanualen, se dem på en nettside, sjekk kontrasten og send kunden en profilside.",
+    toolTitle: "Verktøy · ColorCraft",
+    toolDescription:
       "Gratis verktøy for fargepaletter. Se fargene på ekte komponenter, sjekk kontrasten etter WCAG 2.2, og eksporter som CSS, Tailwind eller design tokens.",
     ogLocale: "nb_NO",
+  },
+  landing: {
+    openTool: "Åpne verktøyet",
+    kicker: "Gratis fargeverktøy for designere",
+    title: "Fra profilmanual til farger som virker på skjerm",
+    lead: "Legg inn merkefargene slik de står i manualen. ColorCraft lager en palett for nettsider og apper, sjekker at teksten kan leses, og gir deg en profilside du kan sende til kunden.",
+    example: "Se et eksempel",
+    note: "Ingen konto. Fargene blir i nettleseren og i lenken du deler.",
+    previewLabel: "Eksempel: paletten «Havet» på en nettside",
+    stepsTitle: "Slik virker det",
+    steps: [
+      [
+        "Legg inn fargene fra manualen",
+        "Logofarger, flatefarger og uthevingsfarger, med HEX, CMYK og Pantone slik de står. Har du bare logoen, kan verktøyet lese fargene fra den.",
+      ],
+      [
+        "Se dem i bruk",
+        "Fargene vises på en nettside, på trykksaker og som fargeblinde ser dem. Kontrasten sjekkes etter WCAG 2.2, med forslag når teksten blir for svak.",
+      ],
+      [
+        "Del med kunden og utvikleren",
+        "Send en profilside med farger, typografi og bruksregler, eller et fargekort som PDF. Utvikleren får filer til nettside, app og Figma.",
+      ],
+    ] as [string, string][],
+    viewsTitle: "Tre sider, samme farger",
+    views: [
+      ["Verktøy", "Her lager og justerer du paletten, og ser kontrasten."],
+      [
+        "Nettside",
+        "Paletten på en hel nettside. Bytt en farge, og siden endres med en gang.",
+      ],
+      ["Profilside", "Fargeprofilen du sender til kunden, klar for utskrift."],
+    ] as [string, string][],
+    forTitle: "For designere og utviklere",
+    designers: "For designere",
+    designerPoints: [
+      "Fargene står slik de er i manualen, uten automatikk du ikke har bedt om",
+      "Kontrast forklart med vanlige ord",
+      "Profilside og fargekort til kunden",
+      "Typografi, bruksregler og Pantone på samme sted",
+    ],
+    developers: "For utviklere",
+    developerPoints: [
+      "Roller for hele grensesnittet, i lys og mørk modus",
+      "Tonetrapp fra 50 til 950 for hver merkefarge",
+      "CSS, SCSS, Tailwind 4, Figma, design tokens, Swift, Flutter og Android",
+      "Kontrast etter WCAG 2.2, med AA og AAA",
+    ],
+    switchNote:
+      "Velg «Designere» eller «Utviklere» i toppen, så viser verktøyet det du trenger.",
+    privacyTitle: "Fargene dine blir hos deg",
+    privacyText:
+      "Verktøyet kjører i nettleseren. Paletten ligger i lenken, etter #, og den delen sendes aldri til serveren. Det du lagrer, lagres i nettleseren din.",
+    privacyLink: "Les om personvern",
+    madeBy: "ColorCraft er laget av",
+    forAi: "For AI og andre verktøy",
   },
   account: {
     metaTitle: "Konto · ColorCraft",
@@ -901,10 +975,72 @@ export type Messages = typeof nb;
 
 const en: Messages = {
   meta: {
-    title: "ColorCraft: test color palettes and contrast",
+    title: "ColorCraft: from brand guide to colors on screen",
     description:
+      "A free color tool for designers. Add the colors from the brand guide, see them on a website, check the contrast and send the client a profile page.",
+    toolTitle: "Tool · ColorCraft",
+    toolDescription:
       "A free color palette tool. See your colors on real components, check contrast against WCAG 2.2, and export as CSS, Tailwind or design tokens.",
     ogLocale: "en_US",
+  },
+  landing: {
+    openTool: "Open the tool",
+    kicker: "A free color tool for designers",
+    title: "From brand guide to colors that work on screen",
+    lead: "Add the brand colors as they are in the guide. ColorCraft makes a palette for websites and apps, checks that the text can be read, and gives you a profile page to send to the client.",
+    example: "See an example",
+    note: "No account. The colors stay in your browser and in the link you share.",
+    previewLabel: "Example: the palette “Havet” on a website",
+    stepsTitle: "How it works",
+    steps: [
+      [
+        "Add the colors from the guide",
+        "Logo colors, surface colors and highlight colors, with HEX, CMYK and Pantone as they are. If you only have the logo, the tool can read the colors from it.",
+      ],
+      [
+        "See them in use",
+        "The colors are shown on a website, on print and as people with color blindness see them. Contrast is checked against WCAG 2.2, with suggestions when text gets too weak.",
+      ],
+      [
+        "Share with the client and the developer",
+        "Send a profile page with colors, typography and usage rules, or a color card as PDF. The developer gets files for websites, apps and Figma.",
+      ],
+    ],
+    viewsTitle: "Three pages, the same colors",
+    views: [
+      ["Tool", "Where you make and adjust the palette, and see the contrast."],
+      [
+        "Website",
+        "The palette on a whole website. Change a color and the page updates right away.",
+      ],
+      [
+        "Profile page",
+        "The color profile you send to the client, ready to print.",
+      ],
+    ],
+    forTitle: "For designers and developers",
+    designers: "For designers",
+    designerPoints: [
+      "The colors stay as they are in the guide, without automation you did not ask for",
+      "Contrast explained in plain words",
+      "A profile page and color card for the client",
+      "Typography, usage rules and Pantone in one place",
+    ],
+    developers: "For developers",
+    developerPoints: [
+      "Roles for the whole interface, in light and dark mode",
+      "A tone scale from 50 to 950 for each brand color",
+      "CSS, SCSS, Tailwind 4, Figma, design tokens, Swift, Flutter and Android",
+      "Contrast against WCAG 2.2, with AA and AAA",
+    ],
+    switchNote:
+      "Choose “Designers” or “Developers” at the top, and the tool shows what you need.",
+    privacyTitle: "Your colors stay with you",
+    privacyText:
+      "The tool runs in the browser. The palette is in the link, after #, and that part is never sent to the server. What you save is saved in your browser.",
+    privacyLink: "Read about privacy",
+    madeBy: "ColorCraft is made by",
+    forAi: "For AI and other tools",
   },
   account: {
     metaTitle: "Account · ColorCraft",

@@ -1,7 +1,7 @@
 "use client";
 
 import type { MouseEvent } from "react";
-import { localePath, type Locale } from "@/lib/i18n";
+import { localePath, toolPath, type Locale } from "@/lib/i18n";
 import { profilePath } from "@/lib/profile";
 import { sitePath } from "@/lib/site";
 import { btn } from "@/lib/ui";
@@ -13,23 +13,24 @@ import { SimpleToggle } from "@/components/SimpleMode";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ViewSwitch } from "@/components/ViewSwitch";
 
-type View = "tool" | "site" | "profile";
+type View = "home" | "tool" | "site" | "profile";
 
 const STI: Record<View, (l: Locale) => string> = {
-  tool: localePath,
+  home: localePath,
+  tool: toolPath,
   site: sitePath,
   profile: profilePath,
 };
 
 /**
- * Toppen på verktøyet, nettsiden og profilsiden. Den er lik på alle tre og
+ * Toppen på forsiden, verktøyet, nettsiden og profilsiden. Den er lik og
  * endrer seg ikke med «Designere / Utviklere», så ingenting flytter seg når
  * du bytter. Det som hører til én side (dele lenke, ny palett, «Laget av»)
  * står på siden selv.
  */
 export function SiteHeader({
   active,
-  hash,
+  hash = "",
   toolHash = hash,
   fanColors,
   lockTheme = false,
@@ -37,7 +38,7 @@ export function SiteHeader({
 }: {
   active: View;
   /** Fragmentet som følger med til nettsiden og profilsiden. */
-  hash: string;
+  hash?: string;
   /** Fragmentet til verktøyet, hvis det er et annet. */
   toolHash?: string;
   fanColors?: string[];
@@ -64,7 +65,7 @@ export function SiteHeader({
     >
       <div className="mx-auto flex max-w-[1440px] flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3 sm:px-6">
         <a
-          href={`${localePath(locale)}#${toolHash}`}
+          href={localePath(locale)}
           className="flex min-w-0 items-center gap-2.5 rounded-lg"
           aria-label={t.app.home}
         >
@@ -73,13 +74,18 @@ export function SiteHeader({
             Color<span className="font-semibold text-subtle">Craft</span>
           </span>
         </a>
-        <ViewSwitch
-          active={active}
-          toolHref={`${localePath(locale)}#${toolHash}`}
-          siteHref={`${sitePath(locale)}#${hash}`}
-          profileHref={`${profilePath(locale)}#${hash}`}
-          className="sm:mr-auto"
-        />
+        {/* Forsiden har ingen palett ennå, så der står bare veien inn. */}
+        {active === "home" ? (
+          <span className="sm:mr-auto" />
+        ) : (
+          <ViewSwitch
+            active={active}
+            toolHref={`${toolPath(locale)}#${toolHash}`}
+            siteHref={`${sitePath(locale)}#${hash}`}
+            profileHref={`${profilePath(locale)}#${hash}`}
+            className="sm:mr-auto"
+          />
+        )}
         <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
           <a
             href={STI[active](annet)}
@@ -94,6 +100,11 @@ export function SiteHeader({
           <SimpleToggle />
           <ThemeToggle locked={lockTheme} />
           <AccountLink />
+          {active === "home" && (
+            <a href={toolPath(locale)} className={btn("primary", "sm")}>
+              {t.landing.openTool}
+            </a>
+          )}
         </div>
       </div>
     </header>

@@ -92,6 +92,7 @@ const nextConfig: NextConfig = {
     return [
       { source: "/", destination: "/nb" },
       { source: "/profil", destination: "/nb/profil" },
+      { source: "/verktoy", destination: "/nb/verktoy" },
       { source: "/nettside", destination: "/nb/nettside" },
       { source: "/konto", destination: "/nb/konto" },
       { source: "/personvern", destination: "/nb/personvern" },
@@ -102,6 +103,7 @@ const nextConfig: NextConfig = {
     return [
       { source: "/nb", destination: "/", permanent: true },
       { source: "/nb/profil", destination: "/profil", permanent: true },
+      { source: "/nb/verktoy", destination: "/verktoy", permanent: true },
       { source: "/nb/nettside", destination: "/nettside", permanent: true },
       { source: "/nb/konto", destination: "/konto", permanent: true },
       { source: "/nb/personvern", destination: "/personvern", permanent: true },
