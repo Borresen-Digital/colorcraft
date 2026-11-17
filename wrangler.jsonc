@@ -30,11 +30,12 @@
     },
   ],
   // Ikke hemmelige. BETTER_AUTH_SECRET, RESEND_API_KEY og
-  // TURNSTILE_SECRET_KEY settes med `wrangler secret put`, og
-  // TURNSTILE_SITE_KEY legges her når widgeten finnes. Mangler noe, er
-  // kontoene av (lib/auth.ts).
+  // TURNSTILE_SECRET_KEY settes med `wrangler secret put`. Site-nøkkelen
+  // er ColorCraft sin egen Turnstile-widget. Mangler noe, er kontoene av
+  // (lib/auth.ts).
   "vars": {
     "BETTER_AUTH_URL": "https://farger.borresendigital.no",
     "AUTH_FROM_EMAIL": "ColorCraft <farger@borresendigital.no>",
+    "TURNSTILE_SITE_KEY": "0x4AAAAAAGFLWAuhf3bJNnis",
   },
 }
