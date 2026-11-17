@@ -32,10 +32,11 @@ export function toolPath(locale: Locale): string {
  * `/#v=1&n=…`) videre til verktøyet. Fragmentet når aldri serveren, så det
  * må gjøres i nettleseren, og før siden tegnes. Også når bare fragmentet
  * endres på forsiden. Ankere som `#slik` røres ikke.
+ *
+ * Målet regnes ut fra stien (`/` → `/verktoy`, `/en` → `/en/verktoy`), så
+ * skriptet er en fast tekst uten innsatte verdier.
  */
-export function legacyRedirectScript(locale: Locale): string {
-  return `(function(){function f(){var h=location.hash;if(/^#(?:.*&)?(?:p|v|l)=/.test(h))location.replace(${JSON.stringify(toolPath(locale))}+h)}f();addEventListener("hashchange",f)})()`;
-}
+export const LEGACY_REDIRECT_SCRIPT = `(function(){function f(){var h=location.hash;if(/^#(?:.*&)?(?:p|v|l)=/.test(h))location.replace(location.pathname.replace(/[/]$/,"")+"/verktoy"+h)}f();addEventListener("hashchange",f)})()`;
 
 type Role = keyof ColorPalette["colors"];
 

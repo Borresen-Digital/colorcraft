@@ -16,7 +16,7 @@ const EKSEMPEL = "havet";
 /**
  * Forsiden: hva ColorCraft er, slik det virker, og veien inn i verktøyet.
  * Verktøyet ligger på /verktoy. Gamle delte lenker til forsiden sendes dit
- * av et skript i siden (se `legacyRedirectScript`).
+ * av et skript i siden (se `LEGACY_REDIRECT_SCRIPT`).
  */
 export function LandingPage({ locale }: { locale: Locale }) {
   return (
