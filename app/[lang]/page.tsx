@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { LandingPage } from "@/components/LandingPage";
-import { isLocale, legacyRedirectScript } from "@/lib/i18n";
+import { isLocale, LEGACY_REDIRECT_SCRIPT } from "@/lib/i18n";
 
 /**
  * Forsiden er landingssiden. Verktøyet ligger på /verktoy. Delte lenker fra
@@ -11,9 +11,7 @@ export default async function Page({ params }: PageProps<"/[lang]">) {
   if (!isLocale(lang)) notFound();
   return (
     <>
-      <script
-        dangerouslySetInnerHTML={{ __html: legacyRedirectScript(lang) }}
-      />
+      <script dangerouslySetInnerHTML={{ __html: LEGACY_REDIRECT_SCRIPT }} />
       <LandingPage locale={lang} />
     </>
   );
